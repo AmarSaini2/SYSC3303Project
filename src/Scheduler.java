@@ -14,7 +14,7 @@ public class Scheduler extends Thread{
     private HashMap<Integer, HashMap<String, String>> zones; //<ID, <ZoneStart, ZoneEnd>>
 
     /**
-     * Constructor for new Scheduler object
+     * Constructor for Scheduler
      *
      * @param fireIncident
      */
@@ -26,21 +26,35 @@ public class Scheduler extends Thread{
         this.zones = new HashMap<Integer, HashMap<String, String>>();
     }
 
+    /**
+     *
+     *
+     * @param zone
+     */
     public synchronized void newFireRequest(HashMap<Integer,HashMap<String, String>> zone){
         //TODO
         dispatchDrone(zone);
     }
 
+    /**
+     *
+     *
+     */
     public synchronized void droneReturn(){
-        this.fireIncident.put()
+        this.fireIncident.put(); //TODO signal the fireIncident that drone has returned
     }
 
     /**
      * Runs the dispatch function for the chosen drone
      */
-    private void dispatchDrone(HashMap<Integer,HashMap<String, String>> zone){
+    private Boolean dispatchDrone(HashMap<Integer,HashMap<String, String>> zone){
         Drone chosen_drone = chooseDrone();
-        chosen_drone.put(); //TODO
+        if (chosen_drone == null){
+            System.out.print("There is no drone to send");
+            return false;
+        }
+        chosen_drone.put(); //TODO signal the drone
+        return true;
     }
 
     /**
@@ -49,7 +63,11 @@ public class Scheduler extends Thread{
      * @return the drone that will be sent to the fire zone
      */
     private Drone chooseDrone(){
-        return this.drone;
+        //Chooses the first drone
+        for (Drone drone: this.drones.values()){
+            return drone;
+        }
+        return null;
     }
 
     /**
@@ -57,12 +75,8 @@ public class Scheduler extends Thread{
      *
      * @param drone the drone the Scheduler will use to send to fires zones
      */
-    public void addDrone(Drone drone){
-        this.drone = drone;
-    }
-
-    public static void main(String[] args) {
-
+    public void addDrone(Integer droneID, Drone drone){
+        this.drones.put(droneID, drone);
     }
 }
 

@@ -2,27 +2,45 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Scheduler extends Thread{
-    private Drone drone; //Only one drone for iteration 1
-    private FireIncidentSubsystem fireIncidentSubsystem;
-    private HashMap<Integer,HashMap<String, String>> zone;
+    private FireIncident fireIncident;
+
+    //Water in liters required to put out a fire of each severity
+    private final int LOW = 10;
+    private final int MODERATE = 20;
+    private final int HIGH = 30;
+
+    private HashMap<Integer, Drone> drones; //<ID, Drone>
+    private HashMap<Integer, HashMap<String, String>> fireEvents; //<ID, <Time, ZoneID, EventType, Severity>>
+    private HashMap<Integer, HashMap<String, String>> zones; //<ID, <ZoneStart, ZoneEnd>>
 
     /**
      * Constructor for new Scheduler object
      *
-     * @param fireIncidentSubsystem
+     * @param fireIncident
      */
-    public Scheduler(FireIncidentSubsystem fireIncidentSubsystem){
-        this.fireIncidentSubsystem = fireIncidentSubsystem;
+    public Scheduler(FireIncident fireIncident){
+        this.fireIncident = fireIncident;
+
+        this.drones = new HashMap<Integer, Drone>();
+        this.fireEvents = new HashMap<Integer, HashMap<String, String>>();
+        this.zones = new HashMap<Integer, HashMap<String, String>>();
     }
 
-    public void newFireRequest(HashMap<Integer,HashMap<String, String>> zone){
+    public synchronized void newFireRequest(HashMap<Integer,HashMap<String, String>> zone){
         //TODO
-        dispatchDrone();
+        dispatchDrone(zone);
     }
 
-    private void dispatchDrone(){
-        Drone drone = chooseDrone();
-        drone.someFunction(); //TODO
+    public synchronized void droneReturn(){
+        this.fireIncident.put()
+    }
+
+    /**
+     * Runs the dispatch function for the chosen drone
+     */
+    private void dispatchDrone(HashMap<Integer,HashMap<String, String>> zone){
+        Drone chosen_drone = chooseDrone();
+        chosen_drone.put(); //TODO
     }
 
     /**
@@ -31,7 +49,7 @@ public class Scheduler extends Thread{
      * @return the drone that will be sent to the fire zone
      */
     private Drone chooseDrone(){
-        return drone;
+        return this.drone;
     }
 
     /**
@@ -42,4 +60,9 @@ public class Scheduler extends Thread{
     public void addDrone(Drone drone){
         this.drone = drone;
     }
+
+    public static void main(String[] args) {
+
+    }
 }
+

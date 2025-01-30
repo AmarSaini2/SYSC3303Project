@@ -66,4 +66,3 @@ class FireIncidentEvent {
         return "FireIncident [time: " + timeStamp + ", zone:" + zoneID + ", type: " + eventType + ", severity: " + severity + "]";
     }
 }
-

@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 public class Scheduler extends Thread{
-    private FireIncident fireIncident;
+    private FireIncidentSubsystem fireIncidentSubsystem;
     private HashMap<Integer, Drone> drones; //<ID, Drone>
 
     //Water in liters required to put out a fire of each severity
@@ -12,45 +12,45 @@ public class Scheduler extends Thread{
     /**
      * Constructor for Scheduler class
      *
-     * @param fireIncident the FireIncident subsystem that the Scheduler will send messages to
+     * @param fireIncidentSubsystem the FireIncidentSubsystem that the Scheduler will send messages to
      */
-    public Scheduler(FireIncident fireIncident){
-        this.fireIncident = fireIncident;
+    public Scheduler(FireIncidentSubsystem fireIncidentSubsystem){
+        this.fireIncidentSubsystem = fireIncidentSubsystem;
         this.drones = new HashMap<Integer, Drone>();
     }
 
     /**
      * Scheduler receives a fire request and runs dispatchDrone method
      *
-     * @param zone the fire zone passed by the FireIncident subsystem
+     * @param fireIncident the FireIncident passed by the FireIncidentSubsystem
      */
-    public void newFireRequest(HashMap<Integer,HashMap<String, String>> zone){
+    public void newFireRequest(FireIncident fireIncident){
         //TODO input parameters may need to be changed
-        dispatchDrone(zone);
+        dispatchDrone(fireIncident);
     }
 
     /**
-     * Scheduler receives data from drone which is then sent back to the FireIncident subsystem
+     * Scheduler receives data from drone which is then sent back to the FireIncidentSubsystem
      *
-     * @param zone the fire zone passed by the Drone
+     * @param fireIncident the FireIncident passed by the Drone
      */
-    public void droneReturn(HashMap<Integer,HashMap<String, String>> zone){
+    public void droneReturn(FireIncident fireIncident){
         //TODO input parameters may need to be changed
         //TODO FireIncident method needs to be added
-        this.fireIncident.put(zone);
+        this.fireIncidentSubsystem.put(fireIncident);
     }
 
     /**
-     * Scheduler runs chooseDrone method runs then sends the fire zone information to the drone
+     * Scheduler runs chooseDrone method runs then sends the FireIncident information to the drone
      *
-     * @param zone the fire zone passed from the FireIncident
+     * @param fireIncident the FireIncident passed from the FireIncidentSubsystem
      */
-    private void dispatchDrone(HashMap<Integer,HashMap<String, String>> zone){
+    private void dispatchDrone(FireIncident fireIncident){
         Drone chosen_drone = chooseDrone();
         if (chosen_drone == null){
             System.out.print("There is no drone to send");
         }
-        chosen_drone.send(); //TODO Drone method needs be added
+        chosen_drone.send(fireIncident); //TODO Drone method needs be added
     }
 
     /**

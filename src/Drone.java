@@ -2,7 +2,7 @@ import java.util.HashMap;
 
 public class Drone implements Runnable{
     private static int idCounter = 0;
-    private FireIncident assignedFire;
+    private Event assignedFire;
     private Scheduler scheduler;
     private HashMap<String, Double> attributes;
     private double carryingVolume; 
@@ -64,16 +64,16 @@ public class Drone implements Runnable{
      * @param fire the fire to put out.
      * @return the amount of fire retardant needed to put out the fire, in liters.
      */
-    private int getRequiredVolume(FireIncident fire){
+    private int getRequiredVolume(Event fire){
         //I'll just have default behaviour assume the fire is HIGH - better safe than sorry here.
         int requiredVolume = 15;
-        String severity = fire.get("severity");
+        Event.Severity severity = fire.getSeverity();
 
         //I'm pretty sure java is gonna force cast the severity to string from an enumerated type. Shame, woulda liked a swtich here.
-        if(severity.equals("HIGH")){requiredVolume = 15;}
-        if(severity.equals("MODERATE")){requiredVolume = 10;}
-        if(severity.equals("LOW")){requiredVolume = 5;}
-        if(severity.equals("OUT")){requiredVolume = 0;}
+        if(severity.equals(Event.Severity.HIGH)){requiredVolume = 15;}
+        if(severity.equals(Event.Severity.MODERATE)){requiredVolume = 10;}
+        if(severity.equals(Event.Severity.LOW)){requiredVolume = 5;}
+        if(severity.equals(Event.Severity.OUT)){requiredVolume = 0;}
 
         return requiredVolume;
     }
@@ -84,7 +84,7 @@ public class Drone implements Runnable{
      * @param fire the fire to put out.
      * @return the amount of time needed to put out the fire, in seconds.
      */
-    private int getRequiredTime(int requiredVolume, FireIncident fire){
+    private int getRequiredTime(int requiredVolume, Event fire){
         int requiredTime = (int) (requiredVolume*attributes.get("flowRate"));
         //for now, I'm going to just assume it takes 3 seconds to get to the fire. We can implement this later when we actually have zones and positions to calculate movement.
         int travelTime = getTravelTime(fire);
@@ -98,7 +98,7 @@ public class Drone implements Runnable{
      * The main function to send a drone off to a fire. This function encapsulates all behaviour for putting out a fire, namely travelling to a fire, finding the required resources to put out the fire, putting out the fire, and returning an updated fire status.
      * @param fire the fire the drone should be sent towards.
      */
-    public void send(FireIncident fire){
+    public void send(Event fire){
         assignedFire = fire;
 
         //calculate the amount of water needed.
@@ -113,7 +113,7 @@ public class Drone implements Runnable{
             Thread.sleep(requiredTime);
         } catch (Exception e) {}
 
-        FireIncident newFireStatus = new FireIncident(0, 0, 0, FireIncident.type.DRONE_REQUEST, FireIncident.severity.OUT);
+        Event newFireStatus = new Event(0, 0, 0, Event.Type.DRONE_REQUEST, Event.Severity.OUT);
         scheduler.droneReturn(newFireStatus);
     }
 
@@ -122,7 +122,7 @@ public class Drone implements Runnable{
      * @param fire the fire to travel to
      * @return the amount of time to get to a fire, in seconds.
      */
-    private int getTravelTime(FireIncident fire){
+    private int getTravelTime(Event fire){
         //for now, I'm going to just assume it takes 3 seconds to get to the fire. We can implement this later when we actually have zones and positions to calculate movement.
         return 3;
     }
@@ -133,12 +133,6 @@ public class Drone implements Runnable{
     public void run(){
         //busy wait the scheduler here for fires every second. I'd work with what exsists in scheduler.java but busy wait is required by the proj specs
         //Scheduler guaranteed to exsist because I require it as an argument when initing a drone.
-        while (true) { 
-            scheduler.requestForFire();
-            //requestForFire() should call the dispatchDrone() method in scheduler
-            try{
-                Thread.sleep(1000);
-            }catch(InterruptedException e){}
-        }
+        send(scheduler.requestForFire());
     }
 }

@@ -1,51 +1,95 @@
+import java.lang.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
 
-import java.util.HashMap;
+public class FireIncident extends Thread {
+    private final String eventFilePath;
+    private final String zoneFilePath;
+    private final Scheduler scheduler;
+    private ArrayList<Event> events;
+    private ArrayList<Zone> zones;
 
+    public FireIncident(String eventFilePath, String zoneFilePath, Scheduler scheduler) {
+        this.eventFilePath = eventFilePath;
+        this.zoneFilePath = zoneFilePath;
 
-
-public class FireIncident {
-    private int time,zone,id;
-    public static enum type {FIRE_DETECTED, DRONE_REQUEST};
-    private type fireType;
-    public static enum severity {HIGH, MODERATE, LOW, OUT};
-    private severity fireSeverity;
-
-    private HashMap attributes;
-
-
-    FireIncident(int eventTime, int eventZone, int eventId, type eventType, severity eventSeverity){
-        this.time = eventTime;
-        this.zone = eventZone;
-        this.id = eventId;
-        this.fireType = eventType;
-        this.fireSeverity = eventSeverity;
-
-        this.attributes = new HashMap<String, String>();
-        attributes.put("time", this.time);
-        attributes.put("zone", this.zone);
-        attributes.put("id", this.id);
-        attributes.put("type", this.fireType);
-        attributes.put("severity", this.fireSeverity);
+        this.scheduler = scheduler;
+        this.events = new ArrayList<>();
+        this.zones = new ArrayList<>();
     }
 
-    public synchronized void put (HashMap<String, String> data){//replace the value of a valid key
-        for(String key: data.keySet()){
-            if(attributes.get(key) != null){
-                attributes.replace(key, data.get(key));
+    //Adds a new zone from a file input
+    public void newZone(){
+        try (Scanner scanner = new Scanner(new File(zoneFilePath))) {
+            String inputLine;
+            while ((inputLine = scanner.nextLine()) != null) {
+                String[] tokens = inputLine.split(" ");
+
+                int id = Integer.parseInt(tokens[0]);
+                int start = Integer.parseInt(tokens[1]);
+                int end = Integer.parseInt(tokens[2]);
+
+                Zone zone = new Zone(id, start, end);
+                this.zones.add(zone);
+                System.out.println("New zone: id = " +id+ " start = " +start+ " end = " +end);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public synchronized String get(String key){//return the value of a given key
-        return attributes.get(key).toString();
+    public void newEvent() {
+        try (Scanner scanner = new Scanner(new File(eventFilePath))) {
+            String inputLine;
+            while ((inputLine = scanner.nextLine()) != null) {
+                String[] tokens = inputLine.split(" ");
+
+                String timeStamp = tokens[0];
+                int zone = Integer.parseInt(tokens[1]);
+                String eventType = tokens[2];
+                String fireSeverity = tokens[3];
+
+                Event.Type type = null;
+                Event.Severity severity = null;
+
+                if(eventType.equals("FIRE_DETECTED") ){
+                    type = Event.Type.FIRE_DETECTED;
+                } else if (eventType.equals("DRONE_REQUEST")){
+                    type = Event.Type.DRONE_REQUEST;
+                }
+
+                if(fireSeverity.equals("HIGH") ){
+                    severity = Event.Severity.HIGH;
+                } else if (fireSeverity.equals("MODERATE")){
+                    severity = Event.Severity.MODERATE;
+                } else if (fireSeverity.equals("LOW")){
+                    severity = Event.Severity.LOW;
+                }
+
+                if(type != null && severity != null){
+                    Event incident = new Event(Integer.parseInt(timeStamp), zone, this.events.size(), type, severity);
+                    this.events.add(incident);
+
+                    scheduler.newFireRequest(incident);
+                    System.out.println("FireIncidentSubsystem: Sent incident to scheduler -> " + incident.toString());
+                }else{
+                    System.out.println("Type or severity of the event is incorrect");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        updateEvents(this.scheduler.receiveUpdates());
     }
 
-    public static void main(String[] args){
-        FireIncident test = new FireIncident(0, 0, 0, type.FIRE_DETECTED, severity.HIGH);
-        System.out.println(test.get("severity"));
-        HashMap data = new HashMap<String, String>();
-        data.put("severity", severity.LOW);
-        test.put(data);
-        System.out.println(test.get("severity"));
+    public void updateEvents(Event event) {
+        this.events.set(event.getId(), event);
+    }
+
+    public static void main(String[] args) {
+        Scheduler scheduler = new Scheduler();
+        FireIncident fireIncident = new FireIncident("", "", scheduler);
     }
 }

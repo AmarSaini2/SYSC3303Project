@@ -114,7 +114,7 @@ public class Drone implements Runnable{
         } catch (Exception e) {}
 
         Event newFireStatus = new Event(0, 0, 0, Event.Type.DRONE_REQUEST, Event.Severity.OUT);
-        scheduler.droneReturn(newFireStatus);
+        scheduler.sendUpdate(newFireStatus);
     }
 
     /**

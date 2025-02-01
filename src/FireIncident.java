@@ -88,8 +88,14 @@ public class FireIncident extends Thread {
         this.events.set(event.getId(), event);
     }
 
-    public static void main(String[] args) {
-        Scheduler scheduler = new Scheduler();
-        FireIncident fireIncident = new FireIncident("", "", scheduler);
+    //Will need to be removed later
+    @Override
+    public void run() {
+        Zone zone = new Zone(1, 0, 400);
+        Event event = new Event(24, 1, 1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
+        this.zones.add(zone);
+        this.events.add(event);
+        this. scheduler.newFireRequest(event);
+        updateEvents(scheduler.receiveUpdates());
     }
 }

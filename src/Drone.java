@@ -1,6 +1,6 @@
 import java.util.HashMap;
 
-public class Drone implements Runnable{
+public class Drone extends Thread{
     private static int idCounter = 0;
     private Event assignedFire;
     private Scheduler scheduler;
@@ -17,6 +17,7 @@ public class Drone implements Runnable{
      * @param scheduler A scheduler is required for thread-safe running.
      */
     Drone(Scheduler scheduler){
+        this.attributes = new HashMap<String, Double>();
         //arbitrarily assuming takeoff speed as 3.0m/s
         attributes.put("takeoffSpeed", 3.0);
         //arbitrarily assuming speed as 3.0m/s

@@ -33,4 +33,9 @@ public class Event {
     public int getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "Event [time: " + this.time + ", zone:" + this.id + ", type: " + this.type + ", severity: " + this.severity + "]";
+    }
 }

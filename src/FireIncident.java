@@ -20,7 +20,8 @@ public class FireIncident extends Thread {
     }
 
     //Adds a new zone from a file input
-    public void newZone(){
+    //TODO probably need to consider what to do with headers
+    public void readZoneFile(){
         try (Scanner scanner = new Scanner(new File(zoneFilePath))) {
             String inputLine;
             while ((inputLine = scanner.nextLine()) != null) {
@@ -39,7 +40,7 @@ public class FireIncident extends Thread {
         }
     }
 
-    public void newEvent() {
+    public void readEventFile() {
         try (Scanner scanner = new Scanner(new File(eventFilePath))) {
             String inputLine;
             while ((inputLine = scanner.nextLine()) != null) {
@@ -88,14 +89,21 @@ public class FireIncident extends Thread {
         this.events.set(event.getId(), event);
     }
 
-    //Will need to be removed later
+    //TODO Testing purposes only! Will need to be removed later
     @Override
     public void run() {
         Zone zone = new Zone(1, 0, 400);
         Event event = new Event(24, 1, 1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
         this.zones.add(zone);
         this.events.add(event);
-        this. scheduler.newFireRequest(event);
-        updateEvents(scheduler.receiveUpdates());
+        this.scheduler.newFireRequest(event);
+        updateEvents(this.scheduler.receiveUpdates());
+
+        Zone zone1 = new Zone(2, 0, 400);
+        Event event1 = new Event(24, 2, 1, Event.Type.FIRE_DETECTED, Event.Severity.MODERATE);
+        this.zones.add(zone1);
+        this.events.add(event1);
+        this.scheduler.newFireRequest(event1);
+        updateEvents(this.scheduler.receiveUpdates());
     }
 }

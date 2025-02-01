@@ -5,9 +5,9 @@ import java.util.HashMap;
 
 public class FireIncident {
     private int time,zone,id;
-    private enum type {FIRE_DETECTED, DRONE_REQUEST};
+    public static enum type {FIRE_DETECTED, DRONE_REQUEST};
     private type fireType;
-    private enum severity {HIGH, MODERATE, LOW};
+    public static enum severity {HIGH, MODERATE, LOW, OUT};
     private severity fireSeverity;
 
     private HashMap attributes;

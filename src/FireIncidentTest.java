@@ -9,24 +9,43 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Unit tests for the FireIncident class.
+ * This class tests the functionality of reading zone and event files,
+ * as well as the interaction with the Scheduler and Drone classes.
+ */
 public class FireIncidentTest {
 
     FireIncident incident;
     Scheduler scheduler;
     Drone drone;
 
+
+    /**
+     * Sets up the test environment before each test case.
+     * Initializes the Scheduler, FireIncident, and Drone instances,
+     * and starts their respective threads.
+     */
     @BeforeEach
     public void setup(){
         scheduler = new Scheduler();
         incident = new FireIncident("src\\test_Event_File.csv", "src\\test_Zone_File.csv", scheduler);
         drone = new Drone(scheduler);
-
         Thread schedulerThread = new Thread(scheduler);
         Thread droneThread = new Thread(drone);
+        Thread incidentThread = new Thread(incident);
         schedulerThread.start();
         droneThread.start();
+        incidentThread.start();
     } 
 
+    /**
+     * Tests the reading of the zone file.
+     * This test verifies that the zones are processed correctly
+     * and that the expected values are retrieved from the HashMap.
+     *
+     * @throws IOException if an I/O error occurs while reading the zone file.
+     */
     @Test
     public void testReadZoneFile() throws IOException{
         //create test file and write some values to it
@@ -54,8 +73,15 @@ public class FireIncidentTest {
         assertArrayEquals(zones.get(2).getEnd(), new int[] {650,1500});
     }
 
+    /**
+     * Tests the reading of the event file.
+     * This test verifies that the events are processed correctly
+     * and that the expected values are retrieved from the events list.
+     *
+     * @throws IOException if an I/O error occurs while reading the event file.
+     */
     @Test
-    public void testReadEventFile() throws IOException{
+    public void testReadEventFile() throws IOException{//buggy because of the known scheduler deadlock issue. Will be fixed in Iteration 2
         //create test file and write some values to it
         File eventFile = new File("src\\test_Event_File.csv");
         try(FileWriter writer = new FileWriter(eventFile)){
@@ -65,12 +91,11 @@ public class FireIncidentTest {
             writer.close();
         }
 
-
         //read event file
         incident.readZoneFile();
         incident.readEventFile();
 
-        
+
         ArrayList<Event> events = incident.getEvents();
 
         assertEquals(1, events.get(0).getZone().getId());

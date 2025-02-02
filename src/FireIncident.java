@@ -15,8 +15,6 @@ public class FireIncident extends Thread {
     private final Scheduler scheduler;
     private ArrayList<Event> events;
     private HashMap<Integer, Zone> zones;
-    private ArrayList<Event> events; // List of fire events
-    private ArrayList<Zone> zones; // List of defined zones
 
     /**
      * Constructs a FireIncident instance.
@@ -65,9 +63,7 @@ public class FireIncident extends Thread {
                 //add zone into arraylist of zones and print confirmation to console
                 Zone zone = new Zone(id, startX, startY, endX, endY);
                 this.zones.put(zone.getId(), zone);
-                // Add zone into arraylist of zones and print confirmation to console
-                Zone zone = new Zone(id, startX, startY, endX, endY); // Create Zone object
-                this.zones.add(zone); // Store in list
+                
                 //System.out.println("New zone: id = " +zone.getId()+ " start = " +Arrays.toString(zone.getStart())+ " end = "+Arrays.toString(zone.getEnd()));
             }
         } catch (IOException e) {
@@ -161,16 +157,15 @@ public class FireIncident extends Thread {
     public void updateEvents(Event event) {
         this.events.set(event.getId(), event);
     }
-    public HashMap<Integer, Zone> getZones(){//for testing purposes
-    /**
+
+     /**
      * Retrieves the list of zones (for testing purposes).
      *
      * @return The list of zones.
      */
-    public ArrayList<Zone> getZones(){//for testing purposes
-        return this.zones;
+    public HashMap<Integer, Zone> getZones(){//for testing purposes
+        return zones;
     }
-
     /**
      * Retrieves the list of events (for testing purposes).
      *

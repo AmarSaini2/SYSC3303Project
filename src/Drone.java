@@ -108,14 +108,14 @@ public class Drone extends Thread{
 
         if(requiredVolume>carryingVolume){fillTank();}
 
-        //calculate the amount of time needed.
+        //calculate the amount of time needed (assuming seconds)
         int requiredTime = getRequiredTime(requiredVolume, fire);
 
         try {
             Thread.sleep(requiredTime);
         } catch (Exception e) {}
 
-        Event newFireStatus = new Event(Duration.ZERO, 0, 0, Event.Type.DRONE_REQUEST, Event.Severity.OUT);
+        Event newFireStatus = new Event(fire.getTime().plusSeconds(requiredTime), fire.getZone(), fire.getId(), Event.Type.DRONE_REQUEST, Event.Severity.OUT);
         scheduler.sendUpdate(newFireStatus);
 
         send(scheduler.requestForFire()); //Puts drone back into wait

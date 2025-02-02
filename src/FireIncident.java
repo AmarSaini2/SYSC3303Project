@@ -2,7 +2,6 @@ import java.io.*;
 import java.lang.*;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class FireIncident extends Thread {
@@ -46,7 +45,7 @@ public class FireIncident extends Thread {
                 //add zone into arraylist of zones and print confirmation to console
                 Zone zone = new Zone(id, startX, startY, endX, endY);
                 this.zones.add(zone);
-                System.out.println("New zone: id = " +zone.getId()+ " start = " +Arrays.toString(zone.getStart())+ " end = "+Arrays.toString(zone.getEnd()));
+                //System.out.println("New zone: id = " +zone.getId()+ " start = " +Arrays.toString(zone.getStart())+ " end = "+Arrays.toString(zone.getEnd()));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -112,8 +111,8 @@ public class FireIncident extends Thread {
                     Event incident = new Event(time, zone, this.events.size(), type, severity);
                     this.events.add(incident);
 
-                    scheduler.newFireRequest(incident);
                     System.out.println("FireIncidentSubsystem: Sent incident to scheduler -> " + incident.toString());
+                    scheduler.newFireRequest(incident);
                 }else{
                     System.out.println("Type or severity of the event is incorrect");
                 }

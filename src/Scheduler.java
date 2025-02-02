@@ -15,7 +15,7 @@ public class Scheduler extends Thread{
             } catch (InterruptedException e) {}
         }
         this.event = event;
-        System.out.println("Put Event: " +this.event.toString());
+        System.out.println("Scheduler: Put Event-> " +this.event.toString());
         notifyAll();
     }
 
@@ -29,7 +29,7 @@ public class Scheduler extends Thread{
         Event returnEvent = this.event;
         this.event = null;
 
-        System.out.println("Get Event: " +returnEvent.toString());
+        System.out.println("Drone: Get Event-> " +returnEvent.toString());
         notifyAll();
         return returnEvent;
 
@@ -44,7 +44,7 @@ public class Scheduler extends Thread{
         }
 
         this.returnedEvent = event;
-        System.out.println("Put Returned Event: " +this.returnedEvent.toString());
+        System.out.println("Drone: Put Returned Event-> " +this.returnedEvent.toString());
         notifyAll();
     }
 
@@ -59,7 +59,7 @@ public class Scheduler extends Thread{
         Event returnEvent = this.returnedEvent;
         this.returnedEvent = null;
 
-        System.out.println("Get Returned Event: " +returnEvent.toString());
+        System.out.println("FireIncidentSubsystem: Get Returned Event-> " +returnEvent.toString());
         notifyAll();
         return returnEvent;
     }

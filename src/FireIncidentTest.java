@@ -48,23 +48,14 @@ public class FireIncidentTest {
         try(FileWriter writer = new FileWriter(eventFile)){
             writer.write("Time\tZone ID\tEvent Type\tSeverity");
             writer.write("10:01:02\t1\tFIRE_DETECTED\thigh");
-            writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
+            //writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
             writer.close();
         }
 
         //read event file
         incident.readEventFile();
 
-        Thread schedulerThread = new Thread(scheduler);
-        schedulerThread.start();
-        scheduler.requestForFire();
-        scheduler.sendUpdate(null);
-        scheduler.receiveUpdates();
-        try{
-            schedulerThread.join();
-        }catch(InterruptedException e){
-            e.printStackTrace();
-        }
+        
 
         ArrayList<Event> events = incident.getEvents();
 

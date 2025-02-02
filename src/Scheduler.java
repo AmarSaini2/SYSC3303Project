@@ -3,11 +3,17 @@ public class Scheduler extends Thread{
     private Event event;
     private Event returnedEvent;
 
+    /**
+     * Constructor for Scheduler
+     */
     public Scheduler(){
         this.event = null;
     }
 
-    //Put: FireIncident puts an event
+    /**
+     * Synchronized method run by FireIncident to PUT a new Event to Scheduler
+     * @param event the Event being passed
+     */
     public synchronized void newFireRequest(Event event){
         while (this.event != null) {
             try {
@@ -19,7 +25,10 @@ public class Scheduler extends Thread{
         notifyAll();
     }
 
-    //Get: Drone gets an event
+    /**
+     * Synchronized method run by Drone to get a GET an Event from Scheduler
+     * @return the Event passed from the FireIncident
+     */
     public synchronized Event requestForFire(){
         while (this.event == null) {
             try {
@@ -35,7 +44,10 @@ public class Scheduler extends Thread{
 
     }
 
-    //Put: Drone puts the returnedEvent
+    /**
+     * Synchronized method run by Drone to PUT a completed Event to Scheduler
+     * @param event the Event that was put out
+     */
     public synchronized void sendUpdate(Event event){
         while (this.returnedEvent != null) {
             try {
@@ -48,7 +60,10 @@ public class Scheduler extends Thread{
         notifyAll();
     }
 
-    //Get: FireIncident gets the returnedEvent
+    /**
+     * Synchronized method run by FireIncident to GET a completed Event from Scheduler
+     * @return the Event that was put out
+     */
     public synchronized Event receiveUpdates(){
         while (this.returnedEvent == null) {
             try {

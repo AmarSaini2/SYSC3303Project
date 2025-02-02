@@ -117,8 +117,6 @@ public class Drone extends Thread{
 
         Event newFireStatus = new Event(fire.getTime().plusSeconds(requiredTime), fire.getZone(), fire.getId(), fire.getType(), Event.Severity.OUT);
         scheduler.sendUpdate(newFireStatus);
-
-        send(scheduler.requestForFire()); //Puts drone back into wait
     }
 
     /**

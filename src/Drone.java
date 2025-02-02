@@ -117,8 +117,6 @@ public class Drone extends Thread{
 
         Event newFireStatus = new Event(fire.getTime().plusSeconds(requiredTime), fire.getZone(), fire.getId(), Event.Type.DRONE_REQUEST, Event.Severity.OUT);
         scheduler.sendUpdate(newFireStatus);
-
-        send(scheduler.requestForFire()); //Puts drone back into wait
     }
 
     /**
@@ -137,6 +135,12 @@ public class Drone extends Thread{
     public void run(){
         //busy wait the scheduler here for fires every second. I'd work with what exsists in scheduler.java but busy wait is required by the proj specs
         //Scheduler guaranteed to exsist because I require it as an argument when initing a drone.
-        send(scheduler.requestForFire());
+        while(true){
+            Event event = scheduler.requestForFire();
+            if(event == null){
+                break;
+            }
+            send(event);
+        }
     }
 }

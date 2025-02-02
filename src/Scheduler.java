@@ -2,12 +2,15 @@ public class Scheduler extends Thread{
 
     private Event event;
     private Event returnedEvent;
+    private Boolean finish;
 
     /**
      * Constructor for Scheduler
      */
     public Scheduler(){
         this.event = null;
+        this.returnedEvent = null;
+        this.finish = false;
     }
 
     /**
@@ -32,6 +35,9 @@ public class Scheduler extends Thread{
     public synchronized Event requestForFire(){
         while (this.event == null) {
             try {
+                if(this.finish){
+                    return null;
+                }
                 wait();
             } catch (InterruptedException e) {}
         }
@@ -77,6 +83,15 @@ public class Scheduler extends Thread{
         System.out.println("FireIncidentSubsystem: Get Returned Event-> " +returnEvent.toString());
         notifyAll();
         return returnEvent;
+    }
+
+
+    /**
+     * Called by FireIncident when there are no more events to set finish to true and to stop Drone
+     */
+    public synchronized void finishEvents(){
+        this.finish = true;
+        notifyAll();
     }
 
     

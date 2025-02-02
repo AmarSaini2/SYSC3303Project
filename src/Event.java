@@ -5,6 +5,7 @@ import java.time.Duration;
  */
 public class Event {
     private int id;
+    private static int counter = 0;
     Zone zone;
     public static enum Type {FIRE_DETECTED, DRONE_REQUEST}; // Enum representing event types
     private Type type;
@@ -14,18 +15,18 @@ public class Event {
     private Severity severity;
 
     /**
-     * Constructs an Event instance.
+     * Constructs an Event instance. The identifier is created from an internal static variable to ensure unique id values.
      *
      * @param time The timestamp of the event.
      * @param zone The zone in which the event occurred.
-     * @param id The unique identifier for the event.
      * @param type The type of event (e.g., fire detected, drone request).
      * @param severity The severity level of the event.
      */
-    Event(Duration time, Zone zone, int id, Type type, Severity severity){
+    Event(Duration time, Zone zone, Type type, Severity severity){
         this.time = time;
         this.zone = zone;
-        this.id = id;
+        this.id = counter;
+        counter++;
         this.type = type;
         this.severity = severity;
     }

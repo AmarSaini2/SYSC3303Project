@@ -1,3 +1,4 @@
+import java.time.Duration;
 import java.util.HashMap;
 
 public class Drone extends Thread{
@@ -114,7 +115,7 @@ public class Drone extends Thread{
             Thread.sleep(requiredTime);
         } catch (Exception e) {}
 
-        Event newFireStatus = new Event(0, 0, 0, Event.Type.DRONE_REQUEST, Event.Severity.OUT);
+        Event newFireStatus = new Event(Duration.ZERO, 0, 0, Event.Type.DRONE_REQUEST, Event.Severity.OUT);
         scheduler.sendUpdate(newFireStatus);
 
         send(scheduler.requestForFire()); //Puts drone back into wait

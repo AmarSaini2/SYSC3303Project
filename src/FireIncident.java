@@ -1,6 +1,8 @@
-import java.lang.*;
 import java.io.*;
+import java.lang.*;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class FireIncident extends Thread {
@@ -23,17 +25,28 @@ public class FireIncident extends Thread {
     //TODO probably need to consider what to do with headers
     public void readZoneFile(){
         try (Scanner scanner = new Scanner(new File(zoneFilePath))) {
+            scanner.nextLine();//skip header row
             String inputLine;
-            while ((inputLine = scanner.nextLine()) != null) {
-                String[] tokens = inputLine.split(" ");
-
+            while (scanner.hasNextLine()) {
+                inputLine = scanner.nextLine();
+                String[] tokens = inputLine.split("\t");
+                //convert the id from string to int
                 int id = Integer.parseInt(tokens[0]);
-                int start = Integer.parseInt(tokens[1]);
-                int end = Integer.parseInt(tokens[2]);
+                //split start and end coords into seperate integer values
+                String startCoord = tokens[1].substring(1, tokens[1].length()-1);
+                String[] startCoords = startCoord.split(";");
+                int startX = Integer.parseInt(startCoords[0]);
+                int startY = Integer.parseInt(startCoords[1]);
 
-                Zone zone = new Zone(id, start, end);
+                String endCoord = tokens[2].substring(1, tokens[2].length()-1);
+                String[] endCoords  = endCoord.split(";");
+                int endX = Integer.parseInt(endCoords[0]);
+                int endY = Integer.parseInt(endCoords[1]);
+
+                //add zone into arraylist of zones and print confirmation to console
+                Zone zone = new Zone(id, startX, startY, endX, endY);
                 this.zones.add(zone);
-                System.out.println("New zone: id = " +id+ " start = " +start+ " end = " +end);
+                System.out.println("New zone: id = " +zone.getId()+ " start = " +Arrays.toString(zone.getStart())+ " end = "+Arrays.toString(zone.getEnd()));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -42,10 +55,13 @@ public class FireIncident extends Thread {
 
     public void readEventFile() {
         try (Scanner scanner = new Scanner(new File(eventFilePath))) {
+            scanner.nextLine();//skip header row
             String inputLine;
-            while ((inputLine = scanner.nextLine()) != null) {
-                String[] tokens = inputLine.split(" ");
+            while (scanner.hasNextLine()) {//loop through all lines of the file
+                inputLine = scanner.nextLine();
+                String[] tokens = inputLine.split("\t");//split by tabs
 
+                //assign tokens to variables
                 String timeStamp = tokens[0];
                 int zone = Integer.parseInt(tokens[1]);
                 String eventType = tokens[2];
@@ -54,22 +70,46 @@ public class FireIncident extends Thread {
                 Event.Type type = null;
                 Event.Severity severity = null;
 
+                //assign eventType values using enum
                 if(eventType.equals("FIRE_DETECTED") ){
                     type = Event.Type.FIRE_DETECTED;
                 } else if (eventType.equals("DRONE_REQUEST")){
                     type = Event.Type.DRONE_REQUEST;
                 }
 
-                if(fireSeverity.equals("HIGH") ){
+                //assign Severity values using enum
+                switch(fireSeverity.toLowerCase()){
+                    case "high":
                     severity = Event.Severity.HIGH;
-                } else if (fireSeverity.equals("MODERATE")){
+                    break;
+
+                    case "moderate":
                     severity = Event.Severity.MODERATE;
-                } else if (fireSeverity.equals("LOW")){
+                    break;
+
+                    case "low":
                     severity = Event.Severity.LOW;
+                    break;
+
+                    default:
+                    System.out.println("Unknown severity: " + fireSeverity);
+                    severity = null;
+                    break;
                 }
 
+                //System.out.println("Time: " + timeStamp + " Zone: " + zone + " Type: " + type + " Severity: " + severity);
+                //parse time string into duration value
+                String[] splitTimeStamp = timeStamp.split(":"); //split by colon
+                int hours = Integer.parseInt(splitTimeStamp[0]);
+                int min = Integer.parseInt(splitTimeStamp[1]);
+                int sec = Integer.parseInt(splitTimeStamp[2]);
+
+                Duration time = Duration.ofHours(hours)
+                                           .plusMinutes(min)
+                                           .plusSeconds(sec);
+
                 if(type != null && severity != null){
-                    Event incident = new Event(Integer.parseInt(timeStamp), zone, this.events.size(), type, severity);
+                    Event incident = new Event(time, zone, this.events.size(), type, severity);
                     this.events.add(incident);
 
                     scheduler.newFireRequest(incident);
@@ -89,9 +129,20 @@ public class FireIncident extends Thread {
         this.events.set(event.getId(), event);
     }
 
+    public ArrayList<Zone> getZones(){//for testing purposes
+        return this.zones;
+    }
+
+    public ArrayList<Event> getEvents(){//for testing purposes
+        return this.events;
+    }
+
     //TODO Testing purposes only! Will need to be removed later
     @Override
     public void run() {
+        this.readZoneFile();
+        this.readEventFile();
+        /*
         Zone zone = new Zone(1, 0, 400);
         Event event = new Event(24, 1, 1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
         this.zones.add(zone);
@@ -105,5 +156,6 @@ public class FireIncident extends Thread {
         this.events.add(event1);
         this.scheduler.newFireRequest(event1);
         updateEvents(this.scheduler.receiveUpdates());
+        */
     }
 }

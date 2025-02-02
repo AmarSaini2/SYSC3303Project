@@ -1,12 +1,15 @@
+import java.time.Duration;
+
 public class Event {
-    private int time,zone,id;
+    private int zone,id;
     public static enum Type {FIRE_DETECTED, DRONE_REQUEST};
     private Type type;
+    private Duration time;
 
     public static enum Severity {HIGH, MODERATE, LOW, OUT};
     private Severity severity;
 
-    Event(int time, int zone, int id, Type type, Severity severity){
+    Event(Duration time, int zone, int id, Type type, Severity severity){
         this.time = time;
         this.zone = zone;
         this.id = id;
@@ -22,7 +25,7 @@ public class Event {
         return type;
     }
 
-    public int getTime() {
+    public Duration getTime() {
         return time;
     }
 
@@ -36,6 +39,8 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event [time: " + this.time + ", zone:" + this.id + ", type: " + this.type + ", severity: " + this.severity + "]";
+        //convert timestamp duration obj into readable string as part of this printout
+        return "Event [time: " + String.format("%02d:%02d:%02d", this.time.toHours(),this.time.toMinutesPart(),this.time.toSecondsPart())+ ", zone:" + this.id + ", type: " + this.type + ", severity: " + this.severity + "]";
     }
+    
 }

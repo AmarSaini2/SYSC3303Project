@@ -43,10 +43,15 @@ public class FireIncidentTest {
 
         //check that zone is processed correctly
         HashMap<Integer, Zone> zones = incident.getZones();
+
         
-        assertEquals(zones.get(0).getId(), 1);
-        assertArrayEquals(zones.get(0).getStart(), new int[]{0,0});
-        assertArrayEquals(zones.get(0).getEnd(), new int[] {700,600});
+        assertEquals(zones.get(1).getId(), 1);
+        assertArrayEquals(zones.get(1).getStart(), new int[]{0,0});
+        assertArrayEquals(zones.get(1).getEnd(), new int[] {700,600});
+
+        assertEquals(zones.get(2).getId(), 2);
+        assertArrayEquals(zones.get(2).getStart(), new int[]{0,600});
+        assertArrayEquals(zones.get(2).getEnd(), new int[] {650,1500});
     }
 
     @Test
@@ -56,7 +61,7 @@ public class FireIncidentTest {
         try(FileWriter writer = new FileWriter(eventFile)){
             writer.write("Time\tZone ID\tEvent Type\tSeverity\n");
             writer.write("10:01:02\t1\tFIRE_DETECTED\thigh\n");
-            //writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
+            writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
             writer.close();
         }
 
@@ -68,7 +73,7 @@ public class FireIncidentTest {
         
         ArrayList<Event> events = incident.getEvents();
 
-        assertEquals(1, events.get(0).getZone());
+        assertEquals(1, events.get(0).getZone().getId());
         assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());
         assertEquals(Event.Severity.OUT, events.get(0).getSeverity());
     }

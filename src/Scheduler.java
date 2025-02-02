@@ -1,82 +1,99 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class Scheduler extends Thread{
-    private FireIncident fireIncident;
 
-    //Water in liters required to put out a fire of each severity
-    private final int LOW = 10;
-    private final int MODERATE = 20;
-    private final int HIGH = 30;
-
-    private HashMap<Integer, Drone> drones; //<ID, Drone>
-    private HashMap<Integer, HashMap<String, String>> fireEvents; //<ID, <Time, ZoneID, EventType, Severity>>
-    private HashMap<Integer, HashMap<String, String>> zones; //<ID, <ZoneStart, ZoneEnd>>
+    private Event event;
+    private Event returnedEvent;
+    private Boolean finish;
 
     /**
      * Constructor for Scheduler
-     *
-     * @param fireIncident
      */
-    public Scheduler(FireIncident fireIncident){
-        this.fireIncident = fireIncident;
-
-        this.drones = new HashMap<Integer, Drone>();
-        this.fireEvents = new HashMap<Integer, HashMap<String, String>>();
-        this.zones = new HashMap<Integer, HashMap<String, String>>();
+    public Scheduler(){
+        this.event = null;
+        this.returnedEvent = null;
+        this.finish = false;
     }
 
     /**
-     *
-     *
-     * @param zone
+     * Synchronized method run by FireIncident to PUT a new Event to Scheduler
+     * @param event the Event being passed
      */
-    public synchronized void newFireRequest(HashMap<Integer,HashMap<String, String>> zone){
-        //TODO
-        dispatchDrone(zone);
-    }
-
-    /**
-     *
-     *
-     */
-    public synchronized void droneReturn(){
-        this.fireIncident.put(); //TODO signal the fireIncident that drone has returned
-    }
-
-    /**
-     * Runs the dispatch function for the chosen drone
-     */
-    private Boolean dispatchDrone(HashMap<Integer,HashMap<String, String>> zone){
-        Drone chosen_drone = chooseDrone();
-        if (chosen_drone == null){
-            System.out.print("There is no drone to send");
-            return false;
+    public synchronized void newFireRequest(Event event){
+        while (this.event != null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
         }
-        chosen_drone.put(); //TODO signal the drone
-        return true;
+        this.event = event;
+        System.out.println("\nScheduler: Put Event-> " +this.event.toString());
+        notifyAll();
     }
 
     /**
-     * Run by the Scheduler to choose which drone will be sent to the fire zone
-     *
-     * @return the drone that will be sent to the fire zone
+     * Synchronized method run by Drone to get a GET an Event from Scheduler
+     * @return the Event passed from the FireIncident
      */
-    private Drone chooseDrone(){
-        //Chooses the first drone
-        for (Drone drone: this.drones.values()){
-            return drone;
+    public synchronized Event requestForFire(){
+        while (this.event == null) {
+            try {
+                if(this.finish){
+                    return null;
+                }
+                wait();
+            } catch (InterruptedException e) {}
         }
-        return null;
+        Event returnEvent = this.event;
+        this.event = null;
+
+        System.out.println("Drone: Get Event-> " +returnEvent.toString());
+        notifyAll();
+        return returnEvent;
+
     }
 
     /**
-     * Sets the drone for the Scheduler
-     *
-     * @param drone the drone the Scheduler will use to send to fires zones
+     * Synchronized method run by Drone to PUT a completed Event to Scheduler
+     * @param event the Event that was put out
      */
-    public void addDrone(Integer droneID, Drone drone){
-        this.drones.put(droneID, drone);
+    public synchronized void sendUpdate(Event event){
+        while (this.returnedEvent != null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        }
+
+        this.returnedEvent = event;
+        System.out.println("Drone: Put Returned Event-> " +this.returnedEvent.toString());
+        notifyAll();
     }
+
+    /**
+     * Synchronized method run by FireIncident to GET a completed Event from Scheduler
+     * @return the Event that was put out
+     */
+    public synchronized Event receiveUpdates(){
+        while (this.returnedEvent == null) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        }
+
+        Event returnEvent = this.returnedEvent;
+        this.returnedEvent = null;
+
+        System.out.println("FireIncidentSubsystem: Get Returned Event-> " +returnEvent.toString());
+        notifyAll();
+        return returnEvent;
+    }
+
+
+    /**
+     * Called by FireIncident when there are no more events to set finish to true and to stop Drone
+     */
+    public synchronized void finishEvents(){
+        this.finish = true;
+        notifyAll();
+    }
+
+
 }
 

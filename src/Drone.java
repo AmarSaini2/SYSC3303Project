@@ -115,7 +115,7 @@ public class Drone extends Thread{
             Thread.sleep(requiredTime);
         } catch (Exception e) {}
 
-        Event newFireStatus = new Event(fire.getTime().plusSeconds(requiredTime), fire.getZone(), fire.getId(), Event.Type.DRONE_REQUEST, Event.Severity.OUT);
+        Event newFireStatus = new Event(fire.getTime().plusSeconds(requiredTime), fire.getZone(), fire.getId(), fire.getType(), Event.Severity.OUT);
         scheduler.sendUpdate(newFireStatus);
     }
 

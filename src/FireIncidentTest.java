@@ -12,11 +12,18 @@ public class FireIncidentTest {
 
     FireIncident incident;
     Scheduler scheduler;
+    Drone drone;
 
     @BeforeEach
     public void setup(){
         scheduler = new Scheduler();
         incident = new FireIncident("src\\test_Event_File.csv", "src\\test_Zone_File.csv", scheduler);
+        drone = new Drone(scheduler);
+
+        Thread schedulerThread = new Thread(scheduler);
+        Thread droneThread = new Thread(drone);
+        schedulerThread.start();
+        droneThread.start();
     } 
 
     @Test

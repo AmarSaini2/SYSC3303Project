@@ -35,7 +35,7 @@ public class DroneTest {
     @Test
     public void testSendToFire() throws InterruptedException {
         Zone zone = new Zone (1, 0,0,700,600);
-       Event fireEvent = new Event(Duration.ofSeconds(1),zone,1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
+       Event fireEvent = new Event(Duration.ofSeconds(1),zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
 
        //send fire request to scheduler
        scheduler.newFireRequest(fireEvent);

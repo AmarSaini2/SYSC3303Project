@@ -132,7 +132,7 @@ public class FireIncident extends Thread {
 
                 // Only process valid events
                 if(type != null && severity != null){
-                    Event incident = new Event(time, zones.get(zone), this.events.size(), type, severity);
+                    Event incident = new Event(time, zones.get(zone), type, severity);
                     this.events.add(incident);
 
                     scheduler.newFireRequest(incident);

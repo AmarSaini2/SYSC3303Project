@@ -2,7 +2,6 @@ import java.io.*;
 import java.lang.*;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -46,7 +45,7 @@ public class FireIncident extends Thread {
                 //add zone into arraylist of zones and print confirmation to console
                 Zone zone = new Zone(id, startX, startY, endX, endY);
                 this.zones.put(zone.getId(), zone);
-                System.out.println("New zone: id = " +zone.getId()+ " start = " +Arrays.toString(zone.getStart())+ " end = "+Arrays.toString(zone.getEnd()));
+                //System.out.println("New zone: id = " +zone.getId()+ " start = " +Arrays.toString(zone.getStart())+ " end = "+Arrays.toString(zone.getEnd()));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,14 +112,13 @@ public class FireIncident extends Thread {
                     this.events.add(incident);
 
                     scheduler.newFireRequest(incident);
-
                     updateEvents(this.scheduler.receiveUpdates());
-
                     //System.out.println("FireIncidentSubsystem: Sent incident to scheduler -> " + incident.toString());
                 }else{
                     System.out.println("Type or severity of the event is incorrect");
                 }
             }
+            scheduler.finishEvents();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -139,25 +137,9 @@ public class FireIncident extends Thread {
         return this.events;
     }
 
-    //TODO Testing purposes only! Will need to be removed later
     @Override
     public void run() {
         this.readZoneFile();
         this.readEventFile();
-        /*
-        Zone zone = new Zone(1, 0, 400);
-        Event event = new Event(24, 1, 1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
-        this.zones.add(zone);
-        this.events.add(event);
-        this.scheduler.newFireRequest(event);
-        updateEvents(this.scheduler.receiveUpdates());
-
-        Zone zone1 = new Zone(2, 0, 400);
-        Event event1 = new Event(24, 2, 1, Event.Type.FIRE_DETECTED, Event.Severity.MODERATE);
-        this.zones.add(zone1);
-        this.events.add(event1);
-        this.scheduler.newFireRequest(event1);
-        updateEvents(this.scheduler.receiveUpdates());
-        */
     }
 }

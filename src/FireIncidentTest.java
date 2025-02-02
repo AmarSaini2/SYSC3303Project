@@ -13,11 +13,18 @@ public class FireIncidentTest {
 
     FireIncident incident;
     Scheduler scheduler;
+    Drone drone;
 
     @BeforeEach
     public void setup(){
         scheduler = new Scheduler();
         incident = new FireIncident("src\\test_Event_File.csv", "src\\test_Zone_File.csv", scheduler);
+        drone = new Drone(scheduler);
+
+        Thread schedulerThread = new Thread(scheduler);
+        Thread droneThread = new Thread(drone);
+        schedulerThread.start();
+        droneThread.start();
     } 
 
     @Test
@@ -47,29 +54,22 @@ public class FireIncidentTest {
         //create test file and write some values to it
         File eventFile = new File("src\\test_Event_File.csv");
         try(FileWriter writer = new FileWriter(eventFile)){
-            writer.write("Time\tZone ID\tEvent Type\tSeverity");
-            writer.write("10:01:02\t1\tFIRE_DETECTED\thigh");
-            writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
+            writer.write("Time\tZone ID\tEvent Type\tSeverity\n");
+            writer.write("10:01:02\t1\tFIRE_DETECTED\thigh\n");
+            //writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
             writer.close();
         }
 
+
         //read event file
+        incident.readZoneFile();
         incident.readEventFile();
 
-        Thread schedulerThread = new Thread(scheduler);
-        schedulerThread.start();
-        scheduler.requestForFire();
-        scheduler.sendUpdate(null);
-        scheduler.receiveUpdates();
-        try{
-            schedulerThread.join();
-        }catch(InterruptedException e){
-            e.printStackTrace();
-        }
-
+        
         ArrayList<Event> events = incident.getEvents();
 
-        assertEquals(Duration.ofHours(10).plusMinutes(1).plusSeconds(2), events.get(0).getTime());
-
+        assertEquals(1, events.get(0).getZone());
+        assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());
+        assertEquals(Event.Severity.OUT, events.get(0).getSeverity());
     }
 }

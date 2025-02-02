@@ -2,12 +2,15 @@ public class Scheduler extends Thread{
 
     private Event event;
     private Event returnedEvent;
+    private Boolean finish;
 
     /**
      * Constructor for Scheduler
      */
     public Scheduler(){
         this.event = null;
+        this.returnedEvent = null;
+        this.finish = false;
     }
 
     /**
@@ -21,7 +24,7 @@ public class Scheduler extends Thread{
             } catch (InterruptedException e) {}
         }
         this.event = event;
-        System.out.println("\nPut Event: " +this.event.toString());
+        System.out.println("\nScheduler: Put Event-> " +this.event.toString());
         notifyAll();
     }
 
@@ -32,13 +35,16 @@ public class Scheduler extends Thread{
     public synchronized Event requestForFire(){
         while (this.event == null) {
             try {
+                if(this.finish){
+                    return null;
+                }
                 wait();
             } catch (InterruptedException e) {}
         }
         Event returnEvent = this.event;
         this.event = null;
 
-        System.out.println("Get Event: " +returnEvent.toString());
+        System.out.println("Drone: Get Event-> " +returnEvent.toString());
         notifyAll();
         return returnEvent;
 
@@ -56,7 +62,7 @@ public class Scheduler extends Thread{
         }
 
         this.returnedEvent = event;
-        System.out.println("Put Completed Event: " +this.returnedEvent.toString());
+        System.out.println("Drone: Put Returned Event-> " +this.returnedEvent.toString());
         notifyAll();
     }
 
@@ -74,11 +80,20 @@ public class Scheduler extends Thread{
         Event returnEvent = this.returnedEvent;
         this.returnedEvent = null;
 
-        System.out.println("Get Completed Event: " +returnEvent.toString());
+        System.out.println("FireIncidentSubsystem: Get Returned Event-> " +returnEvent.toString());
         notifyAll();
         return returnEvent;
     }
 
-    
+
+    /**
+     * Called by FireIncident when there are no more events to set finish to true and to stop Drone
+     */
+    public synchronized void finishEvents(){
+        this.finish = true;
+        notifyAll();
+    }
+
+
 }
 

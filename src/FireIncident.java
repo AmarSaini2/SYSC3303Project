@@ -155,7 +155,14 @@ public class FireIncident extends Thread {
      * @param event The updated event information.
      */
     public void updateEvents(Event event) {
-        this.events.set(event.getId(), event);
+        int index = events.indexOf(event);
+
+        //the code should not be done this way, in iteration 2 we should change the events arrayList to a hashmap of <id:object> similar to zones.
+        if(index != -1){
+            this.events.set(index, event);
+        }else{
+            System.out.println("the fireIncident could not find an event to update");
+        }
     }
 
      /**

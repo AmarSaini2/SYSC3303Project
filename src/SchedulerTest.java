@@ -17,7 +17,8 @@ public class SchedulerTest {
 
     @Test
     public void testnewFireRequest() throws InterruptedException {
-       Event event = new Event(Duration.ofSeconds(1),1,1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
+        Zone zone = new Zone (1, 0,0,700,600);
+       Event event = new Event(Duration.ofSeconds(1),zone,1, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
        Thread producer = new Thread(() -> scheduler.newFireRequest(event));
        producer.start();
        producer.join();//wait for producer thread to finish running
@@ -29,7 +30,8 @@ public class SchedulerTest {
 
     @Test
     public void testSendUpdate() throws InterruptedException{
-        Event event = new Event(Duration.ofSeconds(1),1,1,Event.Type.DRONE_REQUEST, Event.Severity.HIGH);
+        Zone zone = new Zone (1, 0,0,700,600);
+        Event event = new Event(Duration.ofSeconds(1),zone,1,Event.Type.DRONE_REQUEST, Event.Severity.HIGH);
         Thread updater = new Thread(() -> scheduler.sendUpdate(event));
         updater.start();
         updater.join(); //wait for thread to finish

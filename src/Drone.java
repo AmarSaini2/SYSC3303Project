@@ -22,7 +22,7 @@ public class Drone extends Thread{
         //arbitrarily assuming takeoff speed as 3.0m/s
         attributes.put("takeoffSpeed", 3.0);
         //arbitrarily assuming speed as 3.0m/s
-        attributes.put("travelSpeed", 3.0);
+        attributes.put("travelSpeed", 12.0);
         //flow rate as 1.25L/s
         attributes.put("flowRate", 1.25);
         //max capacity at 15L
@@ -110,9 +110,9 @@ public class Drone extends Thread{
 
         //calculate the amount of time needed (assuming seconds)
         int requiredTime = getRequiredTime(requiredVolume, fire);
-
+        System.out.println("Drone Required Time: " +requiredTime);
         try {
-            Thread.sleep(requiredTime);
+            Thread.sleep(requiredTime * 100);
         } catch (Exception e) {}
 
         Event newFireStatus = new Event(fire.getTime().plusSeconds(requiredTime), fire.getZone(), fire.getId(), fire.getType(), Event.Severity.OUT);
@@ -125,8 +125,12 @@ public class Drone extends Thread{
      * @return the amount of time to get to a fire, in seconds.
      */
     private int getTravelTime(Event fire){
-        //for now, I'm going to just assume it takes 3 seconds to get to the fire. We can implement this later when we actually have zones and positions to calculate movement.
-        return 3;
+        Zone zone = fire.getZone();
+        int x = zone.getStart()[0] + ((zone.getStart()[0] + zone.getEnd()[0])/2);
+        int y = zone.getStart()[1] + ((zone.getStart()[1] + zone.getEnd()[1])/2);
+        //Assume start from (0,0)
+        double distance = 2 * Math.sqrt(x^2 + y^2);
+        return  (int) (distance/this.attributes.get("travelSpeed"));
     }
 
     /**

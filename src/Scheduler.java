@@ -21,7 +21,7 @@ public class Scheduler extends Thread{
             } catch (InterruptedException e) {}
         }
         this.event = event;
-        System.out.println("Put Event: " +this.event.toString());
+        System.out.println("\nPut Event: " +this.event.toString());
         notifyAll();
     }
 

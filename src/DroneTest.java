@@ -31,7 +31,7 @@ public class DroneTest {
 
        //assertions to verify expected behaviour
        assertNotNull(newFireStatus);
-       assertEquals(Event.Type.DRONE_REQUEST, newFireStatus.getType());
+       assertEquals(Event.Type.FIRE_DETECTED, newFireStatus.getType());
        assertEquals(Event.Severity.OUT, newFireStatus.getSeverity());
     }
 }

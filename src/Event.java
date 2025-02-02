@@ -4,6 +4,9 @@ import java.time.Duration;
  * The Event class represents a fire incident event, storing details such as time, zone, type, and severity.
  */
 public class Event {
+    private int id;
+    Zone zone;
+    public static enum Type {FIRE_DETECTED, DRONE_REQUEST};
     private int zone,id;
     public static enum Type {FIRE_DETECTED, DRONE_REQUEST}; // Enum representing event types
     private Type type;
@@ -12,6 +15,7 @@ public class Event {
     public static enum Severity {HIGH, MODERATE, LOW, OUT}; // Enum representing severity levels of a fire incident.
     private Severity severity;
 
+    Event(Duration time, Zone zone, int id, Type type, Severity severity){
     /**
      * Constructs an Event instance.
      *
@@ -56,6 +60,7 @@ public class Event {
         return time;
     }
 
+    public Zone getZone() {
     /**
      * Retrieves the zone where the event occurred.
      *

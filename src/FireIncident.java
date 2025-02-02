@@ -2,6 +2,7 @@ import java.io.*;
 import java.lang.*;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 /***
@@ -12,6 +13,8 @@ public class FireIncident extends Thread {
     private final String eventFilePath;
     private final String zoneFilePath;
     private final Scheduler scheduler;
+    private ArrayList<Event> events;
+    private HashMap<Integer, Zone> zones;
     private ArrayList<Event> events; // List of fire events
     private ArrayList<Zone> zones; // List of defined zones
 
@@ -28,15 +31,15 @@ public class FireIncident extends Thread {
 
         this.scheduler = scheduler;
         this.events = new ArrayList<>();
-        this.zones = new ArrayList<>();
+        this.zones = new HashMap<Integer, Zone>();
     }
-
+  
+    //Adds a new zone from a file input
 
     /**
      * Reads zone data from the inputted file and stores it in the list of zones.
      * Skips the header row in the file.
      */
-    //TODO probably need to consider what to do with headers
     public void readZoneFile(){
         try (Scanner scanner = new Scanner(new File(zoneFilePath))) {
             scanner.nextLine(); // Skip header row
@@ -58,7 +61,10 @@ public class FireIncident extends Thread {
                 String[] endCoords  = endCoord.split(";");
                 int endX = Integer.parseInt(endCoords[0]);
                 int endY = Integer.parseInt(endCoords[1]);
-
+              
+                //add zone into arraylist of zones and print confirmation to console
+                Zone zone = new Zone(id, startX, startY, endX, endY);
+                this.zones.put(zone.getId(), zone);
                 // Add zone into arraylist of zones and print confirmation to console
                 Zone zone = new Zone(id, startX, startY, endX, endY); // Create Zone object
                 this.zones.add(zone); // Store in list
@@ -130,11 +136,12 @@ public class FireIncident extends Thread {
 
                 // Only process valid events
                 if(type != null && severity != null){
-                    Event incident = new Event(time, zone, this.events.size(), type, severity);
+                    Event incident = new Event(time, zones.get(zone), this.events.size(), type, severity);
                     this.events.add(incident);
 
-                    System.out.println("FireIncidentSubsystem: Sent incident to scheduler -> " + incident.toString());
                     scheduler.newFireRequest(incident);
+                    updateEvents(this.scheduler.receiveUpdates());
+                    //System.out.println("FireIncidentSubsystem: Sent incident to scheduler -> " + incident.toString());
                 }else{
                     System.out.println("Type or severity of the event is incorrect");
                 }
@@ -143,7 +150,6 @@ public class FireIncident extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         updateEvents(this.scheduler.receiveUpdates()); // Update events with scheduler feedback
     }
 
@@ -155,7 +161,7 @@ public class FireIncident extends Thread {
     public void updateEvents(Event event) {
         this.events.set(event.getId(), event);
     }
-
+    public HashMap<Integer, Zone> getZones(){//for testing purposes
     /**
      * Retrieves the list of zones (for testing purposes).
      *

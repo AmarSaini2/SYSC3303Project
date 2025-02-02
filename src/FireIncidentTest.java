@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FireIncidentTest {
 
@@ -41,11 +42,16 @@ public class FireIncidentTest {
         incident.readZoneFile();
 
         //check that zone is processed correctly
-        ArrayList<Zone> zones = incident.getZones();
+        HashMap<Integer, Zone> zones = incident.getZones();
+
         
-        assertEquals(zones.get(0).getId(), 1);
-        assertArrayEquals(zones.get(0).getStart(), new int[]{0,0});
-        assertArrayEquals(zones.get(0).getEnd(), new int[] {700,600});
+        assertEquals(zones.get(1).getId(), 1);
+        assertArrayEquals(zones.get(1).getStart(), new int[]{0,0});
+        assertArrayEquals(zones.get(1).getEnd(), new int[] {700,600});
+
+        assertEquals(zones.get(2).getId(), 2);
+        assertArrayEquals(zones.get(2).getStart(), new int[]{0,600});
+        assertArrayEquals(zones.get(2).getEnd(), new int[] {650,1500});
     }
 
     @Test
@@ -53,20 +59,22 @@ public class FireIncidentTest {
         //create test file and write some values to it
         File eventFile = new File("src\\test_Event_File.csv");
         try(FileWriter writer = new FileWriter(eventFile)){
-            writer.write("Time\tZone ID\tEvent Type\tSeverity");
-            writer.write("10:01:02\t1\tFIRE_DETECTED\thigh");
-            //writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
+            writer.write("Time\tZone ID\tEvent Type\tSeverity\n");
+            writer.write("10:01:02\t1\tFIRE_DETECTED\thigh\n");
+            writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
             writer.close();
         }
 
+
         //read event file
+        incident.readZoneFile();
         incident.readEventFile();
 
         
-
         ArrayList<Event> events = incident.getEvents();
 
-        assertEquals(Duration.ofHours(10).plusMinutes(1).plusSeconds(2), events.get(0).getTime());
-
+        assertEquals(1, events.get(0).getZone().getId());
+        assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());
+        assertEquals(Event.Severity.OUT, events.get(0).getSeverity());
     }
 }

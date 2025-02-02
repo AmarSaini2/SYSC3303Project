@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FireIncidentTest {
 
@@ -41,7 +42,7 @@ public class FireIncidentTest {
         incident.readZoneFile();
 
         //check that zone is processed correctly
-        ArrayList<Zone> zones = incident.getZones();
+        HashMap<Integer, Zone> zones = incident.getZones();
         
         assertEquals(zones.get(0).getId(), 1);
         assertArrayEquals(zones.get(0).getStart(), new int[]{0,0});

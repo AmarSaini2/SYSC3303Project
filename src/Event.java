@@ -1,7 +1,8 @@
 import java.time.Duration;
 
 public class Event {
-    private int zone,id;
+    private int id;
+    Zone zone;
     public static enum Type {FIRE_DETECTED, DRONE_REQUEST};
     private Type type;
     private Duration time;
@@ -9,7 +10,7 @@ public class Event {
     public static enum Severity {HIGH, MODERATE, LOW, OUT};
     private Severity severity;
 
-    Event(Duration time, int zone, int id, Type type, Severity severity){
+    Event(Duration time, Zone zone, int id, Type type, Severity severity){
         this.time = time;
         this.zone = zone;
         this.id = id;
@@ -29,7 +30,7 @@ public class Event {
         return time;
     }
 
-    public int getZone() {
+    public Zone getZone() {
         return zone;
     }
 

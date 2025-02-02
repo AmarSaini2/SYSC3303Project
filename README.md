@@ -33,10 +33,10 @@ There are three main components of project:
 ### Steps to Run the Project
 
 1. **Clone or Download the Project**
-```
-git clone https://github.com/AmarSaini2/SYSC3303Project.git
-cd SYSC3303Project
-```
+    ```
+    git clone https://github.com/AmarSaini2/SYSC3303Project.git
+    cd SYSC3303Project
+    ```
 
 2. **Open in IntelliJ IDEA**
 - Select **File → Open** and choose the project directory.

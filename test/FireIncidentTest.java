@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 
 import java.io.*;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,7 +28,7 @@ public class FireIncidentTest {
     @BeforeEach
     public void setup(){
         scheduler = new Scheduler();
-        incident = new FireIncident("src\\test_Event_File.csv", "src\\test_Zone_File.csv", scheduler);
+        incident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", scheduler);
         drone = new Drone(scheduler);
         Thread schedulerThread = new Thread(scheduler);
         Thread droneThread = new Thread(drone);
@@ -49,7 +48,7 @@ public class FireIncidentTest {
     @Test
     public void testReadZoneFile() throws IOException{
         //create test file and write some values to it
-        File zoneFile = new File("src\\test_Zone_File.csv");
+        File zoneFile = new File("test\\test_Zone_File.csv");
         try(FileWriter writer = new FileWriter(zoneFile)){
             writer.write("Zone ID\tZone Start\tZone End\n");
             writer.write("1\t(0;0)\t(700;600)\n");
@@ -83,7 +82,7 @@ public class FireIncidentTest {
     @Test
     public void testReadEventFile() throws IOException{//buggy because of the known scheduler deadlock issue. Will be fixed in Iteration 2
         //create test file and write some values to it
-        File eventFile = new File("src\\test_Event_File.csv");
+        File eventFile = new File("test\\test_Event_File.csv");
         try(FileWriter writer = new FileWriter(eventFile)){
             writer.write("Time\tZone ID\tEvent Type\tSeverity\n");
             writer.write("10:01:02\t1\tFIRE_DETECTED\thigh\n");

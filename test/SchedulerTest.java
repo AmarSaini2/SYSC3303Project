@@ -32,7 +32,7 @@ public class SchedulerTest {
      * @throws InterruptedException if the thread is interrupted while waiting.
      */
     @Test
-    public void testnewFireRequest() throws InterruptedException {
+    public void testNewFireRequest() throws InterruptedException {
         Zone zone = new Zone (1, 0,0,700,600);
         Event event = new Event(Duration.ofSeconds(1),zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
 

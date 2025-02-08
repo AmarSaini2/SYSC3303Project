@@ -76,10 +76,18 @@ public class Event {
         return id;
     }
 
+    /**
+     * Sets the time of an Event object
+     * @param time the new time of the Event
+     */
     public void setTime(Duration time) {
         this.time = time;
     }
 
+    /**
+     * Sets the severity of an Event object
+     * @param severity the new severity of the Event
+     */
     public void setSeverity(Severity severity) {
         this.severity = severity;
     }

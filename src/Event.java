@@ -1,4 +1,5 @@
 import java.time.Duration;
+import java.time.LocalTime;
 
 /**
  * The Event class represents a fire incident event, storing details such as time, zone, type, and severity.
@@ -9,7 +10,7 @@ public class Event {
     Zone zone;
     public static enum Type {FIRE_DETECTED, DRONE_REQUEST}; // Enum representing event types
     private Type type;
-    private Duration time;
+    private LocalTime time;
 
     public static enum Severity {HIGH, MODERATE, LOW, OUT}; // Enum representing severity levels of a fire incident.
     private Severity severity;
@@ -22,7 +23,7 @@ public class Event {
      * @param type The type of event (e.g., fire detected, drone request).
      * @param severity The severity level of the event.
      */
-    Event(Duration time, Zone zone, Type type, Severity severity){
+    Event(LocalTime time, Zone zone, Type type, Severity severity){
         this.time = time;
         this.zone = zone;
         this.id = counter;
@@ -54,7 +55,7 @@ public class Event {
      *
      * @return The event's timestamp as a Duration object.
      */
-    public Duration getTime() {
+    public LocalTime getTime() {
         return time;
     }
 
@@ -80,7 +81,7 @@ public class Event {
      * Sets the time of an Event object
      * @param time the new time of the Event
      */
-    public void setTime(Duration time) {
+    public void setTime(LocalTime time) {
         this.time = time;
     }
 
@@ -100,7 +101,7 @@ public class Event {
     @Override
     public String toString() {
         //convert timestamp duration obj into readable string as part of this printout
-        return "Event [time: " + String.format("%02d:%02d:%02d", this.time.toHours(),this.time.toMinutesPart(),this.time.toSecondsPart())+ ", zone:" + this.id + ", type: " + this.type + ", severity: " + this.severity + "]";
+        return "Event [time: " +this.time+ ", zone:" + this.id + ", type: " + this.type + ", severity: " + this.severity + "]";
     }
     
 }

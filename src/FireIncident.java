@@ -1,7 +1,6 @@
 import java.io.*;
 import java.lang.*;
-import java.time.Duration;
-import java.util.ArrayList;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -120,15 +119,8 @@ public class FireIncident extends Thread {
                 }
 
                 //System.out.println("Time: " + timeStamp + " Zone: " + zone + " Type: " + type + " Severity: " + severity);
-                // Parse timestamp into Duration object
-                String[] splitTimeStamp = timeStamp.split(":"); //split by colon
-                int hours = Integer.parseInt(splitTimeStamp[0]);
-                int min = Integer.parseInt(splitTimeStamp[1]);
-                int sec = Integer.parseInt(splitTimeStamp[2]);
 
-                Duration time = Duration.ofHours(hours)
-                                           .plusMinutes(min)
-                                           .plusSeconds(sec);
+                LocalTime time = LocalTime.parse(timeStamp);
 
                 // Only process valid events
                 if(type != null && severity != null){

@@ -1,4 +1,5 @@
 import java.time.Duration;
+import java.time.LocalTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -34,7 +35,7 @@ public class SchedulerTest {
     @Test
     public void testNewFireRequest() throws InterruptedException {
         Zone zone = new Zone (1, 0,0,700,600);
-        Event event = new Event(Duration.ofSeconds(1),zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
+        Event event = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
 
         // Create a producer thread to send the fire request
        Thread producer = new Thread(() -> scheduler.newFireRequest(event));
@@ -57,7 +58,7 @@ public class SchedulerTest {
     @Test
     public void testSendUpdate() throws InterruptedException{
         Zone zone = new Zone (1, 0,0,700,600);
-        Event event = new Event(Duration.ofSeconds(1),zone,Event.Type.DRONE_REQUEST, Event.Severity.HIGH);
+        Event event = new Event(LocalTime.now(), zone, Event.Type.DRONE_REQUEST, Event.Severity.HIGH);
 
         //create and updater thread to send the update
         Thread updater = new Thread(() -> scheduler.sendUpdate(event));

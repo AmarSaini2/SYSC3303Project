@@ -1,4 +1,4 @@
-import java.time.Duration;
+import java.time.LocalTime;
 import java.util.HashMap;
 
 public class Drone extends Thread{
@@ -114,7 +114,7 @@ public class Drone extends Thread{
         try {
             Thread.sleep(requiredTime * 100);
         } catch (Exception e) {}
-        fire.setTime(fire.getTime().plusSeconds(requiredTime));
+        fire.setTime(LocalTime.now());
         fire.setSeverity(Event.Severity.OUT);
         scheduler.sendUpdate(fire);
     }

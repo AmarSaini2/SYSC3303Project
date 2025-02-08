@@ -1,4 +1,6 @@
 import java.time.Duration;
+import java.time.LocalTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -34,7 +36,7 @@ public class DroneTest {
     @Test
     public void testSendToFire() throws InterruptedException {
         Zone zone = new Zone (1, 0,0,700,600);
-       Event fireEvent = new Event(Duration.ofSeconds(1),zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
+       Event fireEvent = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
 
        //send fire request to scheduler
        scheduler.newFireRequest(fireEvent);

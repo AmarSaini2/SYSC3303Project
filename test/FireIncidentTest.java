@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -30,12 +29,6 @@ public class FireIncidentTest {
         scheduler = new Scheduler();
         incident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", scheduler);
         drone = new Drone(scheduler);
-        Thread schedulerThread = new Thread(scheduler);
-        Thread droneThread = new Thread(drone);
-        Thread incidentThread = new Thread(incident);
-        schedulerThread.start();
-        droneThread.start();
-        incidentThread.start();
     } 
 
     /**
@@ -90,6 +83,7 @@ public class FireIncidentTest {
             writer.close();
         }
 
+        drone.start();
         //read event file
         incident.readZoneFile();
         incident.readEventFile();
@@ -97,8 +91,14 @@ public class FireIncidentTest {
 
         HashMap<Integer, Event> events = incident.getEvents();
 
-        assertEquals(1, events.get(0).getZone().getId());
-        assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());
-        assertEquals(Event.Severity.OUT, events.get(0).getSeverity());
+        for(Integer i: events.keySet()){
+            Event event = events.get(i);
+            if(event.getZone() .getId() == 1){
+                assertEquals(Event.Type.FIRE_DETECTED, event.getType());
+            }else if(event.getZone() .getId() == 2){
+                assertEquals(Event.Type.DRONE_REQUEST, event.getType());
+            }
+            assertEquals(Event.Severity.OUT, event.getSeverity());
+        }
     }
 }

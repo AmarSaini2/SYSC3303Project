@@ -13,7 +13,7 @@ public class FireIncident extends Thread {
     private final String eventFilePath;
     private final String zoneFilePath;
     private final Scheduler scheduler;
-    private ArrayList<Event> events;
+    private HashMap<Integer, Event> events;
     private HashMap<Integer, Zone> zones;
 
     /**
@@ -28,7 +28,7 @@ public class FireIncident extends Thread {
         this.zoneFilePath = zoneFilePath;
 
         this.scheduler = scheduler;
-        this.events = new ArrayList<>();
+        this.events = new HashMap<Integer, Event>();
         this.zones = new HashMap<Integer, Zone>();
     }
   
@@ -132,12 +132,12 @@ public class FireIncident extends Thread {
 
                 // Only process valid events
                 if(type != null && severity != null){
-                    Event incident = new Event(time, zones.get(zone), type, severity);
-                    this.events.add(incident);
+                    Event event = new Event(time, zones.get(zone), type, severity);
+                    this.events.put(event.getId(), event);
 
-                    scheduler.newFireRequest(incident);
+                    scheduler.newFireRequest(event);
                     updateEvents(this.scheduler.receiveUpdates());
-                    //System.out.println("FireIncidentSubsystem: Sent incident to scheduler -> " + incident.toString());
+                    //System.out.println("FireIncidentSubsystem: Sent event to scheduler -> " + event.toString());
                 }else{
                     System.out.println("Type or severity of the event is incorrect");
                 }
@@ -146,7 +146,6 @@ public class FireIncident extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        updateEvents(this.scheduler.receiveUpdates()); // Update events with scheduler feedback
     }
 
     /**
@@ -155,14 +154,7 @@ public class FireIncident extends Thread {
      * @param event The updated event information.
      */
     public void updateEvents(Event event) {
-        int index = events.indexOf(event);
-
-        //the code should not be done this way, in iteration 2 we should change the events arrayList to a hashmap of <id:object> similar to zones.
-        if(index != -1){
-            this.events.set(index, event);
-        }else{
-            System.out.println("the fireIncident could not find an event to update");
-        }
+        this.events.put(event.getId(), event);
     }
 
      /**
@@ -178,7 +170,7 @@ public class FireIncident extends Thread {
      *
      * @return The list of events.
      */
-    public ArrayList<Event> getEvents(){//for testing purposes
+    public HashMap<Integer, Event> getEvents(){//for testing purposes
         return this.events;
     }
 

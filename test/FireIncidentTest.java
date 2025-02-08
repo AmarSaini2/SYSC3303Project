@@ -95,7 +95,7 @@ public class FireIncidentTest {
         incident.readEventFile();
 
 
-        ArrayList<Event> events = incident.getEvents();
+        HashMap<Integer, Event> events = incident.getEvents();
 
         assertEquals(1, events.get(0).getZone().getId());
         assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());

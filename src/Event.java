@@ -76,6 +76,14 @@ public class Event {
         return id;
     }
 
+    public void setTime(Duration time) {
+        this.time = time;
+    }
+
+    public void setSeverity(Severity severity) {
+        this.severity = severity;
+    }
+
     /**
      * Returns a string representation of the event.
      *

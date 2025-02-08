@@ -1,5 +1,5 @@
-import java.time.Duration;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The Event class represents a fire incident event, storing details such as time, zone, type, and severity.
@@ -24,7 +24,7 @@ public class Event {
      * @param severity The severity level of the event.
      */
     Event(LocalTime time, Zone zone, Type type, Severity severity){
-        this.time = time;
+        this.time = LocalTime.parse(time.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         this.zone = zone;
         this.id = counter;
         counter++;
@@ -82,7 +82,7 @@ public class Event {
      * @param time the new time of the Event
      */
     public void setTime(LocalTime time) {
-        this.time = time;
+        this.time = LocalTime.parse(time.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
     }
 
     /**
@@ -101,7 +101,7 @@ public class Event {
     @Override
     public String toString() {
         //convert timestamp duration obj into readable string as part of this printout
-        return "Event [time: " +this.time+ ", zone:" + this.id + ", type: " + this.type + ", severity: " + this.severity + "]";
+        return "Event [time: " +this.time+ ", zone:" + this.zone.getId() + ", type: " + this.type + ", severity: " + this.severity + "]";
     }
     
 }

@@ -120,11 +120,9 @@ public class FireIncident extends Thread {
 
                 //System.out.println("Time: " + timeStamp + " Zone: " + zone + " Type: " + type + " Severity: " + severity);
 
-                LocalTime time = LocalTime.parse(timeStamp);
-
                 // Only process valid events
                 if(type != null && severity != null){
-                    Event event = new Event(time, zones.get(zone), type, severity);
+                    Event event = new Event(LocalTime.now(), zones.get(zone), type, severity);
                     this.events.put(event.getId(), event);
 
                     scheduler.newFireRequest(event);

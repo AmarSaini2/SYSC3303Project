@@ -13,6 +13,8 @@ There are three main components of project:
 
 - **Main.java**: Entry point for the system, initializes and starts all subsystems.
 - **Drone.java**: Simulates a drone responding to fire incidents. Handles travel, water/foam release, and communication with the scheduler.
+- **DroneFSM.java**: Manages the state of the drone.
+- **DroneResponse.java**: Holds fire response data from drones.
 - **DroneTest.java**: Unit tests for the `Drone` class to verify correct behavior.
 - **Event.java**: Represents a fire event, storing details like severity, time, and location.
 - **FireIncident.java**: Simulates fire incidents, sending fire requests to the scheduler, and reading input files.
@@ -20,6 +22,7 @@ There are three main components of project:
 - **Scheduler.java**: Central component responsible for receiving fire reports, assigning drones, and managing event queues.
 - **SchedulerTest.java**: Unit tests for the `Scheduler` class.
 - **Zone.java**: Defines geographical fire zones.
+- **GenericQueue.java**: A thread-safe queue implementation.
 - **Event_File.csv**: Sample input file containing fire event data.
 - **Zone_File.csv**: Sample input file defining fire zones.
 

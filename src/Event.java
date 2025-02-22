@@ -2,28 +2,37 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * The Event class represents a fire incident event, storing details such as time, zone, type, and severity.
+ * The Event class represents a fire incident event, storing details such as
+ * time, zone, type, and severity.
  */
 public class Event {
     private int id;
     private static int counter = 0;
     Zone zone;
-    public static enum Type {FIRE_DETECTED, DRONE_REQUEST}; // Enum representing event types
+
+    public static enum Type {
+        FIRE_DETECTED, DRONE_REQUEST
+    }; // Enum representing event types
+
     private Type type;
     private LocalTime time;
 
-    public static enum Severity {HIGH, MODERATE, LOW, OUT}; // Enum representing severity levels of a fire incident.
+    public static enum Severity {
+        HIGH, MODERATE, LOW, OUT
+    }; // Enum representing severity levels of a fire incident.
+
     private Severity severity;
 
     /**
-     * Constructs an Event instance. The identifier is created from an internal static variable to ensure unique id values.
+     * Constructs an Event instance. The identifier is created from an internal
+     * static variable to ensure unique id values.
      *
-     * @param time The timestamp of the event.
-     * @param zone The zone in which the event occurred.
-     * @param type The type of event (e.g., fire detected, drone request).
+     * @param time     The timestamp of the event.
+     * @param zone     The zone in which the event occurred.
+     * @param type     The type of event (e.g., fire detected, drone request).
      * @param severity The severity level of the event.
      */
-    Event(LocalTime time, Zone zone, Type type, Severity severity){
+    Event(LocalTime time, Zone zone, Type type, Severity severity) {
         this.time = LocalTime.parse(time.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
         this.zone = zone;
         this.id = counter;
@@ -79,6 +88,7 @@ public class Event {
 
     /**
      * Sets the time of an Event object
+     * 
      * @param time the new time of the Event
      */
     public void setTime(LocalTime time) {
@@ -87,6 +97,7 @@ public class Event {
 
     /**
      * Sets the severity of an Event object
+     * 
      * @param severity the new severity of the Event
      */
     public void setSeverity(Severity severity) {
@@ -100,8 +111,9 @@ public class Event {
      */
     @Override
     public String toString() {
-        //convert timestamp duration obj into readable string as part of this printout
-        return "Event [time: " +this.time+ ", zone:" + this.zone.getId() + ", type: " + this.type + ", severity: " + this.severity + "]";
+        // convert timestamp duration obj into readable string as part of this printout
+        return "Event [time: " + this.time + ", zone:" + this.zone.getId() + ", type: " + this.type + ", severity: "
+                + this.severity + "]";
     }
-    
+
 }

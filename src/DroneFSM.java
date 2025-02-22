@@ -16,9 +16,9 @@ public class DroneFSM {
         }
     }
 
-    public static final Map<DroneState, StateTransition> stateTable = new HashMap<>();
+    public final Map<DroneState, StateTransition> stateTable = new HashMap<>();
 
-    public static void initialize(Drone drone) {
+    public void initialize(Drone drone) {
         stateTable.put(DroneState.IDLE, new StateTransition(DroneState.EN_ROUTE, drone::sleepMode));
         stateTable.put(DroneState.EN_ROUTE, new StateTransition(DroneState.DROPPING_AGENT, drone::travelToFire));
         stateTable.put(DroneState.DROPPING_AGENT,
@@ -29,7 +29,7 @@ public class DroneFSM {
         stateTable.put(DroneState.FAULT, new StateTransition(DroneState.RETURNING_TO_BASE, drone::handleFault));
     }
 
-    public static StateTransition getNextState(DroneState currentState) {
+    public StateTransition getNextState(DroneState currentState) {
         return stateTable.getOrDefault(currentState, new StateTransition(DroneState.IDLE, () -> {
         }));
     }

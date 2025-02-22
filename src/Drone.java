@@ -11,6 +11,7 @@ public class Drone extends Thread {
     private final GenericQueue<DroneResponse> responseQueue;
     private final Random random;
     private DroneFSM.DroneState currentState;
+    private DroneFSM droneFSM;
 
     public Drone(GenericQueue<DroneResponse> responseQueue) {
         this.responseQueue = responseQueue;
@@ -27,19 +28,22 @@ public class Drone extends Thread {
         this.carryingVolume = attributes.get("maxCapacity");
         this.assignedFire = null;
         this.currentState = DroneFSM.DroneState.IDLE;
-        DroneFSM.initialize(this); // Set up FSM table
+        this.droneFSM = new DroneFSM();
+        this.droneFSM.initialize(this);
     }
 
     /**
      * Assigns a fire event to the drone if it's idle.
      */
-    public synchronized void assignFire(Event fire) {
-        System.out.println("[Drone " + id + "] Fire assigned: " + fire);
+    public synchronized boolean assignFire(Event fire) {
         if (this.assignedFire == null) {
             this.assignedFire = fire;
             currentState = DroneFSM.DroneState.EN_ROUTE;
+            System.out.println("[Drone " + id + "] Fire assigned: " + fire);
             notifyAll(); // Wake up the thread
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -47,7 +51,7 @@ public class Drone extends Thread {
         while (true) {
             synchronized (this) {
                 // System.out.println("[Drone " + id + "] Current state: " + currentState);
-                System.out.println("[Drone " + id + "] Assigned fire: " + assignedFire);
+                // System.out.println("[Drone " + id + "] Assigned fire: " + assignedFire);
                 while (this.assignedFire == null) {
                     try {
                         wait(); // Sleep until new fire is assigned
@@ -58,7 +62,7 @@ public class Drone extends Thread {
             }
 
             // Execute the function for the current state
-            DroneFSM.StateTransition transition = DroneFSM.getNextState(currentState);
+            DroneFSM.StateTransition transition = droneFSM.getNextState(currentState);
 
             DroneFSM.DroneState beforeState = currentState;
 
@@ -96,16 +100,14 @@ public class Drone extends Thread {
      * Calculates estimated travel time to the fire zone.
      */
     private int getTravelTime(Event fire) {
-        // Zone zone = fire.getZone();
-        // double distance = Math.sqrt(zone.getStart()[0] * zone.getStart()[0] +
-        // zone.getEnd()[1] * zone.getEnd()[1]);
-        // return (int) (distance / attributes.get("travelSpeed"));
-        return 1;
+        Zone zone = fire.getZone();
+        double distance = Math.sqrt(zone.getStart()[0] * zone.getStart()[0] +
+                zone.getEnd()[1] * zone.getEnd()[1]);
+        return (int) (distance / attributes.get("travelSpeed"));
     }
 
     private int getExtinguishTime(int requiredVolume) {
-        // return (int) (requiredVolume / attributes.get("flowRate"));
-        return 1;
+        return (int) (requiredVolume / attributes.get("flowRate"));
     }
 
     // ========== STATE HANDLING FUNCTIONS ==========

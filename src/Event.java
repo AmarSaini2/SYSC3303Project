@@ -112,7 +112,7 @@ public class Event {
     @Override
     public String toString() {
         // convert timestamp duration obj into readable string as part of this printout
-        return "Event [time: " + this.time + ", zone:" + this.zone.getId() + ", type: " + this.type + ", severity: "
+        return "Event [id: " + this.id + ", time: " + this.time + ", zone:" + this.zone.getId() + ", type: " + this.type + ", severity: "
                 + this.severity + "]";
     }
 

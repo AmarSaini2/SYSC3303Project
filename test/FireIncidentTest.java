@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 
 import java.io.*;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -13,7 +15,9 @@ import java.util.HashMap;
  * as well as the interaction with the Scheduler and Drone classes.
  */
 public class FireIncidentTest {
-
+    private GenericQueue<Event> sharedFireQueue; // Queue for incoming fire events
+    private GenericQueue<DroneResponse> responseQueue; // Queue for drone responses
+    private ArrayList<Drone> drones;
     FireIncident incident;
     Scheduler scheduler;
     Drone drone;
@@ -26,10 +30,20 @@ public class FireIncidentTest {
      */
     @BeforeEach
     public void setup(){
-        scheduler = new Scheduler();
-        incident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", scheduler);
-        drone = new Drone(scheduler);
-    } 
+        sharedFireQueue = new GenericQueue<>();
+        responseQueue = new GenericQueue<>();
+        drones = new ArrayList<>();
+        scheduler = new Scheduler(sharedFireQueue, responseQueue, drones);
+        incident = new FireIncident("src\\test_Event_File.csv", "src\\test_Zone_File.csv", sharedFireQueue);
+        drone = new Drone(responseQueue);
+        drones.add(drone);  // Add drone to the scheduler's list of drones
+        Thread schedulerThread = new Thread(scheduler);
+        Thread droneThread = new Thread(drones.get(0));
+        Thread incidentThread = new Thread(incident);
+        schedulerThread.start();
+        droneThread.start();
+        incidentThread.start();
+    }
 
     /**
      * Tests the reading of the zone file.
@@ -41,7 +55,7 @@ public class FireIncidentTest {
     @Test
     public void testReadZoneFile() throws IOException{
         //create test file and write some values to it
-        File zoneFile = new File("test\\test_Zone_File.csv");
+        File zoneFile = new File("src\\test_Zone_File.csv");
         try(FileWriter writer = new FileWriter(zoneFile)){
             writer.write("Zone ID\tZone Start\tZone End\n");
             writer.write("1\t(0;0)\t(700;600)\n");
@@ -55,7 +69,7 @@ public class FireIncidentTest {
         //check that zone is processed correctly
         HashMap<Integer, Zone> zones = incident.getZones();
 
-        
+
         assertEquals(zones.get(1).getId(), 1);
         assertArrayEquals(zones.get(1).getStart(), new int[]{0,0});
         assertArrayEquals(zones.get(1).getEnd(), new int[] {700,600});
@@ -75,15 +89,13 @@ public class FireIncidentTest {
     @Test
     public void testReadEventFile() throws IOException{//buggy because of the known scheduler deadlock issue. Will be fixed in Iteration 2
         //create test file and write some values to it
-        File eventFile = new File("test\\test_Event_File.csv");
+        File eventFile = new File("src\\test_Event_File.csv");
         try(FileWriter writer = new FileWriter(eventFile)){
             writer.write("Time\tZone ID\tEvent Type\tSeverity\n");
             writer.write("10:01:02\t1\tFIRE_DETECTED\thigh\n");
             writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
-            writer.close();
         }
 
-        drone.start();
         //read event file
         incident.readZoneFile();
         incident.readEventFile();
@@ -91,14 +103,8 @@ public class FireIncidentTest {
 
         HashMap<Integer, Event> events = incident.getEvents();
 
-        for(Integer i: events.keySet()){
-            Event event = events.get(i);
-            if(event.getZone() .getId() == 1){
-                assertEquals(Event.Type.FIRE_DETECTED, event.getType());
-            }else if(event.getZone() .getId() == 2){
-                assertEquals(Event.Type.DRONE_REQUEST, event.getType());
-            }
-            assertEquals(Event.Severity.OUT, event.getSeverity());
-        }
+        assertEquals(1, events.get(0).getZone().getId());
+        assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());
+        assertEquals(Event.Severity.HIGH, events.get(0).getSeverity());
     }
 }

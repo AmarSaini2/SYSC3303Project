@@ -18,7 +18,6 @@ public class SchedulerTest {
 
     ArrayList<Drone> drones;
 
-    private Scheduler scheduler;
     /**
      * Sets up the test environment before each test case.
      * Initializes a new instance of the Scheduler class.
@@ -31,8 +30,6 @@ public class SchedulerTest {
 
         Drone drone = new Drone(droneResponseQueue);
         drones.add(drone);
-
-        scheduler = new Scheduler(sharedFireQueue, droneResponseQueue, drones);
 
     }
 

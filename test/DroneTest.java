@@ -1,5 +1,6 @@
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -13,8 +14,8 @@ import org.junit.jupiter.api.Test;
  * and receiving updates from the Scheduler.
  */
 public class DroneTest {
+    GenericQueue<DroneResponse> droneResponseQueue;
 
-    private Scheduler scheduler;
     private Drone drone;
 
     /**
@@ -23,8 +24,10 @@ public class DroneTest {
      */
     @BeforeEach
     public void setUp() {
-        scheduler = new Scheduler();
-        drone = new Drone(scheduler);
+        droneResponseQueue = new GenericQueue<DroneResponse>();
+
+        drone = new Drone(droneResponseQueue);
+        drone.start();
     }
 
     /**
@@ -38,20 +41,18 @@ public class DroneTest {
         Zone zone = new Zone (1, 0,0,700,600);
        Event fireEvent = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
 
-       //send fire request to scheduler
-       scheduler.newFireRequest(fireEvent);
-
        //start drone thread
-       Thread droneThread = new Thread(drone);
-       droneThread.start();
+        drone.assignFire(fireEvent);
        //cannot wait for thread to finish because the drone thread is meant to run infinitely
 
+        DroneResponse response = droneResponseQueue.get();
+
        //check if the scheduler recieved the update after the fire is dealt with
-       Event newFireStatus = scheduler.receiveUpdates();
+       Event newFireStatus = response.getEvent();
 
        //assertions to verify expected behaviour
        assertNotNull(newFireStatus);
-       assertEquals(Event.Type.FIRE_DETECTED, newFireStatus.getType());
-       assertEquals(Event.Severity.OUT, newFireStatus.getSeverity());
+       assertEquals(newFireStatus, fireEvent);
+        assertEquals(Event.Severity.OUT, newFireStatus.getSeverity());
     }
 }

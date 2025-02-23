@@ -207,4 +207,8 @@ public class Drone extends Thread {
     public String toString() {
         return "Drone " + id + " (State: " + currentState + ")";
     }
+
+    public Event getAssignedFire() {
+        return assignedFire;
+    }
 }

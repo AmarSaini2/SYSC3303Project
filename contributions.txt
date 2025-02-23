@@ -1,5 +1,5 @@
-Samuel, Lo (101230930): Implemented the Drone Subsystem.
-John, Guo (101233817): Implemented the Scheduler Subsystem.
-Kaitlyn, Conron (101264263): Implemented the initial version of the Fire Incident Subsystem (later modified) and wrote JavaDoc comments.
-Yacine, Djaou (100963615): Created UML and Sequence Diagrams, wrote the README file.
-Amar Saini (101258965): Wrote unit tests and performed general bug fixes.
+Samuel, Lo (101230930): Updated the Scheduler
+John, Guo (101233817): Create drone state diagram
+Kaitlyn, Conron (101264263): Update the unit tests
+Yacine, Djaou (100963615): Implemented the Drone state machine
+Amar Saini (101258965): Updated class diagram, sequnec diagram, and README file.

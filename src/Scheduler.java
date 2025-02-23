@@ -1,4 +1,3 @@
-import Event.Severity;
 import java.util.ArrayList;
 
 /**
@@ -116,7 +115,6 @@ public class Scheduler extends Thread {
                 } else if (responseType == DroneResponse.ResponseType.SUCCESS) {
                     System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: "
                             + response.getEvent());
-                    response.getEvent().setSeverity(Event.Severity.OUT);
                     
                 }
 

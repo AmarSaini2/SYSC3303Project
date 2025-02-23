@@ -192,6 +192,7 @@ public class Drone extends Thread {
 
     public void handleSuccess() {
         System.out.println("[Drone " + id + "] Fire extinguished successfully!");
+        this.assignedFire.setSeverity(Event.Severity.OUT);
         sendResponse(DroneResponse.ResponseType.SUCCESS);
         this.assignedFire = null;
     }

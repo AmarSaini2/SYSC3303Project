@@ -125,10 +125,4 @@ public class DroneFSM {
     public static DroneState getState(String stateName){
         return stateTable.get(stateName);
     }
-
-    /* 
-    public StateTransition getNextState(DroneState currentState) {
-        return stateTable.getOrDefault(currentState, new StateTransition(DroneState.IDLE, () -> {
-        }));
-    }*/
 }

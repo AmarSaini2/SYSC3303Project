@@ -1,4 +1,3 @@
-import Event.Severity;
 import java.util.ArrayList;
 
 /**

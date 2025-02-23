@@ -1,4 +1,3 @@
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -10,7 +9,7 @@ public class Drone extends Thread {
     private double carryingVolume;
     private final GenericQueue<DroneResponse> responseQueue;
     private final Random random;
-    private DroneFSM.DroneState currentState;
+    private DroneState currentState;
     private DroneFSM droneFSM;
 
     public Drone(GenericQueue<DroneResponse> responseQueue) {
@@ -27,9 +26,13 @@ public class Drone extends Thread {
         this.id = idCounter++;
         this.carryingVolume = attributes.get("maxCapacity");
         this.assignedFire = null;
-        this.currentState = DroneFSM.DroneState.IDLE;
         this.droneFSM = new DroneFSM();
         this.droneFSM.initialize(this);
+        this.currentState = DroneFSM.getState("Idle");
+    }
+
+    public void setState(String stateName){
+        this.currentState = DroneFSM.getState(stateName);
     }
 
     /**
@@ -38,7 +41,7 @@ public class Drone extends Thread {
     public synchronized boolean assignFire(Event fire) {
         if (this.assignedFire == null) {
             this.assignedFire = fire;
-            currentState = DroneFSM.DroneState.EN_ROUTE;
+            currentState = DroneFSM.getState("EnRoute");
             System.out.println("[Drone " + id + "] Fire assigned: " + fire);
             notifyAll(); // Wake up the thread
             return true;
@@ -60,24 +63,21 @@ public class Drone extends Thread {
                     }
                 }
             }
-
-            // Execute the function for the current state
+            /* 
             DroneFSM.StateTransition transition = droneFSM.getNextState(currentState);
 
-            DroneFSM.DroneState beforeState = currentState;
+            DroneFSM.DroneState beforeState = currentState;*/
 
-            transition.action.run();
-
+            // Execute the function for the current state
             // Move to next state
-            if (currentState == beforeState) {
-                currentState = transition.nextState;
-            }
+            currentState.action(this);
+            currentState.goNextState(this);
 
         }
     }
 
     public boolean isFree() {
-        return currentState == DroneFSM.DroneState.IDLE && assignedFire == null;
+        return "Idle".equals(currentState.getStateString()) && assignedFire == null;
     }
 
     /**
@@ -127,7 +127,7 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "] Traveling to fire at Zone: " + assignedFire.getZone().getId());
 
         try {
-            Thread.sleep(getTravelTime(assignedFire) * 1000);
+            Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -144,7 +144,7 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "] Dropping firefighting agent...");
 
         try {
-            Thread.sleep(getExtinguishTime(getRequiredVolume(assignedFire)) * 1000);
+            Thread.sleep(getExtinguishTime(getRequiredVolume(assignedFire)) /* *1000 */);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -161,7 +161,7 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "] Returning to base...");
 
         try {
-            Thread.sleep(getTravelTime(assignedFire) * 1000);
+            Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
             System.out.println("[Drone " + id + "] Reached base.");
         } catch (InterruptedException e) {
             e.printStackTrace();

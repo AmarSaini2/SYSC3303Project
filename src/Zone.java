@@ -1,8 +1,10 @@
+import java.io.Serializable;
+
 /**
  * The Zone class represents a geographical zone in which fire incidents may occur.
  * Each zone has an identifier and boundary coordinates.
  */
-public class Zone {
+public class Zone implements Serializable {
     private int id;
     private int[] start; // Start coordinates (x, y)
     private int[] end; // End coordinates (x, y)

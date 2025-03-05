@@ -1,4 +1,5 @@
 import java.io.*;
+import java.net.*;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -16,6 +17,8 @@ import java.util.Scanner;
  * fire reports.
  */
 public class FireIncident extends Thread {
+    private DatagramSocket sendSocket, receiveSocket;
+    private InetAddress schedulerAddr;
     private final String eventFilePath; // Path to the fire event data file
     private final String zoneFilePath; // Path to the zone data file
     private final GenericQueue<Event> sharedFireQueue; // Shared queue to communicate with the scheduler
@@ -133,15 +136,31 @@ public class FireIncident extends Thread {
                     Event event = new Event(LocalTime.now(), zones.get(zone), type, severity);
                     this.events.put(event.getId(), event);
 
+                    /*
                     // Send the event to the scheduler through the shared queue
                     sharedFireQueue.add(event);
                     System.out.println("[FireIncidentSubsystem]: Sent event to scheduler -> " + event.toString());
+                    */
+                    sendToScheduler(event);
                 } else {
                     System.out.println("Type or severity of the event is incorrect");
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void sendToScheduler(Event e){
+        byte[] serializedEvent = e.serializeEvent();
+        try{
+            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), 5000);
+            sendSocket.send(packet);
+            System.out.println("Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
+        }catch(UnknownHostException f){
+            f.printStackTrace();
+        }catch(IOException g){
+            g.printStackTrace();
         }
     }
 
@@ -181,7 +200,15 @@ public class FireIncident extends Thread {
      */
     @Override
     public void run() {
+        try{
+            this.sendSocket = new DatagramSocket();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        
         this.readZoneFile(); // Load zones from the file
         this.readEventFile(); // Load fire incidents and send them to the scheduler
+
+        this.sendSocket.close();
     }
 }

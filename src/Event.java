@@ -1,3 +1,4 @@
+import java.io.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -5,7 +6,7 @@ import java.time.format.DateTimeFormatter;
  * The Event class represents a fire incident event, storing details such as
  * time, zone, type, and severity.
  */
-public class Event {
+public class Event implements Comparable<Event>, Serializable {
     private int id;
     private static int counter = 0;
     Zone zone;
@@ -114,6 +115,37 @@ public class Event {
         // convert timestamp duration obj into readable string as part of this printout
         return "Event [id: " + this.id + ", time: " + this.time + ", zone:" + this.zone.getId() + ", type: " + this.type + ", severity: "
                 + this.severity + "]";
+    }
+
+    @Override
+    public int compareTo(Event other){
+        return this.severity.ordinal() - other.severity.ordinal();
+    }
+
+    public byte[] serializeEvent(){
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        try{
+            ObjectOutputStream out = new ObjectOutputStream(byteOut);
+            out.writeObject(this);
+            out.flush();
+            return byteOut.toByteArray();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return null;//return null for failure
+    }
+
+    public static Event deserializeEvent(byte[] data){
+        ByteArrayInputStream byteIn = new ByteArrayInputStream(data);
+        try{
+            ObjectInputStream in = new ObjectInputStream(byteIn);
+            return (Event) in.readObject();
+        }catch(IOException e){
+            e.printStackTrace();
+        }catch( ClassNotFoundException f){
+            f.printStackTrace();
+        }
+        return null;//return null for failure
     }
 
 }

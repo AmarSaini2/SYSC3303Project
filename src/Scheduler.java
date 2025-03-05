@@ -1,4 +1,23 @@
+import java.io.IOException;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.concurrent.PriorityBlockingQueue;
+
+/*
+ * TODOS:
+ * -implement drone tracking
+ * -priorityblockingqueue for events
+ * -add parsed events to queue
+ * -remove events when they are claimed downed by the drones
+ * -pick the highest priority event to send out next
+ * 
+ * -implement UDP compliance:
+ * -designate ports for sending/receiving with everyone DRONE NEEDED
+ * -set up socket for receiving from FireIncident/Drone DONE
+ * -unpack incoming packets -> either add to eventqueue or remove from eventqueue NEED TO PUT IN QUEUES
+ * -set up socket for sending to drones
+ * -pack outgoiing packets to drones
+ */
 
 /**
  * The Scheduler class is responsible for:
@@ -13,8 +32,17 @@ import java.util.ArrayList;
  * - `responseQueue` → Receives updates from `Drones` after task completion.
  */
 public class Scheduler extends Thread {
+    private DatagramSocket receiveSocket, sendSocket;
+    private InetAddress FI_addr;
+    private int FI_port;
+
     private final GenericQueue<Event> sharedFireQueue; // Queue for incoming fire events
     private final GenericQueue<DroneResponse> responseQueue; // Queue for drone responses
+
+    private final PriorityBlockingQueue<Event> eventQueue;//Queue for fire events
+    
+    //private final PriorityBlockingQueue<Event> eventQueue;//Queue for events
+
     private final ArrayList<Drone> drones; // List of drones managed by the scheduler
     private boolean finish; // Flag to stop the scheduler when all tasks are complete
     private boolean areAllDronesBusy; // Tracks whether all drones are currently occupied
@@ -34,6 +62,24 @@ public class Scheduler extends Thread {
         this.responseQueue = responseQueue;
         this.drones = drones;
         this.areAllDronesBusy = false; // Initially, some drones are expected to be available
+        this.eventQueue = new PriorityBlockingQueue<>();
+    }
+
+    private void handleFireIncident(){
+        byte[] data = new byte[512];
+        DatagramPacket packet = new DatagramPacket(data, data.length);
+        try{
+            receiveSocket.receive(packet);
+            FI_addr = packet.getAddress();
+            FI_port = packet.getPort();
+            Event event = Event.deserializeEvent(packet.getData());
+            System.out.println("Event Received: " + event.toString());
+            //INSERT INTO PRIORITY QUEUE
+            eventQueue.add(event);
+            System.out.println("Added event to eventQueue");
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -46,6 +92,26 @@ public class Scheduler extends Thread {
      */
     @Override
     public void run() {
+        try{
+            receiveSocket = new DatagramSocket(5000);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+
+        /*
+        handleFireIncident();//REPLACE TO CORRECT PLACEMENT
+        handleFireIncident();
+        try{
+            System.out.println("First item out of the priority queue: " + eventQueue.take().toString());//change to send message to drone
+        }catch(InterruptedException e){
+            e.printStackTrace();
+        }
+
+        */
+        
+
+        
         // Start a separate thread to handle drone responses asynchronously
         new Thread(this::monitorDroneResponses).start();
 
@@ -84,6 +150,8 @@ public class Scheduler extends Thread {
                 e.printStackTrace(); // Handle unexpected interruptions
             }
         }
+
+        receiveSocket.close();
     }
 
     /**

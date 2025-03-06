@@ -1,6 +1,7 @@
 import java.io.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 /**
  * The Event class represents a fire incident event, storing details such as
@@ -10,6 +11,7 @@ public class Event implements Comparable<Event>, Serializable {
     private int id;
     private static int counter = 0;
     Zone zone;
+    private ArrayList<Object[]> assignedDrones;
 
     public static enum Type {
         FIRE_DETECTED, DRONE_REQUEST
@@ -40,6 +42,7 @@ public class Event implements Comparable<Event>, Serializable {
         counter++;
         this.type = type;
         this.severity = severity;
+        this.assignedDrones = new ArrayList<>();
     }
 
     /**
@@ -103,6 +106,18 @@ public class Event implements Comparable<Event>, Serializable {
      */
     public void setSeverity(Severity severity) {
         this.severity = severity;
+    }
+
+    public void addAssignedDrone(Object[] entry){
+        this.assignedDrones.add(entry);
+    }
+
+    public void removeAssignedDrone(Object[] entry){
+        this.assignedDrones.remove(entry);
+    }
+
+    public ArrayList<Object[]> getAssignedDrones(){
+        return this.assignedDrones;
     }
 
     /**

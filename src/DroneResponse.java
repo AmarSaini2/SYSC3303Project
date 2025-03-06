@@ -1,5 +1,13 @@
 // Updated code 
-public class DroneResponse {
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+public class DroneResponse implements Serializable {
     public enum ResponseType {
         SUCCESS, FAILURE, REFILL_REQUIRED
     }
@@ -58,5 +66,31 @@ public class DroneResponse {
     public String toString() {
         return "[DroneResponse] Drone ID: " + droneId + " | Event: " + event +
                 " | Response: " + responseType;
+    }
+
+    public byte[] serializeResponse(){
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        try{
+            ObjectOutputStream out = new ObjectOutputStream(byteOut);
+            out.writeObject(this);
+            out.flush();
+            return byteOut.toByteArray();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return null;//return null for failure
+    }
+
+    public static DroneResponse deserializeResponse(byte[] data){
+        ByteArrayInputStream byteIn = new ByteArrayInputStream(data);
+        try{
+            ObjectInputStream in = new ObjectInputStream(byteIn);
+            return (DroneResponse) in.readObject();
+        }catch(IOException e){
+            e.printStackTrace();
+        }catch( ClassNotFoundException f){
+            f.printStackTrace();
+        }
+        return null;//return null for failure
     }
 }

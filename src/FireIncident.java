@@ -136,11 +136,10 @@ public class FireIncident extends Thread {
                     Event event = new Event(LocalTime.now(), zones.get(zone), type, severity);
                     this.events.put(event.getId(), event);
 
-                    /*
                     // Send the event to the scheduler through the shared queue
                     sharedFireQueue.add(event);
                     System.out.println("[FireIncidentSubsystem]: Sent event to scheduler -> " + event.toString());
-                    */
+
                     sendToScheduler(event);
                 } else {
                     System.out.println("Type or severity of the event is incorrect");
@@ -156,7 +155,7 @@ public class FireIncident extends Thread {
         try{
             DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), 5000);
             sendSocket.send(packet);
-            System.out.println("Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
+            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
         }catch(UnknownHostException f){
             f.printStackTrace();
         }catch(IOException g){

@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.net.*;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -11,6 +13,8 @@ public class Drone extends Thread {
     private final Random random;
     private DroneState currentState;
     private DroneFSM droneFSM;
+    private DatagramSocket socket;
+    private InetAddress schedulerAddr;
 
     public Drone(GenericQueue<DroneResponse> responseQueue) {
         this.responseQueue = responseQueue;
@@ -29,6 +33,12 @@ public class Drone extends Thread {
         this.droneFSM = new DroneFSM();
         this.droneFSM.initialize(this);
         this.currentState = DroneFSM.getState("Idle");
+        try {
+            this.socket = new DatagramSocket();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
     }
 
     public void setState(String stateName){
@@ -42,16 +52,64 @@ public class Drone extends Thread {
         if (this.assignedFire == null) {
             this.assignedFire = fire;
             currentState = DroneFSM.getState("EnRoute");
-            System.out.println("[Drone " + id + "] Fire assigned: " + fire);
+            System.out.println("[Drone " + this.id + "] Fire assigned: " + fire);
             notifyAll(); // Wake up the thread
             return true;
         }
         return false;
     }
 
+    private void sendWakeupMessage(){
+        byte[] data = "ONLINE".getBytes();
+        try {
+            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"), 6000);
+            socket.setBroadcast(true);
+            socket.send(packet);
+            System.out.println("[Drone " + this.id + "] Wakeup message sent");
+            byte[] incomingData = new byte[512];
+            DatagramPacket response = new DatagramPacket(data, data.length);
+            socket.receive(response);
+            System.out.println("[Drone " + this.id + "] Received confirmation from Scheduler");
+            schedulerAddr = response.getAddress();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void checkMessage(){
+        byte[] data = new byte[1024];
+        DatagramPacket packet = new DatagramPacket(data, data.length);
+       try {
+            socket.setSoTimeout(100);
+            socket.receive(packet);
+            String packetString = new String(packet.getData());
+            if(packetString.equals("STOP")){//check for temporarily named abandon call from scheduler (if the fire this drone is working on just finished
+            assignedFire = null;
+            this.currentState = DroneFSM.getState("Idle");
+            return;    
+            }
+
+            if(this.assignedFire == null && this.isFree()){
+                this.assignFire(Event.deserializeEvent(packet.getData()));//assign Fire to drone
+                System.out.println("[Drone " + this.id + "] Received assignment of new event: " +  this.assignedFire);
+            }
+
+
+           
+       }catch (SocketTimeoutException e) {
+            return;
+       }catch(IOException e){
+        e.printStackTrace();
+       }
+    }
+
     @Override
     public void run() {
+        sendWakeupMessage();
         while (true) {
+            checkMessage();
+            /*
             synchronized (this) {
                 // System.out.println("[Drone " + id + "] Current state: " + currentState);
                 // System.out.println("[Drone " + id + "] Assigned fire: " + assignedFire);
@@ -63,6 +121,7 @@ public class Drone extends Thread {
                     }
                 }
             }
+            */
             /* 
             DroneFSM.StateTransition transition = droneFSM.getNextState(currentState);
 
@@ -72,7 +131,6 @@ public class Drone extends Thread {
             // Move to next state
             currentState.action(this);
             currentState.goNextState(this);
-
         }
     }
 
@@ -192,6 +250,9 @@ public class Drone extends Thread {
 
     public void handleSuccess() {
         System.out.println("[Drone " + id + "] Fire extinguished successfully!");
+
+        
+
         this.assignedFire.setSeverity(Event.Severity.OUT);
         sendResponse(DroneResponse.ResponseType.SUCCESS);
         this.assignedFire = null;
@@ -200,6 +261,16 @@ public class Drone extends Thread {
     private void sendResponse(DroneResponse.ResponseType responseType) {
         DroneResponse response = new DroneResponse(assignedFire, id, responseType);
         System.out.println("[Drone " + id + "] Response sent: " + responseType);
+
+        byte[] data = response.serializeResponse();
+        DatagramPacket packet = new DatagramPacket(data, data.length, schedulerAddr, 6000);
+        try {
+            socket.send(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+
         responseQueue.add(response);
     }
 

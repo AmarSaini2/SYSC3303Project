@@ -4,22 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.PriorityBlockingQueue;
 
-/*
- * TODOS:
- * -implement drone tracking
- * -priorityblockingqueue for events
- * -add parsed events to queue
- * -remove events when they are claimed downed by the drones
- * -pick the highest priority event to send out next
- * 
- * -implement UDP compliance:
- * -designate ports for sending/receiving with everyone DRONE NEEDED
- * -set up socket for receiving from FireIncident/Drone DONE
- * -unpack incoming packets -> either add to eventqueue or remove from eventqueue NEED TO PUT IN QUEUES
- * -set up socket for sending to drones
- * -pack outgoiing packets to drones
- */
-
 /**
  * The Scheduler class is responsible for:
  * - Receiving fire events from the FireIncident subsystem.
@@ -132,19 +116,6 @@ public class Scheduler extends Thread {
             e.printStackTrace();
         }
 
-
-        /*
-        handleFireIncident();//REPLACE TO CORRECT PLACEMENT
-        handleFireIncident();
-        try{
-            System.out.println("First item out of the priority queue: " + eventQueue.take().toString());//change to send message to drone
-        }catch(InterruptedException e){
-            e.printStackTrace();
-        }
-
-        */
-        
-
         
         // Start a separate thread to handle drone responses asynchronously
         new Thread(this::monitorDroneResponses).start();
@@ -154,7 +125,7 @@ public class Scheduler extends Thread {
 
             try {
                 // If all drones are busy, the scheduler waits for an available drone
-                while (areAllDronesBusy) {
+                while (freeDroneList.isEmpty()) {
                     synchronized (this) {
                         wait(); // Waits until a drone becomes free (notified by monitorDroneResponses)
                     }
@@ -163,53 +134,20 @@ public class Scheduler extends Thread {
                 
                 // Retrieve the next fire request from the queue (Blocking call - waits if queue is empty)
                 Event event = eventQueue.take();
-                /*
-                Event fireRequest = sharedFireQueue.get();
-                System.out.println("[Scheduler] Received request: " + fireRequest);
-                */
 
                 // Assign fire request to an available drone
                 if(freeDroneList.isEmpty()){
                     System.out.println("[Scheduler]: No available drones");
                 }else{
-                    if(freeDroneListInUse){
-                        synchronized (this) {
-                            wait();
-                        }
-                    }
-                    freeDroneListInUse = true;
                     for(Object[] drone: freeDroneList){
                         sendToDrone(event, (int) drone[0], (InetAddress) drone[1]);
                         freeDroneList.remove(drone);
                         event.addAssignedDrone(drone);//assign drone to event
                         System.out.println("[Scheduler]: Assigning Drone to event: " + event);
                     }
-                    freeDroneListInUse = false;
-                    synchronized (this) {
-                        notifyAll();
-                    }
                     
                 }
                 
-                /*
-                boolean assigned = false;
-                for (Drone drone : drones) {
-                    if (drone.isFree()) { // Check if the drone is free
-                        drone.assignFire(fireRequest); // Assign the fire to the drone
-                        System.out.println("[Scheduler] Assigned request to " + drone);
-                        assigned = true;
-                        break; // Stop searching once an available drone is found
-                    }
-                }
-                
-
-                // If no drones are available, requeue the fire event
-                if (!assigned) {
-                    System.out.println("[Scheduler] No available drones. Requeuing request...");
-                    this.areAllDronesBusy = true; // Mark all drones as busy
-                    sharedFireQueue.add(fireRequest); // Put the request back into the queue
-                }
-                */
 
             } catch (InterruptedException e) {
                 e.printStackTrace(); // Handle unexpected interruptions
@@ -270,6 +208,7 @@ public class Scheduler extends Thread {
                         case DroneResponse.ResponseType.SUCCESS:
                             System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent());
                             eventQueue.remove(response.getEvent());
+                            freeDroneList.add(new Object[] {packet.getPort(), packet.getAddress()});
 
                             /*
                             //send a message to all other drones that are currently working this event 

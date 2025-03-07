@@ -109,24 +109,7 @@ public class Drone extends Thread {
         sendWakeupMessage();
         while (true) {
             checkMessage();
-            /*
-            synchronized (this) {
-                // System.out.println("[Drone " + id + "] Current state: " + currentState);
-                // System.out.println("[Drone " + id + "] Assigned fire: " + assignedFire);
-                while (this.assignedFire == null) {
-                    try {
-                        wait(); // Sleep until new fire is assigned
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            */
-            /* 
-            DroneFSM.StateTransition transition = droneFSM.getNextState(currentState);
-
-            DroneFSM.DroneState beforeState = currentState;*/
-
+            
             // Execute the function for the current state
             // Move to next state
             currentState.action(this);

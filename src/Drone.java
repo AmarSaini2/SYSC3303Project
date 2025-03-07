@@ -81,14 +81,10 @@ public class Drone extends Thread {
         byte[] data = new byte[1024];
         DatagramPacket packet = new DatagramPacket(data, data.length);
        try {
-            socket.setSoTimeout(100);
+            socket.setSoTimeout(300);
             socket.receive(packet);
             String packetString = new String(packet.getData());
-            if(packetString.equals("STOP")){//check for temporarily named abandon call from scheduler (if the fire this drone is working on just finished
-            assignedFire = null;
-            this.currentState = DroneFSM.getState("Idle");
-            return;    
-            }
+            System.out.println("[PACKET]" + packetString);
 
             if(this.assignedFire == null && this.isFree()){
                 this.assignFire(Event.deserializeEvent(packet.getData()));//assign Fire to drone

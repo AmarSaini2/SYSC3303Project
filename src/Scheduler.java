@@ -209,24 +209,6 @@ public class Scheduler extends Thread {
                             System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent());
                             eventQueue.remove(response.getEvent());
                             freeDroneList.add(new Object[] {packet.getPort(), packet.getAddress()});
-
-                            /*
-                            //send a message to all other drones that are currently working this event 
-                            if(freeDroneListInUse){
-                                synchronized(this){
-                                    wait();
-                                }
-                            }
-                            freeDroneListInUse = true;
-                            for(Object[] drone: response.getEvent().getAssignedDrones()){
-                                //send stop message to each drone -> Code in stop method on drone and write function to send message
-                                sendToDrone("STOP", (int) drone[0], (InetAddress) drone[1]);
-                            }
-                            freeDroneListInUse = false;
-                            synchronized (this) {
-                                notifyAll();
-                            }
-                            */
                             
                             break;    
                     }
@@ -236,26 +218,7 @@ public class Scheduler extends Thread {
                 }catch(InterruptedException e){
                     e.printStackTrace();
                 }
-                /*
-                DroneResponse response = responseQueue.get();
-                System.out.println("[Scheduler] Processing Drone Response: " + response);
-                DroneResponse.ResponseType responseType = response.getResponseType();
-
-                // Handle different drone response cases
-                if (responseType == DroneResponse.ResponseType.FAILURE) {
-                    System.out.println("[Scheduler] Drone " + response.getDroneId() + " failed! Reassigning fire: "
-                            + response.getEvent());
-                    sharedFireQueue.add(response.getEvent()); // Reassign the fire request
-                } else if (responseType == DroneResponse.ResponseType.REFILL_REQUIRED) {
-                    System.out.println("[Scheduler] Drone " + response.getDroneId() + " needs refill. Will be available soon.");
-                    // The drone will return to base & refill automatically, no requeue needed.
-                } else if (responseType == DroneResponse.ResponseType.SUCCESS) {
-                    System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: "
-                            + response.getEvent());
-                    
-                }
-                */
-
+                
                 // A drone has completed its mission (success, failure, or refill request),
                 // so at least one drone is now available.
                 this.areAllDronesBusy = false;

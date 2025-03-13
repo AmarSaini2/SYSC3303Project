@@ -43,7 +43,7 @@ public class Main {
         Scheduler scheduler = new Scheduler(sharedFireQueue, droneResponseQueue, drones);
 
         // Create the FireIncident subsystem that will read fire incidents from a file
-        FireIncident fireIncident = new FireIncident("Event_File.csv", "Zone_File.csv", sharedFireQueue);
+        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", sharedFireQueue);
 
         // Start the FireIncident subsystem (reads fire events and sends them to the
         // scheduler)

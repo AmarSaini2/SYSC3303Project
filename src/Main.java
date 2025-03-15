@@ -3,13 +3,13 @@ import java.util.ArrayList;
 
 /**
  * The Main class initializes and starts the firefighting drone system.
- * 
+ *
  * This class is responsible for:
  * - Creating the shared communication queues.
  * - Initializing the FireIncident, Scheduler, and Drones.
  * - Starting each component as a separate thread.
  * - Using join() to ensure all threads complete execution properly.
- * 
+ *
  * The system follows a multi-threaded architecture:
  * - FireIncident Thread → Reads fire events from a file and sends them to
  * the scheduler.
@@ -20,30 +20,15 @@ import java.util.ArrayList;
  */
 public class Main {
     public static void main(String[] args) {
-
-        // Create a shared queue for fire incidents to communicate with the scheduler
-        GenericQueue<Event> sharedFireQueue = new GenericQueue<Event>();
-
-        // Create a shared queue for drone responses to communicate with the scheduler
-        GenericQueue<DroneResponse> droneResponseQueue = new GenericQueue<DroneResponse>();
-
-        // List to hold all drones in the system
-        ArrayList<Drone> drones = new ArrayList<Drone>();
-
-        // Define the number of drones in the simulation
-        int nDrones = 2; // Currently, only one drone is being added
-
-        // Create and add drones to the system
-        for (int i = 0; i < nDrones; i++) {
-            Drone drone = new Drone(droneResponseQueue);
-            drones.add(drone);
-        }
+        Drone drone0 = new Drone();
+        Drone drone1 = new Drone();
+        Drone drone2 = new Drone();
 
         // Create the scheduler which will manage drone assignments and event processing
-        Scheduler scheduler = new Scheduler(sharedFireQueue, droneResponseQueue, drones);
+        Scheduler scheduler = new Scheduler();
 
         // Create the FireIncident subsystem that will read fire incidents from a file
-        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", sharedFireQueue);
+        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv");
 
         // Start the FireIncident subsystem (reads fire events and sends them to the
         // scheduler)
@@ -52,10 +37,10 @@ public class Main {
         // Start the Scheduler (assigns drones to fire incidents)
         scheduler.start();
 
-        // Start all drones (each drone operates independently)
-        for (Drone d : drones) {
-            d.start();
-        }
+        drone0.start();
+        drone1.start();
+        drone2.start();
+
 
         /**
          * Synchronization using `join()`
@@ -67,9 +52,9 @@ public class Main {
         try {
             scheduler.join(); // Wait for the scheduler to finish execution
             fireIncident.join(); // Wait for the FireIncident subsystem to finish execution
-            for (Drone d : drones) {
-                d.join(); // Wait for each drone to finish execution
-            }
+            drone0.join();
+            drone1.join();
+            drone2.join();
         } catch (InterruptedException e) {
             e.printStackTrace(); // Handle any interruption in thread execution
         }

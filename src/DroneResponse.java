@@ -1,4 +1,4 @@
-// Updated code 
+// Updated code
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,7 +18,7 @@ public class DroneResponse implements Serializable {
 
     /**
      * Constructor for DroneResponse.
-     * 
+     *
      * @param event        The event that the drone responded to.
      * @param droneId      The ID of the drone sending the response.
      * @param responseType The type of response (SUCCESS, FAILURE, TIMEOUT,
@@ -32,7 +32,7 @@ public class DroneResponse implements Serializable {
 
     /**
      * Gets the event associated with this response.
-     * 
+     *
      * @return The event.
      */
     public Event getEvent() {
@@ -41,7 +41,7 @@ public class DroneResponse implements Serializable {
 
     /**
      * Gets the ID of the drone that sent this response.
-     * 
+     *
      * @return The drone ID.
      */
     public int getDroneId() {
@@ -50,7 +50,7 @@ public class DroneResponse implements Serializable {
 
     /**
      * Gets the type of response from the drone.
-     * 
+     *
      * @return The response type.
      */
     public ResponseType getResponseType() {
@@ -59,7 +59,7 @@ public class DroneResponse implements Serializable {
 
     /**
      * Returns a string representation of the DroneResponse.
-     * 
+     *
      * @return A formatted string.
      */
     @Override
@@ -94,3 +94,4 @@ public class DroneResponse implements Serializable {
         return null;//return null for failure
     }
 }
+

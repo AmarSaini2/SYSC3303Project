@@ -49,7 +49,7 @@ class DroneDroppingAgent implements DroneState{
 
     @Override
     public void action(Drone drone){drone.extinguishFire();}
-    
+
     @Override
     public String getStateString(){
         return "Dropping Agent";
@@ -62,7 +62,7 @@ class DroneReturningToBase implements DroneState{
 
     @Override
     public void action(Drone drone){drone.returnToBase();}
-    
+
     @Override
     public String getStateString(){
         return "Returning To Base";
@@ -75,7 +75,7 @@ class DroneFillingTank implements DroneState{
 
     @Override
     public void action(Drone drone){drone.refillTank();}
-    
+
     @Override
     public String getStateString(){
         return "Filling Tank";
@@ -88,7 +88,7 @@ class DroneSuccess implements DroneState{
 
     @Override
     public void action(Drone drone){drone.handleSuccess();}
-    
+
     @Override
     public String getStateString(){
         return "Success";
@@ -101,7 +101,7 @@ class DroneFault implements DroneState{
 
     @Override
     public void action(Drone drone){drone.handleFault();}
-    
+
     @Override
     public String getStateString(){
         return "Fault";

@@ -8,6 +8,7 @@ public class Zone implements Serializable {
     private int id;
     private int[] start; // Start coordinates (x, y)
     private int[] end; // End coordinates (x, y)
+    private static final long serialVersionUID = 1L;//added for serialization compatibility
 
     /**
      * Constructs a Zone instance.

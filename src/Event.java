@@ -26,6 +26,8 @@ public class Event implements Comparable<Event>, Serializable {
 
     private Severity severity;
 
+    private static final long serialVersionUID = 1L;//added for serialization compatibility
+
     /**
      * Constructs an Event instance. The identifier is created from an internal
      * static variable to ensure unique id values.
@@ -92,7 +94,7 @@ public class Event implements Comparable<Event>, Serializable {
 
     /**
      * Sets the time of an Event object
-     * 
+     *
      * @param time the new time of the Event
      */
     public void setTime(LocalTime time) {
@@ -101,7 +103,7 @@ public class Event implements Comparable<Event>, Serializable {
 
     /**
      * Sets the severity of an Event object
-     * 
+     *
      * @param severity the new severity of the Event
      */
     public void setSeverity(Severity severity) {

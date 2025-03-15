@@ -9,15 +9,13 @@ public class Drone extends Thread {
     private Event assignedFire;
     private final HashMap<String, Double> attributes;
     private double carryingVolume;
-    private final GenericQueue<DroneResponse> responseQueue;
     private final Random random;
     private DroneState currentState;
     private DroneFSM droneFSM;
     private DatagramSocket socket;
     private InetAddress schedulerAddr;
 
-    public Drone(GenericQueue<DroneResponse> responseQueue) {
-        this.responseQueue = responseQueue;
+    public Drone() {
         this.random = new Random();
         this.attributes = new HashMap<>();
 
@@ -38,7 +36,7 @@ public class Drone extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
     }
 
     public void setState(String stateName){
@@ -80,24 +78,24 @@ public class Drone extends Thread {
     private void checkMessage(){
         byte[] data = new byte[1024];
         DatagramPacket packet = new DatagramPacket(data, data.length);
-       try {
+        try {
             socket.setSoTimeout(300);
             socket.receive(packet);
-            String packetString = new String(packet.getData());
-            System.out.println("[PACKET]" + packetString);
-
-            if(this.assignedFire == null && this.isFree()){
+            if(Event.deserializeEvent(packet.getData()) == null){
+                System.out.println("[DRONE]: Received: " + new String(packet.getData()));
+            }
+            if(this.isFree()){
                 this.assignFire(Event.deserializeEvent(packet.getData()));//assign Fire to drone
                 System.out.println("[Drone " + this.id + "] Received assignment of new event: " +  this.assignedFire);
             }
 
 
-           
-       }catch (SocketTimeoutException e) {
+
+        }catch (SocketTimeoutException e) {
             return;
-       }catch(IOException e){
-        e.printStackTrace();
-       }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -105,7 +103,7 @@ public class Drone extends Thread {
         sendWakeupMessage();
         while (true) {
             checkMessage();
-            
+
             // Execute the function for the current state
             // Move to next state
             currentState.action(this);
@@ -230,7 +228,7 @@ public class Drone extends Thread {
     public void handleSuccess() {
         System.out.println("[Drone " + id + "] Fire extinguished successfully!");
 
-        
+
 
         this.assignedFire.setSeverity(Event.Severity.OUT);
         sendResponse(DroneResponse.ResponseType.SUCCESS);
@@ -248,9 +246,6 @@ public class Drone extends Thread {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-
-        responseQueue.add(response);
     }
 
     @Override

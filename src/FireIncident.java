@@ -57,7 +57,7 @@ public class FireIncident extends Thread {
      * - This method **parses** the file and stores zones in a HashMap.
      * - The first line (header) is **skipped**.
      */
-    public void readZoneFile() {
+    protected void readZoneFile() {
         try (Scanner scanner = new Scanner(new File(zoneFilePath))) {
             scanner.nextLine(); // Skip header row
             String inputLine;
@@ -97,7 +97,7 @@ public class FireIncident extends Thread {
      * - The method reads each event, **creates an Event object**, and **sends it to
      * the scheduler**.
      */
-    public void readEventFile() {
+    protected void readEventFile() {
         try (Scanner scanner = new Scanner(new File(eventFilePath))) {
             scanner.nextLine(); // Skip header row
             String inputLine;
@@ -239,7 +239,7 @@ public class FireIncident extends Thread {
         this.socket.close();
     }
 
-    public void closeSockets(){
+    protected void closeSockets(){
         this.socket.close();
     }
 }

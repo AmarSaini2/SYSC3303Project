@@ -46,6 +46,10 @@ public class Drone extends Thread {
         this.currentState = DroneFSM.getState(stateName);
     }
 
+    public String getStateAsString(){
+        return this.currentState.getStateString();
+    }
+
     /**
      * Assigns a fire event to the drone if it's idle.
      */
@@ -60,7 +64,7 @@ public class Drone extends Thread {
         return false;
     }
 
-    public void sendWakeupMessage(){
+    protected void sendWakeupMessage(){
         byte[] data = "ONLINE".getBytes();
         try {
             DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"), this.schedulerPort);
@@ -78,19 +82,20 @@ public class Drone extends Thread {
         }
     }
 
-    private void checkMessage(){
+    protected void checkMessage(){
         byte[] data = new byte[1024];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
             socket.setSoTimeout(300);
             socket.receive(packet);
             if(Event.deserializeEvent(packet.getData()) == null){
-                System.out.println("[DRONE]: Received: " + new String(packet.getData()));
+                System.out.println("[DRONE]: Received: " + new String(packet.getData(),0, packet.getLength()));
             }
             if(this.isFree()){
                 this.assignFire(Event.deserializeEvent(packet.getData()));//assign Fire to drone
                 System.out.println("[Drone " + this.id + "] Received assignment of new event: " +  this.assignedFire);
             }
+            //System.out.println("CHECK: " +new String(packet.getData(),0, packet.getLength()));
 
 
 

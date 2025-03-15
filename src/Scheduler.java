@@ -31,11 +31,18 @@ public class Scheduler extends Thread {
      * Constructor for the Scheduler class.
      *
      */
-    public Scheduler() {
+    public Scheduler(int fireIncidentReceivePort, int droneReceivePort) {
         this.finish = false; // Initially, the scheduler runs continuously
         this.eventQueue = new PriorityBlockingQueue<>();
         this.freeDroneList = new CopyOnWriteArrayList<>();
         this.freeDroneListInUse = false;
+
+        try{
+            FISocket = new DatagramSocket(fireIncidentReceivePort);
+            droneSocket = new DatagramSocket(droneReceivePort);
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
     }
 
     private void handleFireIncident(){
@@ -90,12 +97,6 @@ public class Scheduler extends Thread {
      */
     @Override
     public void run() {
-        try{
-            FISocket = new DatagramSocket(5000);
-            droneSocket = new DatagramSocket(6000);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
 
 
         // Start a separate thread to handle drone responses asynchronously
@@ -206,6 +207,11 @@ public class Scheduler extends Thread {
                 notifyAll();
             }
         }
+    }
+
+    public void closeSockets(){
+        this.FISocket.close();
+        this.droneSocket.close();
     }
 
     /**

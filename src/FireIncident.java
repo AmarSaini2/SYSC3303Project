@@ -17,12 +17,14 @@ import java.util.Scanner;
  * fire reports.
  */
 public class FireIncident extends Thread {
-    private DatagramSocket socket, receiveSocket;
+    private DatagramSocket socket;
     private InetAddress schedulerAddr;
     private final String eventFilePath; // Path to the fire event data file
     private final String zoneFilePath; // Path to the zone data file
     private HashMap<Integer, Event> events; // Stores fire events (indexed by event ID)
     private HashMap<Integer, Zone> zones; // Stores zone data (indexed by zone ID)
+
+    private int schedulerPort;
 
     /**
      * Constructs a FireIncident instance.
@@ -30,13 +32,21 @@ public class FireIncident extends Thread {
      * @param eventFilePath   Path to the event data file (contains fire incidents).
      * @param zoneFilePath    Path to the zone data file (contains fire locations).
      */
-    public FireIncident(String eventFilePath, String zoneFilePath) {
+    public FireIncident(String eventFilePath, String zoneFilePath, int schedulerPort) {
         this.eventFilePath = eventFilePath;
         this.zoneFilePath = zoneFilePath;
 
         // Initialize HashMaps to store fire events and fire zones
         this.events = new HashMap<>();
         this.zones = new HashMap<>();
+
+        this.schedulerPort = schedulerPort;
+
+        try{
+            this.socket = new DatagramSocket();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -146,7 +156,7 @@ public class FireIncident extends Thread {
     private void sendToScheduler(Event e){
         byte[] serializedEvent = e.serializeEvent();
         try{
-            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), 5000);
+            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
             socket.send(packet);
             System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
         }catch(UnknownHostException f){
@@ -222,15 +232,14 @@ public class FireIncident extends Thread {
      */
     @Override
     public void run() {
-        try{
-            this.socket = new DatagramSocket();
-        }catch(IOException e){
-            e.printStackTrace();
-        }
         this.readZoneFile(); // Load zones from the file
         this.readEventFile(); // Load fire incidents and send them to the scheduler
         this.receiveResponse();//get drone responses forwarded by scheduler
 
+        this.socket.close();
+    }
+
+    public void closeSockets(){
         this.socket.close();
     }
 }

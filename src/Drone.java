@@ -14,8 +14,9 @@ public class Drone extends Thread {
     private DroneFSM droneFSM;
     private DatagramSocket socket;
     private InetAddress schedulerAddr;
+    private int schedulerPort;
 
-    public Drone() {
+    public Drone(int schedulerPort) {
         this.random = new Random();
         this.attributes = new HashMap<>();
 
@@ -37,6 +38,8 @@ public class Drone extends Thread {
             e.printStackTrace();
         }
 
+        this.schedulerPort = schedulerPort;
+
     }
 
     public void setState(String stateName){
@@ -57,10 +60,10 @@ public class Drone extends Thread {
         return false;
     }
 
-    private void sendWakeupMessage(){
+    public void sendWakeupMessage(){
         byte[] data = "ONLINE".getBytes();
         try {
-            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"), 6000);
+            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"), this.schedulerPort);
             socket.setBroadcast(true);
             socket.send(packet);
             System.out.println("[Drone " + this.id + "] Wakeup message sent");
@@ -240,7 +243,7 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "] Response sent: " + responseType);
 
         byte[] data = response.serializeResponse();
-        DatagramPacket packet = new DatagramPacket(data, data.length, schedulerAddr, 6000);
+        DatagramPacket packet = new DatagramPacket(data, data.length, schedulerAddr, this.schedulerPort);
         try {
             socket.send(packet);
         } catch (Exception e) {

@@ -269,4 +269,9 @@ public class Drone extends Thread {
     public DatagramSocket getSocket(){
         return this.socket;
     }
+
+    public static void main(String[] args) {
+        Drone drone = new Drone(6000);
+        drone.start();
+    }
 }

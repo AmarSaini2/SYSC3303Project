@@ -46,22 +46,24 @@ public class Scheduler extends Thread {
     }
 
     private void handleFireIncident(){
-        byte[] buffer = new byte[2048];
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-        try{
-            FISocket.setSoTimeout(1000);
-            FISocket.receive(packet);
-            FI_addr = packet.getAddress();
-            FI_port = packet.getPort();
-            Event event = Event.deserializeEvent(packet.getData());
-            System.out.println("[Scheduler]: Event Received: " + event.toString());
-            //INSERT INTO PRIORITY QUEUE
-            eventQueue.add(event);
-            System.out.println("[Scheduler]: Added event to eventQueue");
-        }catch(SocketTimeoutException e){
-            System.out.println("[Scheduler]: No pending Fire Incidents");
-        }catch(IOException e){
-            e.printStackTrace();
+        while (eventQueue.isEmpty()) {
+            byte[] buffer = new byte[2048];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            try {
+                FISocket.setSoTimeout(1000);
+                FISocket.receive(packet);
+                FI_addr = packet.getAddress();
+                FI_port = packet.getPort();
+                Event event = Event.deserializeEvent(packet.getData());
+                System.out.println("[Scheduler]: Event Received: " + event.toString());
+                //INSERT INTO PRIORITY QUEUE
+                eventQueue.add(event);
+                System.out.println("[Scheduler]: Added event to eventQueue");
+            } catch (SocketTimeoutException e) {
+                System.out.println("[Scheduler]: No pending Fire Incidents");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -221,5 +223,10 @@ public class Scheduler extends Thread {
         FISocket.close();
         droneSocket.close();
         System.out.println("[Scheduler] Shutting down...");
+    }
+
+    public static void main(String[] args) {
+        Scheduler scheduler = new Scheduler(5000, 6000);
+        scheduler.start();
     }
 }

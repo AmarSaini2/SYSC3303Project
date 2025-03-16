@@ -238,4 +238,9 @@ public class FireIncident extends Thread {
 
         this.socket.close();
     }
+
+    public static void main(String[] args) {
+        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", 5000);
+        fireIncident.start();
+    }
 }

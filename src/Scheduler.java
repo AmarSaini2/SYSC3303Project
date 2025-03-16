@@ -15,9 +15,9 @@ import java.util.concurrent.PriorityBlockingQueue;
  * - `responseQueue` → Receives updates from `Drones` after task completion.
  */
 public class Scheduler extends Thread {
-    private DatagramSocket FISocket, droneSocket;
-    private InetAddress FI_addr;
-    private int FI_port;
+    private DatagramSocket fireIncidentSocket, droneSocket;
+    private InetAddress fireIncidentAddress;
+    private int fireIncidentPort;
 
 
     private final PriorityBlockingQueue<Event> eventQueue;//Queue for fire events
@@ -40,7 +40,7 @@ public class Scheduler extends Thread {
         this.allDroneList = new CopyOnWriteArrayList<>();
 
         try{
-            FISocket = new DatagramSocket(fireIncidentReceivePort);
+            fireIncidentSocket = new DatagramSocket(fireIncidentReceivePort);
             droneSocket = new DatagramSocket(droneReceivePort);
         }catch(IOException e){
             throw new RuntimeException(e);
@@ -52,10 +52,10 @@ public class Scheduler extends Thread {
             byte[] buffer = new byte[2048];
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
             try {
-                FISocket.setSoTimeout(1000);
-                FISocket.receive(packet);
-                FI_addr = packet.getAddress();
-                FI_port = packet.getPort();
+                fireIncidentSocket.setSoTimeout(1000);
+                fireIncidentSocket.receive(packet);
+                fireIncidentAddress = packet.getAddress();
+                fireIncidentPort = packet.getPort();
                 String msg = new String(packet.getData(), 0, packet.getLength());
                 if (msg.toUpperCase().equals("FINISH")){
                     System.out.println("[Scheduler]: Received: FINISH");
@@ -148,7 +148,7 @@ public class Scheduler extends Thread {
 
         finishDrones();
 
-        FISocket.close();
+        fireIncidentSocket.close();
     }
 
     /**
@@ -190,7 +190,7 @@ public class Scheduler extends Thread {
                 //handle drone response message
                 DroneResponse response = DroneResponse.deserializeResponse(packet.getData());
 
-                FISocket.send(new DatagramPacket(packet.getData(), packet.getLength(), FI_addr, FI_port));//forward drone messages to FireIncident
+                fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
 
 
                 //handling response types

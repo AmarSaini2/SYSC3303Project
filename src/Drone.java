@@ -13,7 +13,7 @@ public class Drone extends Thread {
     private DroneState currentState;
     private DroneFSM droneFSM;
     private DatagramSocket socket;
-    private InetAddress schedulerAddr;
+    private InetAddress schedulerAddress;
     private int schedulerPort;
     private boolean finish;
 
@@ -79,7 +79,7 @@ public class Drone extends Thread {
             DatagramPacket response = new DatagramPacket(data, data.length);
             socket.receive(response);
             System.out.println("[Drone " + this.id + "] Received confirmation from Scheduler");
-            schedulerAddr = response.getAddress();
+            schedulerAddress = response.getAddress();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -311,7 +311,7 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "] Response sent: " + responseType);
 
         byte[] data = response.serializeResponse();
-        DatagramPacket packet = new DatagramPacket(data, data.length, schedulerAddr, this.schedulerPort);
+        DatagramPacket packet = new DatagramPacket(data, data.length, schedulerAddress, this.schedulerPort);
         try {
             socket.send(packet);
         } catch (Exception e) {

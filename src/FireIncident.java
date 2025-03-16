@@ -18,7 +18,7 @@ import java.util.Scanner;
  */
 public class FireIncident extends Thread {
     private DatagramSocket socket;
-    private InetAddress schedulerAddr;
+    private InetAddress schedulerAddress;
     private final String eventFilePath; // Path to the fire event data file
     private final String zoneFilePath; // Path to the zone data file
     private HashMap<Integer, Event> events; // Stores fire events (indexed by event ID)

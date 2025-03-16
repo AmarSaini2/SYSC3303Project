@@ -15,6 +15,7 @@ public class Drone extends Thread {
     private DatagramSocket socket;
     private InetAddress schedulerAddr;
     private int schedulerPort;
+    private boolean finish;
 
     public Drone(int schedulerPort) {
         this.random = new Random();
@@ -39,6 +40,8 @@ public class Drone extends Thread {
         }
 
         this.schedulerPort = schedulerPort;
+
+        this.finish = false;
 
     }
 
@@ -88,6 +91,12 @@ public class Drone extends Thread {
         try {
             socket.setSoTimeout(300);
             socket.receive(packet);
+            String receiveMessage = new String(packet.getData(), 0, packet.getLength());
+            if(receiveMessage.equals("FINISH")){
+                System.out.println("[Drone "+this.id+"]: Received FINISH");
+                this.finish = true;
+                return;
+            }
             if(Event.deserializeEvent(packet.getData()) == null){
                 System.out.println("[DRONE]: Received: " + new String(packet.getData(),0, packet.getLength()));
             }
@@ -109,8 +118,12 @@ public class Drone extends Thread {
     @Override
     public void run() {
         sendWakeupMessage();
-        while (true) {
+        while (!finish) {
             checkMessage();
+
+            if(finish) {
+                return;
+            }
 
             // Execute the function for the current state
             // Move to next state
@@ -157,11 +170,29 @@ public class Drone extends Thread {
 
     public void sleepMode() {
         System.out.println("[Drone " + id + "] IDLE - Waiting for assignment...");
+        byte[] data = new byte[1024];
+        DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
-            synchronized (this) {
-                wait(); // Wait until a new fire is assigned
+            socket.setSoTimeout(0);
+            socket.receive(packet);
+            String receiveMessage = new String(packet.getData(), 0, packet.getLength());
+            if(receiveMessage.equals("FINISH")){
+                System.out.println("[Drone "+this.id+"]: Received FINISH");
+                this.finish = true;
+                return;
             }
-        } catch (InterruptedException e) {
+            if(Event.deserializeEvent(packet.getData()) == null){
+                System.out.println("[DRONE]: Received: " + new String(packet.getData(),0, packet.getLength()));
+            }
+            if(this.isFree()){
+                this.assignFire(Event.deserializeEvent(packet.getData()));//assign Fire to drone
+                System.out.println("[Drone " + this.id + "] Received assignment of new event: " +  this.assignedFire);
+            }
+            //System.out.println("CHECK: " +new String(packet.getData(),0, packet.getLength()));
+
+        }catch (SocketTimeoutException e) {
+            return;
+        }catch(IOException e){
             e.printStackTrace();
         }
     }

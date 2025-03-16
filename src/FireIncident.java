@@ -24,6 +24,8 @@ public class FireIncident extends Thread {
     private HashMap<Integer, Event> events; // Stores fire events (indexed by event ID)
     private HashMap<Integer, Zone> zones; // Stores zone data (indexed by zone ID)
 
+    private HashMap<Integer, DroneResponse> droneResponses;
+
     private int schedulerPort;
 
     /**
@@ -47,6 +49,8 @@ public class FireIncident extends Thread {
         }catch(IOException e){
             e.printStackTrace();
         }
+
+        this.droneResponses = new HashMap<>();
     }
 
     /**
@@ -166,10 +170,20 @@ public class FireIncident extends Thread {
         }
     }
 
+    private void sendToScheduler(String msg){
+        try{
+            DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
+            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + msg);
+            socket.send(packet);
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     private void receiveResponse(){
         byte[] buffer = new byte[2048];
         try{
-            while(true){
+            while(this.droneResponses.size() < this.events.size()){
                 socket.setSoTimeout(10000);
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
@@ -187,7 +201,9 @@ public class FireIncident extends Thread {
                         System.out.println("[FireIncidentSubsystem] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent());
                         break;
                 }
+                this.droneResponses.put(response.getEvent().getId(), response);
             }
+            sendToScheduler("FINISH");
         }catch(SocketTimeoutException e){
             System.out.println("[FireIncidentSubsystem]: No responses received");
         }catch(IOException e){

@@ -20,15 +20,15 @@ import java.util.ArrayList;
  */
 public class Main {
     public static void main(String[] args) {
-        Drone drone0 = new Drone();
-        Drone drone1 = new Drone();
-        Drone drone2 = new Drone();
+        Drone drone0 = new Drone(6000);
+        Drone drone1 = new Drone(6000);
+        Drone drone2 = new Drone(6000);
 
         // Create the scheduler which will manage drone assignments and event processing
-        Scheduler scheduler = new Scheduler();
+        Scheduler scheduler = new Scheduler(5000, 6000);
 
         // Create the FireIncident subsystem that will read fire incidents from a file
-        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv");
+        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", 5000);
 
         // Start the FireIncident subsystem (reads fire events and sends them to the
         // scheduler)

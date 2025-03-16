@@ -1,12 +1,10 @@
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-
 import java.io.*;
-import java.time.Duration;
-import java.util.ArrayList;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -15,13 +13,7 @@ import java.util.HashMap;
  * as well as the interaction with the Scheduler and Drone classes.
  */
 public class FireIncidentTest {
-    private GenericQueue<Event> sharedFireQueue; // Queue for incoming fire events
-    private GenericQueue<DroneResponse> responseQueue; // Queue for drone responses
-    private ArrayList<Drone> drones;
-    FireIncident incident;
-    Scheduler scheduler;
-    Drone drone;
-
+    FireIncident fireIncident;
 
     /**
      * Sets up the test environment before each test case.
@@ -30,19 +22,7 @@ public class FireIncidentTest {
      */
     @BeforeEach
     public void setup(){
-        sharedFireQueue = new GenericQueue<>();
-        responseQueue = new GenericQueue<>();
-        drones = new ArrayList<>();
-        scheduler = new Scheduler(sharedFireQueue, responseQueue, drones);
-        incident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", sharedFireQueue);
-        drone = new Drone(responseQueue);
-        drones.add(drone);  // Add drone to the scheduler's list of drones
-        Thread schedulerThread = new Thread(scheduler);
-        Thread droneThread = new Thread(drones.get(0));
-        Thread incidentThread = new Thread(incident);
-        schedulerThread.start();
-        droneThread.start();
-        incidentThread.start();
+        fireIncident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", 5500);
     }
 
     /**
@@ -64,19 +44,27 @@ public class FireIncidentTest {
         }
 
         //read zone file
-        incident.readZoneFile();
+        fireIncident.readZoneFile();
 
         //check that zone is processed correctly
-        HashMap<Integer, Zone> zones = incident.getZones();
+        HashMap<Integer, Zone> zones = fireIncident.getZones();
 
+        System.out.println("Zone 1:");
+        assertEquals(1, zones.get(1).getId());
+        System.out.println("id: Expected: 1, Actual: "+ zones.get(1).getId());
+        assertArrayEquals(new int[]{0,0}, zones.get(1).getStart());
+        System.out.println("start: Expected: [0, 0], Actual: " +Arrays.toString(zones.get(1).getStart()));
+        assertArrayEquals(new int[] {700,600}, zones.get(1).getEnd());
+        System.out.println("end: Expected: [700, 700], Actual: " +Arrays.toString(zones.get(1).getEnd()));
+        System.out.println();
 
-        assertEquals(zones.get(1).getId(), 1);
-        assertArrayEquals(zones.get(1).getStart(), new int[]{0,0});
-        assertArrayEquals(zones.get(1).getEnd(), new int[] {700,600});
-
-        assertEquals(zones.get(2).getId(), 2);
-        assertArrayEquals(zones.get(2).getStart(), new int[]{0,600});
-        assertArrayEquals(zones.get(2).getEnd(), new int[] {650,1500});
+        System.out.println("Zone 2:");
+        assertEquals(2, zones.get(2).getId());
+        System.out.println("id: Expected: 2, Actual: "+ zones.get(2).getId());
+        assertArrayEquals(new int[]{0,600}, zones.get(2).getStart());
+        System.out.println("start: Expected: [0, 600], Actual: " +Arrays.toString(zones.get(2).getStart()));
+        assertArrayEquals(new int[] {650,1500}, zones.get(2).getEnd());
+        System.out.println("end: Expected: [650, 1500], Actual: " +Arrays.toString(zones.get(2).getEnd()));
     }
 
     /**
@@ -87,7 +75,7 @@ public class FireIncidentTest {
      * @throws IOException if an I/O error occurs while reading the event file.
      */
     @Test
-    public void testReadEventFile() throws IOException{//buggy because of the known scheduler deadlock issue. Will be fixed in Iteration 2
+    public void testReadEventFile() throws IOException{
         //create test file and write some values to it
         File eventFile = new File("test\\test_Event_File.csv");
         try(FileWriter writer = new FileWriter(eventFile)){
@@ -96,15 +84,43 @@ public class FireIncidentTest {
             writer.write("11:22:33\t2\tDRONE_REQUEST\tlow");
         }
 
+        //Create thread that will receive the events from the FireIncident
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DatagramSocket testSocket = new DatagramSocket(5500);
+                    DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
+                    testSocket.receive(receivePacket);
+                    Event event1 = Event.deserializeEvent(receivePacket.getData());
+                    System.out.println("Event 1:");
+                    assertEquals(1, event1.getZone().getId());
+                    System.out.println("zone: Expected: 1, Actual: " +event1.getZone().getId());
+                    assertEquals(Event.Type.FIRE_DETECTED, event1.getType());
+                    System.out.println("type: Expected: FIRE_DETECTED, Actual: " +event1.getType());
+                    assertEquals(Event.Severity.HIGH, event1.getSeverity());
+                    System.out.println("severity: Expected: HIGH, Actual: " +event1.getSeverity());
+
+                    testSocket.receive(receivePacket);
+                    Event event2 = Event.deserializeEvent(receivePacket.getData());
+                    System.out.println("Event 2:");
+                    assertEquals(2, event2.getZone().getId());
+                    System.out.println("zone: Expected: 2, Actual: " +event2.getZone().getId());
+                    assertEquals(Event.Type.DRONE_REQUEST, event2.getType());
+                    System.out.println("type: Expected: DRONE_REQUEST, Actual: " +event2.getType());
+                    assertEquals(Event.Severity.LOW, event2.getSeverity());
+                    System.out.println("severity: Expected: LOW, Actual: " +event2.getSeverity());
+
+                    testSocket.close();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
         //read event file
-        incident.readZoneFile();
-        incident.readEventFile();
-
-
-        HashMap<Integer, Event> events = incident.getEvents();
-
-        assertEquals(1, events.get(0).getZone().getId());
-        assertEquals(Event.Type.FIRE_DETECTED, events.get(0).getType());
-        assertEquals(Event.Severity.HIGH, events.get(0).getSeverity());
+        fireIncident.readZoneFile();
+        fireIncident.readEventFile();
     }
 }

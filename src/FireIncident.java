@@ -17,12 +17,16 @@ import java.util.Scanner;
  * fire reports.
  */
 public class FireIncident extends Thread {
-    private DatagramSocket socket, receiveSocket;
+    private DatagramSocket socket;
     private InetAddress schedulerAddr;
     private final String eventFilePath; // Path to the fire event data file
     private final String zoneFilePath; // Path to the zone data file
     private HashMap<Integer, Event> events; // Stores fire events (indexed by event ID)
     private HashMap<Integer, Zone> zones; // Stores zone data (indexed by zone ID)
+
+    private HashMap<Integer, DroneResponse> droneResponses;
+
+    private int schedulerPort;
 
     /**
      * Constructs a FireIncident instance.
@@ -30,13 +34,23 @@ public class FireIncident extends Thread {
      * @param eventFilePath   Path to the event data file (contains fire incidents).
      * @param zoneFilePath    Path to the zone data file (contains fire locations).
      */
-    public FireIncident(String eventFilePath, String zoneFilePath) {
+    public FireIncident(String eventFilePath, String zoneFilePath, int schedulerPort) {
         this.eventFilePath = eventFilePath;
         this.zoneFilePath = zoneFilePath;
 
         // Initialize HashMaps to store fire events and fire zones
         this.events = new HashMap<>();
         this.zones = new HashMap<>();
+
+        this.schedulerPort = schedulerPort;
+
+        try{
+            this.socket = new DatagramSocket();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+
+        this.droneResponses = new HashMap<>();
     }
 
     /**
@@ -47,7 +61,7 @@ public class FireIncident extends Thread {
      * - This method **parses** the file and stores zones in a HashMap.
      * - The first line (header) is **skipped**.
      */
-    public void readZoneFile() {
+    protected void readZoneFile() {
         try (Scanner scanner = new Scanner(new File(zoneFilePath))) {
             scanner.nextLine(); // Skip header row
             String inputLine;
@@ -87,7 +101,7 @@ public class FireIncident extends Thread {
      * - The method reads each event, **creates an Event object**, and **sends it to
      * the scheduler**.
      */
-    public void readEventFile() {
+    protected void readEventFile() {
         try (Scanner scanner = new Scanner(new File(eventFilePath))) {
             scanner.nextLine(); // Skip header row
             String inputLine;
@@ -146,7 +160,7 @@ public class FireIncident extends Thread {
     private void sendToScheduler(Event e){
         byte[] serializedEvent = e.serializeEvent();
         try{
-            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), 5000);
+            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
             socket.send(packet);
             System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
         }catch(UnknownHostException f){
@@ -156,10 +170,20 @@ public class FireIncident extends Thread {
         }
     }
 
+    private void sendToScheduler(String msg){
+        try{
+            DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
+            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + msg);
+            socket.send(packet);
+        }catch(IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
     private void receiveResponse(){
         byte[] buffer = new byte[2048];
         try{
-            while(true){
+            while(this.droneResponses.size() < this.events.size()){
                 socket.setSoTimeout(10000);
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
@@ -177,7 +201,9 @@ public class FireIncident extends Thread {
                         System.out.println("[FireIncidentSubsystem] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent());
                         break;
                 }
+                this.droneResponses.put(response.getEvent().getId(), response);
             }
+            sendToScheduler("FINISH");
         }catch(SocketTimeoutException e){
             System.out.println("[FireIncidentSubsystem]: No responses received");
         }catch(IOException e){
@@ -222,15 +248,15 @@ public class FireIncident extends Thread {
      */
     @Override
     public void run() {
-        try{
-            this.socket = new DatagramSocket();
-        }catch(IOException e){
-            e.printStackTrace();
-        }
         this.readZoneFile(); // Load zones from the file
         this.readEventFile(); // Load fire incidents and send them to the scheduler
         this.receiveResponse();//get drone responses forwarded by scheduler
 
         this.socket.close();
+    }
+
+    public static void main(String[] args) {
+        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", 5000);
+        fireIncident.start();
     }
 }

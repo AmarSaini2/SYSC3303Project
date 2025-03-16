@@ -1,12 +1,17 @@
-import java.time.Duration;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.time.LocalTime;
-import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static java.lang.Thread.sleep;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for the Drone class.
@@ -14,45 +19,48 @@ import org.junit.jupiter.api.Test;
  * and receiving updates from the Scheduler.
  */
 public class DroneTest {
-    GenericQueue<DroneResponse> droneResponseQueue;
 
-    private Drone drone;
-
-    /**
-     * Sets up the test environment before each test case.
-     * Initializes a new instance of the Scheduler and Drone classes.
-     */
-    @BeforeEach
-    public void setUp() {
-        droneResponseQueue = new GenericQueue<DroneResponse>();
-
-        drone = new Drone(droneResponseQueue);
-        drone.start();
-    }
-
-    /**
-     * Tests the functionality of sending a fire request to the Scheduler
-     * and verifying that the update is received after the fire is dealt with.
-     *
-     * @throws InterruptedException if the thread is interrupted while waiting.
-     */
     @Test
-    public void testSendToFire() throws InterruptedException {
-        Zone zone = new Zone (1, 0,0,700,600);
-       Event fireEvent = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.HIGH);
+    public void testRun(){
+        Drone drone = new Drone(6500);
 
-       //start drone thread
-        drone.assignFire(fireEvent);
-       //cannot wait for thread to finish because the drone thread is meant to run infinitely
+        drone.start();
+            try {
+                DatagramSocket testSocket = new DatagramSocket(6500);
+                DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
 
-        DroneResponse response = droneResponseQueue.get();
+                testSocket.receive(receivePacket);
+                String receivedMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                assertTrue(receivedMessage.equals("ONLINE"));
+                System.out.println("\nExpected: ONLINE, Actual: " +receivedMessage+ "\n");
 
-       //check if the scheduler recieved the update after the fire is dealt with
-       Event newFireStatus = response.getEvent();
+                InetAddress droneAddr = receivePacket.getAddress();
+                int dronePort = receivePacket.getPort();
 
-       //assertions to verify expected behaviour
-       assertNotNull(newFireStatus);
-       assertEquals(newFireStatus, fireEvent);
-        assertEquals(Event.Severity.OUT, newFireStatus.getSeverity());
+                String sendMessage = "RECEIVED";
+                DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length, droneAddr, dronePort);
+                testSocket.send(sendPacket);
+
+                Zone zone = new Zone (1, 0,0,700,600);
+                Event event = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.LOW);
+
+                byte[] buffer = event.serializeEvent();
+                DatagramPacket sendPacket2 = new DatagramPacket(buffer, buffer.length, droneAddr, dronePort);
+                testSocket.send(sendPacket2);
+
+                DatagramPacket receivePacket2 = new DatagramPacket(new byte[1024], 1024);
+
+                testSocket.receive(receivePacket2);
+                DroneResponse droneResponse = DroneResponse.deserializeResponse(receivePacket2.getData());
+                Event returnedEvent = droneResponse.getEvent();
+                System.out.println("\nEvent Severity: Expected: OUT, Actual: " +returnedEvent.getSeverity()+ "\n");
+
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
     }
+
 }

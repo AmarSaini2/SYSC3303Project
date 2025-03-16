@@ -22,7 +22,6 @@ There are three main components of project:
 - **Scheduler.java**: Central component responsible for receiving fire reports, assigning drones, and managing event queues.
 - **SchedulerTest.java**: Unit tests for the `Scheduler` class.
 - **Zone.java**: Defines geographical fire zones.
-- **GenericQueue.java**: A thread-safe queue implementation.
 - **Event_File.csv**: Sample input file containing fire event data.
 - **Zone_File.csv**: Sample input file defining fire zones.
 
@@ -67,9 +66,10 @@ There are three main components of project:
 ## Expected Behavior
 
 1. **FireIncident** reads fire events from `Event_File.csv` and sends them to **Scheduler**.
-2. **Scheduler** receives fire reports and forwards them to **Drone**.
-3. **Drone** picks up fire assignments and simulates firefighting.
+2. **Scheduler** receives fire reports and forwards them to **Drone** Drones.
+3. Drones pick up fire assignments and simulate firefighting.
 4. **Scheduler** updates event status and confirms fire extinguishment.
+5. The system communicates via UDP
 
 ## Team Members
 

@@ -27,11 +27,6 @@ public class SchedulerTest {
         scheduler = new Scheduler(5000, 6000);
     }
 
-    @AfterEach
-    public void cleanUp(){
-        scheduler.finishEvents();
-    }
-
     /**
      * Tests the newFireRequest method of the Scheduler.
      * This test verifies that an event sent to the scheduler is correctly

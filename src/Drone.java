@@ -264,4 +264,9 @@ public class Drone extends Thread {
     public Event getAssignedFire() {
         return assignedFire;
     }
+
+    //Testing Only
+    public DatagramSocket getSocket(){
+        return this.socket;
+    }
 }

@@ -238,8 +238,4 @@ public class FireIncident extends Thread {
 
         this.socket.close();
     }
-
-    protected void closeSockets(){
-        this.socket.close();
-    }
 }

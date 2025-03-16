@@ -22,7 +22,7 @@ public class FireIncidentTest {
      */
     @BeforeEach
     public void setup(){
-        fireIncident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", 5000);
+        fireIncident = new FireIncident("test\\test_Event_File.csv", "test\\test_Zone_File.csv", 5500);
     }
 
     /**
@@ -65,8 +65,6 @@ public class FireIncidentTest {
         System.out.println("start: Expected: [0, 600], Actual: " +Arrays.toString(zones.get(2).getStart()));
         assertArrayEquals(new int[] {650,1500}, zones.get(2).getEnd());
         System.out.println("end: Expected: [650, 1500], Actual: " +Arrays.toString(zones.get(2).getEnd()));
-
-        fireIncident.closeSockets();
     }
 
     /**
@@ -91,7 +89,7 @@ public class FireIncidentTest {
             @Override
             public void run() {
                 try {
-                    DatagramSocket testSocket = new DatagramSocket(5000);
+                    DatagramSocket testSocket = new DatagramSocket(5500);
                     DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
 
                     testSocket.receive(receivePacket);
@@ -124,7 +122,5 @@ public class FireIncidentTest {
         //read event file
         fireIncident.readZoneFile();
         fireIncident.readEventFile();
-
-        fireIncident.closeSockets();
     }
 }

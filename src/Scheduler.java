@@ -209,11 +209,6 @@ public class Scheduler extends Thread {
         }
     }
 
-    public void closeSockets(){
-        this.FISocket.close();
-        this.droneSocket.close();
-    }
-
     /**
      * Called by FireIncident when all fire events have been processed.
      *

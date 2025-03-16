@@ -22,11 +22,11 @@ public class DroneTest {
 
     @Test
     public void testRun(){
-        Drone drone = new Drone(6000);
+        Drone drone = new Drone(6500);
 
-        new Thread(() -> {
+        drone.start();
             try {
-                DatagramSocket testSocket = new DatagramSocket(6000);
+                DatagramSocket testSocket = new DatagramSocket(6500);
                 DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
 
                 testSocket.receive(receivePacket);
@@ -59,23 +59,8 @@ public class DroneTest {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }).start();
 
-        //Gives the other thread some time to start
-        try {
-            sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
 
-        drone.start();
-
-        //Lets the threads run
-        try {
-            sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
 }

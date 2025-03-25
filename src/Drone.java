@@ -240,7 +240,7 @@ public class Drone extends Thread {
 
             try {
                 // Sleep for 1 second to simulate the drone's travel time
-                Thread.sleep(1000);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -281,7 +281,7 @@ public class Drone extends Thread {
         carryingVolume = attributes.get("maxCapacity");
 
         try {
-            Thread.sleep(2000);
+            Thread.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -292,7 +292,7 @@ public class Drone extends Thread {
         sendResponse(DroneResponse.ResponseType.FAILURE);
         this.assignedFire = null;
         try {
-            Thread.sleep(3000);
+            Thread.sleep(30);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

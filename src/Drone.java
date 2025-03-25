@@ -68,7 +68,7 @@ public class Drone extends Thread {
     }
 
     protected void sendWakeupMessage() {
-        byte[] data = "ONLINE".getBytes();
+        byte[] data = ("ONLINE:"+this.id).getBytes();
         try {
             DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"),
                     this.schedulerPort);
@@ -236,7 +236,7 @@ public class Drone extends Thread {
             // Calculate the current position of the drone
             double currentX = dxPerSecond * currentSecond;
             double currentY = dyPerSecond * currentSecond;
-            System.out.printf("[Drone %d] Traveling... Current position: (%.2f, %.2f)%n", id, currentX, currentY);
+            //System.out.printf("[Drone %d] Traveling... Current position: (%.2f, %.2f)%n", id, currentX, currentY);
 
             try {
                 // Sleep for 1 second to simulate the drone's travel time
@@ -261,7 +261,7 @@ public class Drone extends Thread {
 
         if (carryingVolume <= 0) {
             System.out.println("[Drone " + id + "] OUT OF WATER! Returning to base.");
-            sendResponse(DroneResponse.ResponseType.REFILL_REQUIRED);
+            sendResponse("REFILL_REQUIRED");
         }
     }
 
@@ -289,7 +289,7 @@ public class Drone extends Thread {
 
     public void handleFault() {
         System.out.println("[Drone " + id + "] FAULT detected. Returning to base...");
-        sendResponse(DroneResponse.ResponseType.FAILURE);
+        sendResponse("FAILURE");
         this.assignedFire = null;
         try {
             Thread.sleep(30);
@@ -302,16 +302,15 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "] Fire extinguished successfully!");
 
         this.assignedFire.setSeverity(Event.Severity.OUT);
-        sendResponse(DroneResponse.ResponseType.SUCCESS);
+        sendResponse("SUCCESS");
         this.assignedFire = null;
     }
 
-    private void sendResponse(DroneResponse.ResponseType responseType) {
-        DroneResponse response = new DroneResponse(assignedFire, id, responseType);
-        System.out.println("[Drone " + id + "] Response sent: " + responseType);
+    private void sendResponse(String message) {
+        System.out.println("[Drone " + id + "] Response sent: " + message);
+        message = message + ":" +this.id+ ":" +this.assignedFire.getId();
 
-        byte[] data = response.serializeResponse();
-        DatagramPacket packet = new DatagramPacket(data, data.length, schedulerAddress, this.schedulerPort);
+        DatagramPacket packet = new DatagramPacket(message.getBytes(), message.getBytes().length, schedulerAddress, this.schedulerPort);
         try {
             socket.send(packet);
         } catch (Exception e) {

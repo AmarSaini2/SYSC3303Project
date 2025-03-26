@@ -4,6 +4,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
+/**
+ * TODO for me
+ *
+ * Add super state that that handles fault?
+ * Add a moveTo method moveTo(targetX, targetY) to be used for return to base and to fire
+ * Fix issue with how much agent to drop
+ *
+ */
+
 public class Drone extends Thread {
     private static int idCounter = 0;
     private int id;
@@ -145,6 +154,7 @@ public class Drone extends Thread {
     /**
      * Determines the amount of water required to extinguish a fire.
      */
+    //TODO fix this
     private int getRequiredVolume(Event fire) {
         switch (fire.getSeverity()) {
             case HIGH:
@@ -242,6 +252,7 @@ public class Drone extends Thread {
 
     }
 
+    //TODO take a second look at this
     public void extinguishFire() {
         System.out.println("[Drone " + id + "] Dropping firefighting agent...");
 

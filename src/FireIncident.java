@@ -161,8 +161,8 @@ public class FireIncident extends Thread {
         byte[] serializedEvent = e.serializeEvent();
         try{
             DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
-            socket.send(packet);
             System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
+            socket.send(packet);
         }catch(UnknownHostException f){
             f.printStackTrace();
         }catch(IOException g){

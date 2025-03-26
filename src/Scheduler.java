@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -22,18 +21,15 @@ public class Scheduler extends Thread {
     private InetAddress fireIncidentAddress;
     private int fireIncidentPort;
 
-    private final HashMap<Integer, Event> fullServicedEvents;
-
+    private final ConcurrentHashMap<Integer, Event> fullyServicedEvents;
 
     private final PriorityBlockingQueue<Event> eventQueue;//Queue for fire events
-    private final ConcurrentHashMap<Integer, HashMap<String, Object>> freeDroneList;
-    private final ConcurrentHashMap<Integer, HashMap<String, Object>> allDroneList;
-//    private final CopyOnWriteArrayList<Object[]> freeDroneList;//List of free drones
-//    private final CopyOnWriteArrayList<Object[]> allDroneList;//List of all drones
 
+    private final ConcurrentHashMap<Integer, HashMap<String, Object>> allDroneList;//TODO might want to add a passive drone object and change the drone we have now into drone subsystem
+    private final CopyOnWriteArrayList<Integer> freeDroneList; //Contains a list of all free drones
+    private final CopyOnWriteArrayList<Integer> faultedDroneList; //Contains a list of all faulted drones
 
     private boolean finish; // Flag to stop the scheduler when all tasks are complete
-//    private boolean freeDroneListInUse;
 
     /**
      * Constructor for the Scheduler class.
@@ -43,8 +39,9 @@ public class Scheduler extends Thread {
         this.finish = false; // Initially, the scheduler runs continuously
         this.eventQueue = new PriorityBlockingQueue<>();
 
-        this.freeDroneList = new ConcurrentHashMap<>();
         this.allDroneList = new ConcurrentHashMap<>();
+        this.freeDroneList = new CopyOnWriteArrayList<>();
+        this.faultedDroneList = new CopyOnWriteArrayList<>();
 
         try{
             fireIncidentSocket = new DatagramSocket(fireIncidentReceivePort);
@@ -53,16 +50,14 @@ public class Scheduler extends Thread {
             throw new RuntimeException(e);
         }
 
-        this.fullServicedEvents = new HashMap<>();
-
+        this.fullyServicedEvents = new ConcurrentHashMap<>();
     }
 
     private void handleFireIncident(){
-        while (eventQueue.isEmpty()) {
+        while (!finish) {
             try {
                 DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
 
-                fireIncidentSocket.setSoTimeout(1000);
                 fireIncidentSocket.receive(packet);
                 fireIncidentAddress = packet.getAddress();
                 fireIncidentPort = packet.getPort();
@@ -125,54 +120,43 @@ public class Scheduler extends Thread {
     public void run() {
         // Start a separate thread to handle drone responses asynchronously
         new Thread(this::monitorDroneResponses).start();
+        new Thread(this::handleFireIncident).start();
 
-        while (!finish) { // Scheduler runs until it is told to stop
-            handleFireIncident();
-
-            if(!finish){
-                try {
-                    // If all drones are busy, the scheduler waits for an available drone
-                    while (freeDroneList.isEmpty()) {
-                        synchronized (this) {
-                            wait(); // Waits until a drone becomes free (notified by monitorDroneResponses)
+        while(!finish){
+            try {
+                while (eventQueue.isEmpty() || freeDroneList.isEmpty()) {
+                    synchronized (this) {
+                        wait();
+                        if(finish){
+                            return;
                         }
                     }
-
-                    // Retrieve the next fire request from the queue (Blocking call - waits if queue is empty)
-                    while (eventQueue.isEmpty()) {
-                        synchronized (this) {
-                            wait();
-                        }
-                    }
-
-                    for(Integer id: freeDroneList.keySet()){
-                        HashMap<String, Object> drone = freeDroneList.get(id);
-                        sendToDrone(event, (int) drone.get("port"), (InetAddress) drone.get("address"));
-                        freeDroneList.remove(id);
-                        System.out.println("[Scheduler]: Assigning Drone to event: " + event);
-                        break;
-                    }
-
-                    //Gets the event with the highest priority
-                    Event event = this.eventQueue.take();
-                    event.setAgentSent(event.getAgentSent()+15.00);
-
-                    //Add event back to queue if it still requires more agent
-                    if(event.getAgentSent() > event.getAgentRequired()){
-                        this.fullServicedEvents.put(event.getId(), event);
-                    }else{
-                        this.eventQueue.put(event);
-                    }
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace(); // Handle unexpected interruptions
                 }
+
+                //Gets the event with the highest priority
+                Event event = this.eventQueue.take();
+                event.setAgentSent(event.getAgentSent()+15.0); //TODO get rid of 15.0 constant using the amount of agent left in drone tank
+
+                //Checks if event still requires more agent
+                if(event.getAgentSent() < event.getAgentRequired()){
+                    //Add event back to queue if it still requires more agent
+                    this.eventQueue.put(event);
+                }else{
+                    this.fullyServicedEvents.put(event.getId(), event);
+                }
+
+                //Sends the first drone in freeDroneList to the event
+                for(Integer id: this.freeDroneList){
+                    HashMap<String, Object> drone = this.allDroneList.get(id);
+                    sendToDrone(event, (int) drone.get("port"), (InetAddress) drone.get("address"));
+                    this.freeDroneList.remove(id);
+                    System.out.println("[Scheduler]: Assigned Drone to event: " + event);
+                    break;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
-
-        finishDrones();
-
-        fireIncidentSocket.close();
     }
 
     /**
@@ -203,7 +187,7 @@ public class Scheduler extends Thread {
                         droneHashMap.put("volume", 15.0);
                         droneHashMap.put("location", new Integer[]{0,0});
                         this.allDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
-                        this.freeDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
+                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
 
                         System.out.println("[Scheduler]: Adding Drone to free drone list...");
                         synchronized(this){
@@ -211,9 +195,9 @@ public class Scheduler extends Thread {
                         }
                         sendToDrone("RECEIVED", packet.getPort(), packet.getAddress());//send response to drone
                         break;
-                    case "FAILURE": //FAILURE:DRONE_ID:EVENT_ID
+                    case "FAULTED": //FAILURE:DRONE_ID:EVENT_ID
                         //System.out.println("[Scheduler] Drone " + response.getDroneId() + "failed! Reassigning fire: " + response.getEvent().toString());
-//                        eventQueue.put(response.getEvent());
+                        this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
                         break;
                     case "REFILL_REQUIRED":
                         //System.out.println("[Scheduler] Drone " + response.getDroneId() + " needs refill. Will be available soon.");
@@ -224,8 +208,13 @@ public class Scheduler extends Thread {
                         synchronized (this) {
                             eventQueue.remove(Integer.parseInt(splitMessage[2]));
                         }
-                        freeDroneList.put(Integer.parseInt(splitMessage[1]), new Object[] {packet.getPort(), packet.getAddress()});
+                        freeDroneList.add(Integer.parseInt(splitMessage[1]));
                         fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
+
+                        // Notify the scheduler (run method) that a drone is available for a new assignment
+                        synchronized (this){
+                            notifyAll();
+                        }
                         break;
                 }
             }catch (SocketException e){
@@ -233,18 +222,13 @@ public class Scheduler extends Thread {
             }catch(IOException e){
                 e.printStackTrace();
             }
-
-            // Notify the scheduler (run method) that a drone is available for a new assignment
-            synchronized (this) {
-                notifyAll();
-            }
         }
     }
 
     private void finishDrones(){
         for(Integer id: allDroneList.keySet()){
-            Object[] drone = allDroneList.get(id);
-            sendToDrone("FINISH", (int) drone[0], (InetAddress) drone[1]);
+            HashMap<String, Object> drone = allDroneList.get(id);
+            sendToDrone("FINISH", (int) drone.get("port"), (InetAddress) drone.get("address"));
             System.out.println("[Scheduler]: Sent to Drone: FINISH");
         }
         droneSocket.close();
@@ -259,6 +243,7 @@ public class Scheduler extends Thread {
     public synchronized void finishEvents() {
         this.finish = true; // Stop execution of scheduler and monitoring threads
         notifyAll(); // Notify waiting threads to prevent indefinite blocking
+        finishDrones();
         System.out.println("[Scheduler] Shutting down...");
     }
 

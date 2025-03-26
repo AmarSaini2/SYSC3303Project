@@ -289,7 +289,7 @@ public class Drone extends Thread {
 
     public void handleFault() {
         System.out.println("[Drone " + id + "] FAULT detected. Returning to base...");
-        sendResponse("FAILURE");
+        sendResponse("FAULTED");
         this.assignedFire = null;
         try {
             Thread.sleep(30);

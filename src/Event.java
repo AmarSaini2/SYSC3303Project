@@ -28,6 +28,9 @@ public class Event implements Comparable<Event>, Serializable {
 
     private static final long serialVersionUID = 1L;//added for serialization compatibility
 
+    private double agentRequired;
+
+    private double agentSent;
     /**
      * Constructs an Event instance. The identifier is created from an internal
      * static variable to ensure unique id values.
@@ -45,6 +48,36 @@ public class Event implements Comparable<Event>, Serializable {
         this.type = type;
         this.severity = severity;
         this.assignedDrones = new ArrayList<>();
+
+        switch (this.getSeverity()) {
+            case HIGH:
+                this.agentRequired = 30.0;
+                break;
+            case MODERATE:
+                this.agentRequired = 20.0;
+                break;
+            case LOW:
+                this.agentRequired = 10.0;
+                break;
+        }
+
+        this.agentSent = 0.0;
+    }
+
+    public double getAgentSent(){
+        return this.agentSent;
+    }
+
+    public void setAgentSent(Double agentSent){
+        this.agentSent = agentSent;
+    }
+
+    public double getAgentRequired(){
+        return this.agentRequired;
+    }
+
+    public void setAgentRequired(Double agentRequired){
+        this.agentRequired = agentRequired;
     }
 
     /**
@@ -120,6 +153,23 @@ public class Event implements Comparable<Event>, Serializable {
 
     public ArrayList<Object[]> getAssignedDrones(){
         return this.assignedDrones;
+    }
+
+    public byte[] createMessage(String command){
+        byte[] commandBytes = command.getBytes();
+        byte[] serializedEvent = this.serializeEvent();
+
+        byte[] message = new byte[commandBytes.length+serializedEvent.length];
+
+        for(int i = 0; i < commandBytes.length; i++){
+            message[i] = commandBytes[i];
+        }
+
+        for(int i = 0; i < serializedEvent.length; i++){
+            message[commandBytes.length + i] = serializedEvent[i];
+        }
+
+        return message;
     }
 
     /**

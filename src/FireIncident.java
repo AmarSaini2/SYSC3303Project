@@ -24,7 +24,7 @@ public class FireIncident extends Thread {
     private HashMap<Integer, Event> events; // Stores fire events (indexed by event ID)
     private HashMap<Integer, Zone> zones; // Stores zone data (indexed by zone ID)
 
-    private HashMap<Integer, DroneResponse> droneResponses;
+    private HashMap<Integer, String> droneResponses;
 
     private int schedulerPort;
 
@@ -158,11 +158,11 @@ public class FireIncident extends Thread {
     }
 
     private void sendToScheduler(Event e){
-        byte[] serializedEvent = e.serializeEvent();
+        byte[] message = e.createMessage("NEW_EVENT:");
         try{
-            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
+            DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
+            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + e);
             socket.send(packet);
-            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
         }catch(UnknownHostException f){
             f.printStackTrace();
         }catch(IOException g){
@@ -184,24 +184,23 @@ public class FireIncident extends Thread {
         byte[] buffer = new byte[2048];
         try{
             while(this.droneResponses.size() < this.events.size()){
-                socket.setSoTimeout(10000);
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
-                DroneResponse response = DroneResponse.deserializeResponse(packet.getData());
-                //handling response types
-                switch (response.getResponseType()){
-                    case DroneResponse.ResponseType.FAILURE:
-                        System.out.println("[FireIncidentSubsystem] Drone " + response.getDroneId() + "failed! Reassigning fire: " + response.getEvent());
+                String message = new String(packet.getData(), 0, packet.getLength());
+                String[] splitMessage = message.split(":");
+                switch (splitMessage[0].toUpperCase()) {
+                    case "FAILURE":
+                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + "failed! Reassigning fire: " + splitMessage[2]);
                         break;
-                    case DroneResponse.ResponseType.REFILL_REQUIRED:
-                        System.out.println("[FireIncidentSubsystem] Drone " + response.getDroneId() + " needs refill. Will be available soon.");
+                    case "REFILLED_REQUESTED":
+                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " needs refill. Will be available soon.");
                         break;
-                    case DroneResponse.ResponseType.SUCCESS:
-                        System.out.println("[FireIncidentSubsystem] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent());
+                    case "SUCCESS":
+                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " successfully extinguished fire: " + splitMessage[2]);
                         break;
                 }
-                this.droneResponses.put(response.getEvent().getId(), response);
+                this.droneResponses.put(Integer.parseInt(splitMessage[2]), message);
             }
             sendToScheduler("FINISH");
         }catch(SocketTimeoutException e){

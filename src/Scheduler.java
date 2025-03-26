@@ -1,5 +1,8 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -19,14 +22,15 @@ public class Scheduler extends Thread {
     private InetAddress fireIncidentAddress;
     private int fireIncidentPort;
 
+    private final ConcurrentHashMap<Integer, Event> fullyServicedEvents;
 
     private final PriorityBlockingQueue<Event> eventQueue;//Queue for fire events
-    private final CopyOnWriteArrayList<Object[]> freeDroneList;//List of free drones
-    private final CopyOnWriteArrayList<Object[]> allDroneList;//List of all drones
 
+    private final ConcurrentHashMap<Integer, HashMap<String, Object>> allDroneList;//TODO might want to add a passive drone object and change the drone we have now into drone subsystem
+    private final CopyOnWriteArrayList<Integer> freeDroneList; //Contains a list of all free drones
+    private final CopyOnWriteArrayList<Integer> faultedDroneList; //Contains a list of all faulted drones
 
     private boolean finish; // Flag to stop the scheduler when all tasks are complete
-    private boolean freeDroneListInUse;
 
     /**
      * Constructor for the Scheduler class.
@@ -35,9 +39,10 @@ public class Scheduler extends Thread {
     public Scheduler(int fireIncidentReceivePort, int droneReceivePort) {
         this.finish = false; // Initially, the scheduler runs continuously
         this.eventQueue = new PriorityBlockingQueue<>();
+
+        this.allDroneList = new ConcurrentHashMap<>();
         this.freeDroneList = new CopyOnWriteArrayList<>();
-        this.freeDroneListInUse = false;
-        this.allDroneList = new CopyOnWriteArrayList<>();
+        this.faultedDroneList = new CopyOnWriteArrayList<>();
 
         try{
             fireIncidentSocket = new DatagramSocket(fireIncidentReceivePort);
@@ -45,29 +50,87 @@ public class Scheduler extends Thread {
         }catch(IOException e){
             throw new RuntimeException(e);
         }
+
+        this.fullyServicedEvents = new ConcurrentHashMap<>();
     }
 
-    private void handleFireIncident(){
-        while (eventQueue.isEmpty()) {
-            byte[] buffer = new byte[2048];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+    /**
+     * The main execution loop of the Scheduler.
+     * - Continuously checks for new fire requests.
+     * - Assigns fire events to available drones.
+     * - If no drones are available, it waits for one to become free.
+     * - If a drone fails to complete its task, the fire request is requeued.
+     */
+    @Override
+    public void run() {
+        // Start a separate thread to handle drone responses asynchronously
+        new Thread(this::processDroneMessages).start();
+        new Thread(this::processFireIncidentMessages).start();
+
+        while(!finish){
             try {
-                fireIncidentSocket.setSoTimeout(1000);
+                while (eventQueue.isEmpty() || freeDroneList.isEmpty()) {
+                    synchronized (this) {
+                        wait();
+                        if(finish){
+                            return;
+                        }
+                    }
+                }
+
+                //Gets the event with the highest priority
+                Event event = this.eventQueue.take();
+                event.setAgentSent(event.getAgentSent()+15.0); //TODO get rid of 15.0 constant using the amount of agent left in drone tank
+
+                //Checks if event still requires more agent
+                if(event.getAgentSent() < event.getAgentRequired()){
+                    //Add event back to queue if it still requires more agent
+                    this.eventQueue.put(event);
+                }else{
+                    this.fullyServicedEvents.put(event.getId(), event);
+                }
+
+                //Sends the first drone in freeDroneList to the event
+                for(Integer id: this.freeDroneList){
+                    HashMap<String, Object> drone = this.allDroneList.get(id);
+                    sendToDrone(event, (int) drone.get("port"), (InetAddress) drone.get("address"));
+                    this.freeDroneList.remove(id);
+                    System.out.println("[Scheduler]: Assigned Drone to event: " + event);
+                    break;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void processFireIncidentMessages(){
+        while (!finish) {
+            try {
+                DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
+
                 fireIncidentSocket.receive(packet);
                 fireIncidentAddress = packet.getAddress();
                 fireIncidentPort = packet.getPort();
-                String msg = new String(packet.getData(), 0, packet.getLength());
-                if (msg.toUpperCase().equals("FINISH")){
-                    System.out.println("[Scheduler]: Received: FINISH");
-                    this.finishEvents();
 
-                    return;
+                String message = new String(packet.getData(), 0, packet.getLength());
+                String[] splitMessage = message.split(":");
+                switch (splitMessage[0].toUpperCase()){
+                    case "NEW_EVENT":
+                        Event event = Event.deserializeEvent(Arrays.copyOfRange(packet.getData(),10, packet.getLength()));
+                        System.out.println("[Scheduler]: Event Received: " + event.toString());
+                        //INSERT INTO PRIORITY QUEUE
+                        eventQueue.put(event);
+                        synchronized (this){
+                            notifyAll();
+                        }
+                        System.out.println("[Scheduler]: Added event to eventQueue");
+                        break;
+                    case "FINISH":
+                        System.out.println("[Scheduler]: Received: FINISH");
+                        this.finishEvents();
+                        break;
                 }
-                Event event = Event.deserializeEvent(packet.getData());
-                System.out.println("[Scheduler]: Event Received: " + event.toString());
-                //INSERT INTO PRIORITY QUEUE
-                eventQueue.add(event);
-                System.out.println("[Scheduler]: Added event to eventQueue");
             } catch (SocketTimeoutException e) {
                 System.out.println("[Scheduler]: No pending Fire Incidents");
             } catch (IOException e) {
@@ -76,10 +139,79 @@ public class Scheduler extends Thread {
         }
     }
 
+    /**
+     * Monitors drone responses in a separate thread.
+     * - Continuously listens for responses from drones.
+     * - If a drone fails its mission, the fire event is requeued for
+     * reassignment.
+     * - If drones were previously marked as busy, notifies the scheduler that a
+     * drone is free.
+     */
+    private void processDroneMessages() {
+        while (!finish) { // Runs continuously until the scheduler is stopped
+            try{
+                // Waits for a drone to send a response (Blocking call)
+                DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
+                droneSocket.receive(packet);
+
+                String message = new String(packet.getData(),0 , packet.getLength());
+                System.out.println("[Scheduler] Received :" +message);
+
+                String[] splitMessage = message.split(":");
+                switch (splitMessage[0].toUpperCase()){
+                    case "ONLINE": //ONLINE:DRONE_ID
+                        HashMap<String, Object> droneHashMap = new HashMap<>();
+                        droneHashMap.put("port", packet.getPort());
+                        droneHashMap.put("address", packet.getAddress());
+                        droneHashMap.put("volume", 15.0);
+                        droneHashMap.put("location", new Integer[]{0,0});
+                        this.allDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
+                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+
+                        System.out.println("[Scheduler]: Added Drone " +Integer.parseInt(splitMessage[1])+ " to free drone list");
+                        synchronized(this){
+                            notifyAll();
+                        }
+                        sendToDrone("RECEIVED", packet.getPort(), packet.getAddress());//send response to drone
+                        break;
+                    case "FAULTED": //FAILURE:DRONE_ID:EVENT_ID
+                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + "failed! Reassigning fire: " + response.getEvent().toString());
+                        this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
+                        break;
+                    case "REFILL_REQUIRED":
+                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + " needs refill. Will be available soon.");
+                        sendToDrone("RETURN", Integer.parseInt(splitMessage[1]));
+                        break;
+                    case "SUCCESS": //SUCCESS:DRONE_ID:EVENT_ID:AMOUNT_OF_AGENT
+                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent().toString());
+                        synchronized (this) {
+                            eventQueue.remove(Integer.parseInt(splitMessage[2]));
+                        }
+                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+                        this.fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
+
+                        // Notify the scheduler (run method) that a drone is available for a new assignment
+                        synchronized (this){
+                            notifyAll();
+                        }
+                        break;
+                    case "ARRIVED_EVENT":
+                        sendToDrone("DROP", Integer.parseInt(splitMessage[1]));
+                        break;
+                    default:
+                        throw new RuntimeException("Invalid Command" +message);
+                }
+            }catch (SocketException e){
+                return;
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void sendToDrone(Event event, int port, InetAddress address){
-        byte[] data = event.serializeEvent();
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+        byte[] message = event.createMessage("NEW_EVENT:");
+        DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
         try {
             droneSocket.send(packet);
         } catch (IOException e) {
@@ -97,139 +229,22 @@ public class Scheduler extends Thread {
         }
     }
 
-
-
-    /**
-     * The main execution loop of the Scheduler.
-     * - Continuously checks for new fire requests.
-     * - Assigns fire events to available drones.
-     * - If no drones are available, it waits for one to become free.
-     * - If a drone fails to complete its task, the fire request is requeued.
-     */
-    @Override
-    public void run() {
-        // Start a separate thread to handle drone responses asynchronously
-        new Thread(this::monitorDroneResponses).start();
-
-        while (!finish) { // Scheduler runs until it is told to stop
-            handleFireIncident();
-
-            if(!finish){
-                try {
-                    // If all drones are busy, the scheduler waits for an available drone
-                    while (freeDroneList.isEmpty()) {
-                        synchronized (this) {
-                            wait(); // Waits until a drone becomes free (notified by monitorDroneResponses)
-                        }
-                    }
-
-                    // Retrieve the next fire request from the queue (Blocking call - waits if queue is empty)
-                    Event event = eventQueue.take();
-
-                    // Assign fire request to an available drone
-                    if(freeDroneList.isEmpty()){
-                        System.out.println("[Scheduler]: No available drones");
-                    }else{
-                        for(Object[] drone: freeDroneList){
-                            sendToDrone(event, (int) drone[0], (InetAddress) drone[1]);
-                            freeDroneList.remove(drone);
-                            event.addAssignedDrone(drone);//assign drone to event
-                            System.out.println("[Scheduler]: Assigning Drone to event: " + event);
-                        }
-
-                    }
-
-
-                } catch (InterruptedException e) {
-                    e.printStackTrace(); // Handle unexpected interruptions
-                }
-            }
-        }
-
-        finishDrones();
-
-        fireIncidentSocket.close();
-    }
-
-    /**
-     * Monitors drone responses in a separate thread.
-     * - Continuously listens for responses from drones.
-     * - If a drone fails its mission, the fire event is requeued for
-     * reassignment.
-     * - If drones were previously marked as busy, notifies the scheduler that a
-     * drone is free.
-     */
-    private void monitorDroneResponses() {
-        while (!finish) { // Runs continuously until the scheduler is stopped
-            // Waits for a drone to send a response (Blocking call)
-            byte[] buffer = new byte[2048];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            try{
-                droneSocket.setBroadcast(true);
-                droneSocket.receive(packet);
-                //handle status update packets
-                String data = new String(packet.getData());
-                if(data.contains("ONLINE")){//change to correct message
-                    if(freeDroneListInUse){
-                        synchronized(this){
-                            wait();
-                        }
-                    }
-                    freeDroneListInUse = true;
-                    freeDroneList.add(new Object[]{packet.getPort(), packet.getAddress()});//add drone to free drone list
-                    allDroneList.add(new Object[]{packet.getPort(), packet.getAddress()});
-                    System.out.println("[Scheduler]: Adding Drone to free drone list...");
-                    freeDroneListInUse = false;
-                    synchronized(this){
-                        notifyAll();
-                    }
-                    sendToDrone("RECEIVED", packet.getPort(), packet.getAddress());//send response to drone
-                    continue; //restart loop for next message
-                }
-
-                //handle drone response message
-                DroneResponse response = DroneResponse.deserializeResponse(packet.getData());
-
-                fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
-
-
-                //handling response types
-                switch (response.getResponseType()){
-                    case DroneResponse.ResponseType.FAILURE:
-                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + "failed! Reassigning fire: " + response.getEvent().toString());
-                        eventQueue.add(response.getEvent());
-                        break;
-                    case DroneResponse.ResponseType.REFILL_REQUIRED:
-                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + " needs refill. Will be available soon.");
-                        //no further action, drone will RTB and refill automatically
-                        break;
-                    case DroneResponse.ResponseType.SUCCESS:
-                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent().toString());
-                        eventQueue.remove(response.getEvent());
-                        freeDroneList.add(new Object[] {packet.getPort(), packet.getAddress()});
-
-                        break;
-                }
-
-            }catch (SocketException e){
-                return;
-            }catch(IOException e){
-                e.printStackTrace();
-            }catch(InterruptedException e){
-                e.printStackTrace();
-            }
-
-            // Notify the scheduler (run method) that a drone is available for a new assignment
-            synchronized (this) {
-                notifyAll();
-            }
+    private void sendToDrone(String s, int droneId){
+        System.out.println("[Scheduler] Sent: "+s);
+        byte[] data = s.getBytes();
+        DatagramPacket packet = new DatagramPacket(data, data.length, (InetAddress) this.allDroneList.get(droneId).get("address"), (int) this.allDroneList.get(droneId).get("port"));
+        try {
+            droneSocket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     private void finishDrones(){
-        for(Object[] drone: allDroneList){
-            sendToDrone("FINISH", (int) drone[0], (InetAddress) drone[1]);
-            System.out.println("[Scheduler]: Sent to Drone: FINISH");
+        for(Integer id: allDroneList.keySet()){
+            HashMap<String, Object> drone = allDroneList.get(id);
+            sendToDrone("FINISH", (int) drone.get("port"), (InetAddress) drone.get("address"));
+            System.out.println("[Scheduler]: Sent to Drone " +id+ ": FINISH");
         }
         droneSocket.close();
     }
@@ -243,6 +258,7 @@ public class Scheduler extends Thread {
     public synchronized void finishEvents() {
         this.finish = true; // Stop execution of scheduler and monitoring threads
         notifyAll(); // Notify waiting threads to prevent indefinite blocking
+        finishDrones();
         System.out.println("[Scheduler] Shutting down...");
     }
 

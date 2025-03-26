@@ -1,23 +1,31 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
 public class Drone extends Thread {
     private static int idCounter = 0;
     private int id;
+
     private Event assignedFire;
     private final HashMap<String, Double> attributes;
     private double carryingVolume;
+
     private final Random random;
+
     private DroneState currentState;
     private DroneFSM droneFSM;
+
     private DatagramSocket socket;
     private InetAddress schedulerAddress;
     private int schedulerPort;
+
     private boolean finish;
 
     public Drone(int schedulerPort) {
+        this.id = idCounter++;
+
         this.random = new Random();
         this.attributes = new HashMap<>();
 
@@ -27,18 +35,18 @@ public class Drone extends Thread {
         attributes.put("flowRate", 1.25);
         attributes.put("maxCapacity", 15.0);
 
-        this.id = idCounter++;
         this.carryingVolume = attributes.get("maxCapacity");
         this.assignedFire = null;
+
         this.droneFSM = new DroneFSM();
         this.droneFSM.initialize(this);
         this.currentState = DroneFSM.getState("Idle");
+
         try {
             this.socket = new DatagramSocket();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         this.schedulerPort = schedulerPort;
 
         this.finish = false;
@@ -51,6 +59,24 @@ public class Drone extends Thread {
 
     public String getStateAsString() {
         return this.currentState.getStateString();
+    }
+
+    protected void sendWakeupMessage() {
+        try {
+            byte[] data = ("ONLINE:"+this.id).getBytes();
+            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"),
+                    this.schedulerPort);
+            socket.send(packet);
+            System.out.println("[Drone " + this.id + "] Wakeup message sent");
+
+            DatagramPacket response = new DatagramPacket(new byte[2048], 2048);
+            socket.receive(response);
+            System.out.println("[Drone " + this.id + "] Received confirmation from Scheduler");
+            schedulerAddress = response.getAddress();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -67,49 +93,28 @@ public class Drone extends Thread {
         return false;
     }
 
-    protected void sendWakeupMessage() {
-        byte[] data = ("ONLINE:"+this.id).getBytes();
-        try {
-            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"),
-                    this.schedulerPort);
-            socket.setBroadcast(true);
-            socket.send(packet);
-            System.out.println("[Drone " + this.id + "] Wakeup message sent");
-            byte[] incomingData = new byte[512];
-            DatagramPacket response = new DatagramPacket(data, data.length);
-            socket.receive(response);
-            System.out.println("[Drone " + this.id + "] Received confirmation from Scheduler");
-            schedulerAddress = response.getAddress();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     protected void checkMessage() {
         byte[] data = new byte[1024];
         DatagramPacket packet = new DatagramPacket(data, data.length);
         try {
             socket.setSoTimeout(300);
             socket.receive(packet);
-            String receiveMessage = new String(packet.getData(), 0, packet.getLength());
-            if (receiveMessage.equals("FINISH")) {
-                System.out.println("[Drone " + this.id + "]: Received FINISH");
-                this.finish = true;
-                return;
+            String message = new String(packet.getData(), 0, packet.getLength());
+            String[] splitMessage = message.split(":");
+            switch (splitMessage[0].toUpperCase()){
+                case "NEW_EVENT":
+                    Event event = Event.deserializeEvent(Arrays.copyOfRange(packet.getData(),10, packet.getLength()));
+                    System.out.println("[DRONE]: Received " +event);
+                    this.assignFire(event);// assign Fire to drone
+                    System.out.println("[Drone " + this.id + "] Received assignment of new event: " + this.assignedFire);
+                    break;
+                case "FINISH":
+                    System.out.println("[Drone " + this.id + "]: Received FINISH");
+                    this.finish = true;
+                    break;
             }
-            if (Event.deserializeEvent(packet.getData()) == null) {
-                System.out.println("[DRONE]: Received: " + new String(packet.getData(), 0, packet.getLength()));
-            }
-            if (this.isFree()) {
-                this.assignFire(Event.deserializeEvent(packet.getData()));// assign Fire to drone
-                System.out.println("[Drone " + this.id + "] Received assignment of new event: " + this.assignedFire);
-            }
-            // System.out.println("CHECK: " +new String(packet.getData(),0,
-            // packet.getLength()));
-
         } catch (SocketTimeoutException e) {
-            return;
+
         } catch (IOException e) {
             e.printStackTrace();
         }

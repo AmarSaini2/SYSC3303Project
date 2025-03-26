@@ -155,6 +155,23 @@ public class Event implements Comparable<Event>, Serializable {
         return this.assignedDrones;
     }
 
+    public byte[] createMessage(String command){
+        byte[] commandBytes = command.getBytes();
+        byte[] serializedEvent = this.serializeEvent();
+
+        byte[] message = new byte[commandBytes.length+serializedEvent.length];
+
+        for(int i = 0; i < commandBytes.length; i++){
+            message[i] = commandBytes[i];
+        }
+
+        for(int i = 0; i < serializedEvent.length; i++){
+            message[commandBytes.length + i] = serializedEvent[i];
+        }
+
+        return message;
+    }
+
     /**
      * Returns a string representation of the event.
      *

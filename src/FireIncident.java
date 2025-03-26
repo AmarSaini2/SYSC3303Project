@@ -158,10 +158,10 @@ public class FireIncident extends Thread {
     }
 
     private void sendToScheduler(Event e){
-        byte[] serializedEvent = e.serializeEvent();
+        byte[] message = e.createMessage("NEW_EVENT:");
         try{
-            DatagramPacket packet = new DatagramPacket(serializedEvent, serializedEvent.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
-            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + Event.deserializeEvent(serializedEvent).toString());
+            DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
+            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + e);
             socket.send(packet);
         }catch(UnknownHostException f){
             f.printStackTrace();
@@ -184,7 +184,6 @@ public class FireIncident extends Thread {
         byte[] buffer = new byte[2048];
         try{
             while(this.droneResponses.size() < this.events.size()){
-//                socket.setSoTimeout(10000);
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 

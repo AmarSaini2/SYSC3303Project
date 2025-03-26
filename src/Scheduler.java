@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -64,14 +65,9 @@ public class Scheduler extends Thread {
 
                 String message = new String(packet.getData(), 0, packet.getLength());
                 String[] splitMessage = message.split(":");
-
                 switch (splitMessage[0].toUpperCase()){
-                    case "FINISH":
-                        System.out.println("[Scheduler]: Received: FINISH");
-                        this.finishEvents();
-                        break;
-                    default:
-                        Event event = Event.deserializeEvent(packet.getData());
+                    case "NEW_EVENT":
+                        Event event = Event.deserializeEvent(Arrays.copyOfRange(packet.getData(),10, packet.getLength()));
                         System.out.println("[Scheduler]: Event Received: " + event.toString());
                         //INSERT INTO PRIORITY QUEUE
                         eventQueue.put(event);
@@ -79,6 +75,11 @@ public class Scheduler extends Thread {
                             notifyAll();
                         }
                         System.out.println("[Scheduler]: Added event to eventQueue");
+                        break;
+                    case "FINISH":
+                        System.out.println("[Scheduler]: Received: FINISH");
+                        this.finishEvents();
+                        break;
                 }
             } catch (SocketTimeoutException e) {
                 System.out.println("[Scheduler]: No pending Fire Incidents");
@@ -90,8 +91,8 @@ public class Scheduler extends Thread {
 
 
     private void sendToDrone(Event event, int port, InetAddress address){
-        byte[] data = event.serializeEvent();
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+        byte[] message = event.createMessage("NEW_EVENT:");
+        DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
         try {
             droneSocket.send(packet);
         } catch (IOException e) {

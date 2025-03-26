@@ -99,6 +99,7 @@ public class Drone extends Thread {
         try {
             socket.setSoTimeout(300);
             socket.receive(packet);
+
             String message = new String(packet.getData(), 0, packet.getLength());
             String[] splitMessage = message.split(":");
             switch (splitMessage[0].toUpperCase()){
@@ -193,27 +194,13 @@ public class Drone extends Thread {
                 this.assignFire(Event.deserializeEvent(packet.getData()));// assign Fire to drone
                 System.out.println("[Drone " + this.id + "] Received assignment of new event: " + this.assignedFire);
             }
-            // System.out.println("CHECK: " +new String(packet.getData(),0,
-            // packet.getLength()));
 
         } catch (SocketTimeoutException e) {
-            return;
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    // public void travelToFire() {
-    // System.out.println("[Drone " + id + "] Traveling to fire at Zone: " +
-    // assignedFire.getZone().getId());
-
-    // try {
-    // Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
-    // } catch (InterruptedException e) {
-    // e.printStackTrace();
-    // }
-
-    // }
 
     public void travelToFire() {
         System.out.println("[Drone " + id + "] Traveling to fire at Zone: " + assignedFire.getZone().getId());
@@ -250,6 +237,8 @@ public class Drone extends Thread {
                 e.printStackTrace();
             }
         }
+        String response = sendReceive(String.format("ARRIVED_EVENT:%d:%d", this.id, this.assignedFire.getId()));
+        //Can process response if needed
 
     }
 
@@ -266,7 +255,8 @@ public class Drone extends Thread {
 
         if (carryingVolume <= 0) {
             System.out.println("[Drone " + id + "] OUT OF WATER! Returning to base.");
-            sendResponse("REFILL_REQUIRED");
+            String response = sendReceive(String.format("REFILL_REQUIRED:%d:%d", this.id, this.assignedFire.getId()));
+            //Can process response if needed
         }
     }
 
@@ -320,6 +310,24 @@ public class Drone extends Thread {
             socket.send(packet);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private String sendReceive(String sendMessage){
+        try {
+            socket.setSoTimeout(0);
+            System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+            DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length, schedulerAddress, this.schedulerPort);
+            socket.send(sendPacket);
+
+            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
+            socket.receive(receivePacket);
+            String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
+
+            return receiveMessage;
+        } catch (IOException e){
+            throw new RuntimeException(e);
         }
     }
 

@@ -199,6 +199,8 @@ public class FireIncident extends Thread {
                     case "SUCCESS":
                         System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " successfully extinguished fire: " + splitMessage[2]);
                         break;
+                    default:
+                        System.out.println("Invalid message: "+message);
                 }
                 this.droneResponses.put(Integer.parseInt(splitMessage[2]), message);
             }

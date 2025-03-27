@@ -93,9 +93,9 @@ public class Scheduler extends Thread {
                 //Sends the first drone in freeDroneList to the event
                 for(Integer id: this.freeDroneList){
                     HashMap<String, Object> drone = this.allDroneList.get(id);
+                    System.out.println("[Scheduler]: Assigned Drone " +id+ " to event: " + event);
                     sendToDrone(event, (int) drone.get("port"), (InetAddress) drone.get("address"));
                     this.freeDroneList.remove(id);
-                    System.out.println("[Scheduler]: Assigned Drone to event: " + event);
                     break;
                 }
             } catch (InterruptedException e) {
@@ -130,6 +130,8 @@ public class Scheduler extends Thread {
                         System.out.println("[Scheduler]: Received: FINISH");
                         this.finishEvents();
                         break;
+                    default:
+                        System.out.println("Invalid message: "+message);
                 }
             } catch (SocketTimeoutException e) {
                 System.out.println("[Scheduler]: No pending Fire Incidents");
@@ -155,7 +157,7 @@ public class Scheduler extends Thread {
                 droneSocket.receive(packet);
 
                 String message = new String(packet.getData(),0 , packet.getLength());
-                System.out.println("[Scheduler] Received :" +message);
+                System.out.println("[Scheduler] Received: " +message);
 
                 String[] splitMessage = message.split(":");
                 switch (splitMessage[0].toUpperCase()){
@@ -199,7 +201,7 @@ public class Scheduler extends Thread {
                         sendToDrone("DROP", Integer.parseInt(splitMessage[1]));
                         break;
                     default:
-                        throw new RuntimeException("Invalid Command" +message);
+                        System.out.println("Invalid message: "+message);
                 }
             }catch (SocketException e){
                 return;

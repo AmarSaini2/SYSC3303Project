@@ -110,7 +110,7 @@ public class Drone extends Thread {
             // Execute the function for the current state
             currentState.action(this);
             // Move to next state
-            currentState.goNextState(this);
+            currentState.goNextState(this); //TODO needs to be moved into the action
         }
     }
 
@@ -281,6 +281,7 @@ public class Drone extends Thread {
         }
     }
 
+    //TODO probably want to remove this
     public void handleSuccess() {
         //System.out.println("[Drone " + id + "] Fire extinguished successfully!");
         this.assignedFire.setSeverity(Event.Severity.OUT);

@@ -27,7 +27,13 @@ class DroneIdle implements DroneState{
     }
 }
 
-class DroneEnRoute implements DroneState{
+abstract class DroneActive implements DroneState{
+    public void handleFault(Drone drone){
+        drone.setState("Fault");
+    };
+}
+
+class DroneEnRoute extends DroneActive{
     @Override
     public void goNextState(Drone drone){drone.setState("DroppingAgent");}
 
@@ -43,7 +49,7 @@ class DroneEnRoute implements DroneState{
     }
 }
 
-class DroneDroppingAgent implements DroneState{
+class DroneDroppingAgent extends DroneActive{
     @Override
     public void goNextState(Drone drone){drone.setState("ReturningToBase");}
 
@@ -56,7 +62,7 @@ class DroneDroppingAgent implements DroneState{
     }
 }
 
-class DroneReturningToBase implements DroneState{
+class DroneReturningToBase extends DroneActive{
     @Override
     public void goNextState(Drone drone){drone.setState("FillingTank");}
 
@@ -69,7 +75,7 @@ class DroneReturningToBase implements DroneState{
     }
 }
 
-class DroneFillingTank implements DroneState{
+class DroneFillingTank extends DroneActive{
     @Override
     public void goNextState(Drone drone){drone.setState("Success");}
 

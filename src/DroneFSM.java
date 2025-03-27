@@ -29,8 +29,26 @@ class DroneIdle implements DroneState{
 
 abstract class DroneActive implements DroneState{
     public void handleFault(Drone drone){
-        drone.setState("Fault");
+        drone.setState("ReturningToBase");
     };
+}
+
+class DroneStartUp extends DroneActive{
+
+    @Override
+    public void goNextState(Drone drone) {
+        drone.setState("Idle");
+    }
+
+    @Override
+    public void action(Drone drone) {
+        drone.sendWakeupMessage();
+    }
+
+    @Override
+    public String getStateString() {
+        return "Start Up";
+    }
 }
 
 class DroneEnRoute extends DroneActive{
@@ -39,9 +57,6 @@ class DroneEnRoute extends DroneActive{
 
     @Override
     public void action(Drone drone){drone.travelToFire();}
-
-    @Override
-    public void handleFault(Drone drone){drone.setState("ReturningToBase");}
 
     @Override
     public String getStateString(){
@@ -115,7 +130,8 @@ class DroneFault implements DroneState{
 }
 
 
-public class DroneFSM {
+public class
+DroneFSM {
     public static final Map<String, DroneState> stateTable = new HashMap<>();
 
     public void initialize(Drone drone) {

@@ -160,8 +160,9 @@ public class Scheduler extends Thread {
                 System.out.println("[Scheduler] Received: " +message);
 
                 String[] splitMessage = message.split(":");
-                switch (splitMessage[0].toUpperCase()){
+                switch (splitMessage[0]){
                     case "ONLINE": //ONLINE:DRONE_ID
+                        //TODO change the case when startUp state is implemented
                         HashMap<String, Object> droneHashMap = new HashMap<>();
                         droneHashMap.put("port", packet.getPort());
                         droneHashMap.put("address", packet.getAddress());
@@ -176,16 +177,27 @@ public class Scheduler extends Thread {
                         }
                         sendToDrone("RECEIVED", packet.getPort(), packet.getAddress());//send response to drone
                         break;
-                    case "FAULTED": //FAILURE:DRONE_ID:EVENT_ID
-                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + "failed! Reassigning fire: " + response.getEvent().toString());
-                        this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
+                    case "Idle":
+                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+                        // Notify the scheduler (run method) that a drone is available for a new assignment
+                        synchronized (this){
+                            notifyAll();
+                        }
                         break;
-                    case "REFILL_REQUIRED":
-                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + " needs refill. Will be available soon.");
-                        sendToDrone("RETURN", Integer.parseInt(splitMessage[1]));
+                    case "En Route":
+                        //Tells drone how much agent to drop
+                        sendToDrone(String.format("DROP:%f", 15.00), Integer.parseInt(splitMessage[1]));
                         break;
-                    case "SUCCESS": //SUCCESS:DRONE_ID:EVENT_ID:AMOUNT_OF_AGENT
-                        //System.out.println("[Scheduler] Drone " + response.getDroneId() + " successfully extinguished fire: " + response.getEvent().toString());
+                    case "Dropping Agent":
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+                        break;
+                    case "Returning To Base":
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+                        break;
+                    case "Filling Tank":
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+                        break;
+                    case "Success":
                         synchronized (this) {
                             eventQueue.remove(Integer.parseInt(splitMessage[2]));
                         }
@@ -196,9 +208,11 @@ public class Scheduler extends Thread {
                         synchronized (this){
                             notifyAll();
                         }
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
-                    case "ARRIVED_EVENT":
-                        sendToDrone("DROP", Integer.parseInt(splitMessage[1]));
+                    case "Fault":
+                        this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
+                        sendToDrone("OK", (int) packet.getPort(), (InetAddress) packet.getAddress());
                         break;
                     default:
                         System.out.println("Invalid message: "+message);

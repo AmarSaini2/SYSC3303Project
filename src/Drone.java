@@ -241,6 +241,7 @@ public class Drone extends Thread {
                 break;
             case "OK":
                 currentState.goNextState(this);
+                this.assignedFire = null;
                 break;
             default:
                 System.out.println("Invalid message: "+response);
@@ -250,7 +251,9 @@ public class Drone extends Thread {
     public void returnToBase() {
         //System.out.println("[Drone " + id + "] Returning to base...");
         try {
-            Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
+            //Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
+            //TODO change this once moveTo function is implemented
+            Thread.sleep(10);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -316,14 +319,6 @@ public class Drone extends Thread {
             default:
                 System.out.println("Invalid message: "+response);
         }
-    }
-
-    //TODO probably want to remove this and add to to the extinguish fire state
-    public void handleSuccess() {
-        //System.out.println("[Drone " + id + "] Fire extinguished successfully!");
-        this.assignedFire.setSeverity(Event.Severity.OUT);
-        String response = sendReceive();
-        this.assignedFire = null;
     }
 
     private String sendReceive(){

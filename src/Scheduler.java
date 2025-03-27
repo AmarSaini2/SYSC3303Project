@@ -177,38 +177,46 @@ public class Scheduler extends Thread {
                         }
                         sendToDrone("RECEIVED", packet.getPort(), packet.getAddress());//send response to drone
                         break;
-                    case "Idle":
-                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
-                        // Notify the scheduler (run method) that a drone is available for a new assignment
-                        synchronized (this){
-                            notifyAll();
-                        }
-                        break;
+                        //TODO Idle is not used
+//                    case "Idle":
+//                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+//                        // Notify the scheduler (run method) that a drone is available for a new assignment
+//                        synchronized (this){
+//                            notifyAll();
+//                        }
+//                        break;
                     case "En Route":
                         //Tells drone how much agent to drop
                         sendToDrone(String.format("DROP:%f", 15.00), Integer.parseInt(splitMessage[1]));
                         break;
                     case "Dropping Agent":
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+                        //TODO needs to check if fire is out
+                        //this.assignedFire.setSeverity(Event.Severity.OUT);
+                        /**
+                         *
+                         synchronized (this) {
+                         eventQueue.remove(Integer.parseInt(splitMessage[2]));
+                         }
+                         this.fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
+
+                         // Notify the scheduler (run method) that a drone is available for a new assignment
+                         synchronized (this){
+                         notifyAll();
+                         }
+                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+                         break;
+                         */
                         break;
                     case "Returning To Base":
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     case "Filling Tank":
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
-                        break;
-                    case "Success":
-                        synchronized (this) {
-                            eventQueue.remove(Integer.parseInt(splitMessage[2]));
-                        }
                         this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
-                        this.fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
-
-                        // Notify the scheduler (run method) that a drone is available for a new assignment
                         synchronized (this){
                             notifyAll();
                         }
-                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     case "Fault":
                         this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));

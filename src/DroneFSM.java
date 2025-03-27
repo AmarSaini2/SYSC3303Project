@@ -92,7 +92,7 @@ class DroneReturningToBase extends DroneActive{
 
 class DroneFillingTank extends DroneActive{
     @Override
-    public void goNextState(Drone drone){drone.setState("Success");}
+    public void goNextState(Drone drone){drone.setState("Idle");}
 
     @Override
     public void action(Drone drone){drone.refillTank();}
@@ -100,19 +100,6 @@ class DroneFillingTank extends DroneActive{
     @Override
     public String getStateString(){
         return "Filling Tank";
-    }
-}
-
-class DroneSuccess implements DroneState{
-    @Override
-    public void goNextState(Drone drone){drone.setState("Idle");}
-
-    @Override
-    public void action(Drone drone){drone.handleSuccess();}
-
-    @Override
-    public String getStateString(){
-        return "Success";
     }
 }
 
@@ -140,7 +127,6 @@ DroneFSM {
         stateTable.put("DroppingAgent", new DroneDroppingAgent());
         stateTable.put("ReturningToBase", new DroneReturningToBase());
         stateTable.put("FillingTank", new DroneFillingTank());
-        stateTable.put("Success", new DroneSuccess());
         stateTable.put("Fault", new DroneFault());
     }
 

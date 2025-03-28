@@ -29,8 +29,26 @@ class DroneIdle implements DroneState{
 
 abstract class DroneActive implements DroneState{
     public void handleFault(Drone drone){
-        drone.setState("Fault");
+        drone.setState("ReturningToBase");
     };
+}
+
+class DroneStartUp extends DroneActive{
+
+    @Override
+    public void goNextState(Drone drone) {
+        drone.setState("Idle");
+    }
+
+    @Override
+    public void action(Drone drone) {
+        drone.sendWakeupMessage();
+    }
+
+    @Override
+    public String getStateString() {
+        return "Start Up";
+    }
 }
 
 class DroneEnRoute extends DroneActive{
@@ -39,9 +57,6 @@ class DroneEnRoute extends DroneActive{
 
     @Override
     public void action(Drone drone){drone.travelToFire();}
-
-    @Override
-    public void handleFault(Drone drone){drone.setState("ReturningToBase");}
 
     @Override
     public String getStateString(){
@@ -77,7 +92,7 @@ class DroneReturningToBase extends DroneActive{
 
 class DroneFillingTank extends DroneActive{
     @Override
-    public void goNextState(Drone drone){drone.setState("Success");}
+    public void goNextState(Drone drone){drone.setState("Idle");}
 
     @Override
     public void action(Drone drone){drone.refillTank();}
@@ -85,19 +100,6 @@ class DroneFillingTank extends DroneActive{
     @Override
     public String getStateString(){
         return "Filling Tank";
-    }
-}
-
-class DroneSuccess implements DroneState{
-    @Override
-    public void goNextState(Drone drone){drone.setState("Idle");}
-
-    @Override
-    public void action(Drone drone){drone.handleSuccess();}
-
-    @Override
-    public String getStateString(){
-        return "Success";
     }
 }
 
@@ -119,12 +121,12 @@ public class DroneFSM {
     public static final Map<String, DroneState> stateTable = new HashMap<>();
 
     public void initialize(Drone drone) {
+        stateTable.put("StartUp", new DroneStartUp());
         stateTable.put("Idle", new DroneIdle());
         stateTable.put("EnRoute", new DroneEnRoute());
         stateTable.put("DroppingAgent", new DroneDroppingAgent());
         stateTable.put("ReturningToBase", new DroneReturningToBase());
         stateTable.put("FillingTank", new DroneFillingTank());
-        stateTable.put("Success", new DroneSuccess());
         stateTable.put("Fault", new DroneFault());
     }
 

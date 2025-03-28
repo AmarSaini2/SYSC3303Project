@@ -117,8 +117,7 @@ class DroneFault implements DroneState{
 }
 
 
-public class
-DroneFSM {
+public class DroneFSM {
     public static final Map<String, DroneState> stateTable = new HashMap<>();
 
     public void initialize(Drone drone) {

@@ -102,6 +102,7 @@ public class FireIncident extends Thread {
      * the scheduler**.
      */
     protected void readEventFile() {
+        sendToScheduler("ACTIVATE");
         try (Scanner scanner = new Scanner(new File(eventFilePath))) {
             scanner.nextLine(); // Skip header row
             String inputLine;

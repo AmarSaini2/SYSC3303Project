@@ -32,13 +32,18 @@ public class Scheduler extends Thread {
 
     private boolean finish; // Flag to stop the scheduler when all tasks are complete
 
+    private SchedulerState currentState;
+    private SchedulerFSM schedulerFSM;
+
     /**
      * Constructor for the Scheduler class.
      *
      */
     public Scheduler(int fireIncidentReceivePort, int droneReceivePort) {
         this.finish = false; // Initially, the scheduler runs continuously
+
         this.eventQueue = new PriorityBlockingQueue<>();
+        this.fullyServicedEvents = new ConcurrentHashMap<>();
 
         this.allDroneList = new ConcurrentHashMap<>();
         this.freeDroneList = new CopyOnWriteArrayList<>();
@@ -51,7 +56,17 @@ public class Scheduler extends Thread {
             throw new RuntimeException(e);
         }
 
-        this.fullyServicedEvents = new ConcurrentHashMap<>();
+        this.schedulerFSM = new SchedulerFSM();
+        this.schedulerFSM.initialize();
+        this.currentState = SchedulerFSM.getState("Idle");
+    }
+
+    public void setState(String stateName){
+        this.currentState = SchedulerFSM.getState(stateName);
+    }
+
+    public String getStateAsString(){
+        return this.currentState.getStateString();
     }
 
     /**
@@ -63,6 +78,29 @@ public class Scheduler extends Thread {
      */
     @Override
     public void run() {
+        while(!finish) {
+            System.out.println("[Scheduler] Entering "+getStateAsString()+" state");
+            this.currentState.action(this);
+        }
+    }
+
+    public void idleAction(){
+        try {
+            DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
+            this.fireIncidentSocket.setSoTimeout(0);
+            this.fireIncidentSocket.receive(packet);
+
+            String message = new String(packet.getData(), 0, packet.getLength());
+
+            if(message.equalsIgnoreCase("ACTIVATE")){
+                this.currentState.handleOn(this);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void activeAction(){
         // Start a separate thread to handle drone responses asynchronously
         new Thread(this::processDroneMessages).start();
         new Thread(this::processFireIncidentMessages).start();
@@ -133,6 +171,9 @@ public class Scheduler extends Thread {
                         System.out.println("[Scheduler]: Received: FINISH");
                         this.finishEvents();
                         break;
+                    case "ACTIVATE":
+                        //Ignore
+                        break;
                     default:
                         System.out.println("Invalid message: "+message);
                 }
@@ -141,7 +182,6 @@ public class Scheduler extends Thread {
                 e.printStackTrace();
             }
         }
-        fireIncidentSocket.close();
     }
 
     /**
@@ -157,6 +197,7 @@ public class Scheduler extends Thread {
             try{
                 // Waits for a drone to send a response (Blocking call)
                 DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
+                droneSocket.setSoTimeout(1000);
                 droneSocket.receive(packet);
 
                 String message = new String(packet.getData(),0 , packet.getLength());
@@ -274,8 +315,7 @@ public class Scheduler extends Thread {
                     default:
                         System.out.println("Invalid message: "+message);
                 }
-            }catch (SocketException e){
-                return;
+            }catch (SocketTimeoutException e){
             }catch(IOException e){
                 e.printStackTrace();
             }
@@ -310,7 +350,6 @@ public class Scheduler extends Thread {
             sendToDrone("FINISH", id);
             System.out.println("[Scheduler]: Sent to Drone " +id+ ": FINISH");
         }
-        droneSocket.close();
     }
 
     /**

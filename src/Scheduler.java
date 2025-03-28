@@ -92,9 +92,7 @@ public class Scheduler extends Thread {
 
                 //Sends the first drone in freeDroneList to the event
                 for(Integer id: this.freeDroneList){
-                    HashMap<String, Object> drone = this.allDroneList.get(id);
-                    System.out.println("[Scheduler]: Assigned Drone " +id+ " to event: " + event);
-                    sendToDrone(event, (int) drone.get("port"), (InetAddress) drone.get("address"));
+                    sendToDrone(event, id);
                     this.freeDroneList.remove(id);
                     break;
                 }
@@ -171,22 +169,15 @@ public class Scheduler extends Thread {
                         this.allDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
                         this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
 
-                        System.out.println("[Scheduler]: Added Drone " +Integer.parseInt(splitMessage[1])+ " to free drone list");
+                        //System.out.println("[Scheduler]: Added Drone " +Integer.parseInt(splitMessage[1])+ " to free drone list");
                         synchronized(this){
                             notifyAll();
                         }
-                        sendToDrone("RECEIVED", packet.getPort(), packet.getAddress());//send response to drone
+                        sendToDrone("OK", packet.getPort(), packet.getAddress());//send response to drone
                         break;
-                        //TODO Idle is not used
-//                    case "Idle":
-//                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
-//                        // Notify the scheduler (run method) that a drone is available for a new assignment
-//                        synchronized (this){
-//                            notifyAll();
-//                        }
-//                        break;
                     case "En Route":
                         //Tells drone how much agent to drop
+                        //TODO calculate amount of agent to drop
                         sendToDrone(String.format("DROP:%f", 15.00), Integer.parseInt(splitMessage[1]));
                         break;
                     case "Dropping Agent":
@@ -220,7 +211,7 @@ public class Scheduler extends Thread {
                         break;
                     case "Fault":
                         this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
-                        sendToDrone("OK", (int) packet.getPort(), (InetAddress) packet.getAddress());
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     default:
                         System.out.println("Invalid message: "+message);
@@ -233,9 +224,10 @@ public class Scheduler extends Thread {
         }
     }
 
-    private void sendToDrone(Event event, int port, InetAddress address){
+    private void sendToDrone(Event event, int droneId){
         byte[] message = event.createMessage("NEW_EVENT:");
-        DatagramPacket packet = new DatagramPacket(message, message.length, address, port);
+        System.out.println("[Scheduler] Sent: "+event);
+        DatagramPacket packet = new DatagramPacket(message, message.length, (InetAddress) this.allDroneList.get(droneId).get("address"), (int) this.allDroneList.get(droneId).get("port"));
         try {
             droneSocket.send(packet);
         } catch (IOException e) {
@@ -267,7 +259,7 @@ public class Scheduler extends Thread {
     private void finishDrones(){
         for(Integer id: allDroneList.keySet()){
             HashMap<String, Object> drone = allDroneList.get(id);
-            sendToDrone("FINISH", (int) drone.get("port"), (InetAddress) drone.get("address"));
+            sendToDrone("FINISH", id);
             System.out.println("[Scheduler]: Sent to Drone " +id+ ": FINISH");
         }
         droneSocket.close();

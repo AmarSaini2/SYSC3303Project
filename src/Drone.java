@@ -75,16 +75,16 @@ public class Drone extends Thread {
     //TODO add a startup state and set this as the action
     protected void sendWakeupMessage() {
         try {
-            byte[] data = ("ONLINE:"+this.id).getBytes();
-            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getByName("255.255.255.255"),
-                    this.schedulerPort);
-            socket.send(packet);
-            System.out.println("[Drone " + this.id + "] Wakeup message sent");
+            String sendMessage = "ONLINE:"+this.id;
+            System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+            DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length, InetAddress.getByName("255.255.255.255"), this.schedulerPort);
+            socket.send(sendPacket);
 
-            DatagramPacket response = new DatagramPacket(new byte[2048], 2048);
-            socket.receive(response);
-            System.out.println("[Drone " + this.id + "] Received confirmation from Scheduler");
-            schedulerAddress = response.getAddress();
+            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
+            socket.receive(receivePacket);
+            String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
+            schedulerAddress = receivePacket.getAddress();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -124,10 +124,6 @@ public class Drone extends Thread {
         double distance = Math.sqrt(zone.getStart()[0] * zone.getStart()[0] +
                 zone.getEnd()[1] * zone.getEnd()[1]);
         return (int) (distance / attributes.get("travelSpeed"));
-    }
-
-    private int getExtinguishTime(int requiredVolume) {
-        return (int) (requiredVolume / attributes.get("flowRate"));
     }
 
     // ========== STATE HANDLING FUNCTIONS ==========
@@ -213,7 +209,6 @@ public class Drone extends Thread {
             default:
                 System.out.println("Invalid message: "+response);
         }
-
     }
 
     public void extinguishFire() {

@@ -1,5 +1,3 @@
-import java.time.LocalTime;
-import java.util.ArrayList;
 
 /**
  * The Main class initializes and starts the firefighting drone system.
@@ -27,8 +25,10 @@ public class Main {
         // Create the scheduler which will manage drone assignments and event processing
         Scheduler scheduler = new Scheduler(5000, 6000);
 
+        View view = new View(scheduler);
+
         // Create the FireIncident subsystem that will read fire incidents from a file
-        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", 5000);
+        FireIncident fireIncident = new FireIncident("Event_File.csv", "Zone_File.csv", 5000);//ADD BACK SRC/ BEFORE COMMIT
 
         // Start the FireIncident subsystem (reads fire events and sends them to the
         // scheduler)
@@ -36,6 +36,8 @@ public class Main {
 
         // Start the Scheduler (assigns drones to fire incidents)
         scheduler.start();
+
+        view.start();
 
         drone0.start();
         drone1.start();

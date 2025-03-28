@@ -122,6 +122,7 @@ DroneFSM {
     public static final Map<String, DroneState> stateTable = new HashMap<>();
 
     public void initialize(Drone drone) {
+        stateTable.put("StartUp", new DroneStartUp());
         stateTable.put("Idle", new DroneIdle());
         stateTable.put("EnRoute", new DroneEnRoute());
         stateTable.put("DroppingAgent", new DroneDroppingAgent());

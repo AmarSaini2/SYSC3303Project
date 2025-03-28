@@ -190,10 +190,10 @@ public class FireIncident extends Thread {
                 String message = new String(packet.getData(), 0, packet.getLength());
                 String[] splitMessage = message.split(":");
                 switch (splitMessage[0].toUpperCase()) {
-                    case "FAILURE":
+                    case "FAILURE"://probably can be removed
                         System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + "failed! Reassigning fire: " + splitMessage[2]);
                         break;
-                    case "REFILLED_REQUESTED":
+                    case "REFILLED_REQUESTED"://probably can be removed
                         System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " needs refill. Will be available soon.");
                         break;
                     case "SUCCESS":

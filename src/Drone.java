@@ -7,7 +7,6 @@ import java.util.Random;
 /**
  * TODO for me
  *
- * Add super state that that handles fault?
  * Add a moveTo method moveTo(targetX, targetY) to be used for return to base and to fire
  * Fix issue with how much agent to drop
  * Add states to Scheduler
@@ -51,7 +50,7 @@ public class Drone extends Thread {
 
         this.droneFSM = new DroneFSM();
         this.droneFSM.initialize(this);
-        this.currentState = DroneFSM.getState("Idle");
+        this.currentState = DroneFSM.getState("StartUp");
 
         try {
             this.socket = new DatagramSocket();
@@ -72,33 +71,12 @@ public class Drone extends Thread {
         return this.currentState.getStateString();
     }
 
-    //TODO add a startup state and set this as the action
-    protected void sendWakeupMessage() {
-        try {
-            String sendMessage = "ONLINE:"+this.id;
-            System.out.println("[Drone " + id + "] Sent: " + sendMessage);
-            DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length, InetAddress.getByName("255.255.255.255"), this.schedulerPort);
-            socket.send(sendPacket);
-
-            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
-            socket.receive(receivePacket);
-            String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
-            schedulerAddress = receivePacket.getAddress();
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Assigns a fire event to the drone if it's idle.
      */
     public synchronized boolean assignFire(Event fire) {
         if (this.assignedFire == null) {
             this.assignedFire = fire;
-            currentState = DroneFSM.getState("EnRoute");
-            //System.out.println("[Drone " + this.id + "] Fire assigned: " + fire);
             notifyAll(); // Wake up the thread
             return true;
         }
@@ -107,12 +85,9 @@ public class Drone extends Thread {
 
     @Override
     public void run() {
-        sendWakeupMessage();
         while (!finish) {
             // Execute the function for the current state
             currentState.action(this);
-            // Move to next state
-            //currentState.goNextState(this); //TODO needs to be moved into the action
         }
     }
 
@@ -128,6 +103,26 @@ public class Drone extends Thread {
 
     // ========== STATE HANDLING FUNCTIONS ==========
 
+    protected void sendWakeupMessage() {
+        try {
+            String sendMessage = "ONLINE:"+this.id;
+            System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+            DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length, InetAddress.getByName("255.255.255.255"), this.schedulerPort);
+            socket.send(sendPacket);
+
+            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
+            socket.receive(receivePacket);
+            String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
+            schedulerAddress = receivePacket.getAddress();
+
+            currentState.goNextState(this);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void sleepMode() {
         System.out.println("[Drone " + id + "] IDLE - Waiting for assignment...");
         DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
@@ -142,6 +137,7 @@ public class Drone extends Thread {
                     Event event = Event.deserializeEvent(Arrays.copyOfRange(packet.getData(),10, packet.getLength()));
                     System.out.println("[Drone "+this.id+"] Received: " +event);
                     this.assignFire(event);
+                    currentState.goNextState(this);
                     break;
                 case "FINISH":
                     System.out.println("[Drone "+this.id+"]: Received: FINISH");
@@ -158,7 +154,7 @@ public class Drone extends Thread {
     }
 
     public void travelToFire() {
-        System.out.println("[Drone " + id + "] Traveling to fire at Zone: " + assignedFire.getZone().getId());
+        //System.out.println("[Drone " + id + "] Traveling to fire at Zone: " + assignedFire.getZone().getId());
 
         // Get the target coordinates
         Zone zone = assignedFire.getZone();
@@ -192,7 +188,7 @@ public class Drone extends Thread {
                 e.printStackTrace();
             }
         }
-        String response = sendReceive();
+        String response = sendReceive(String.format("%s:%d:%d:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume));
         String[] splitMessage = response.split(":");
 
         switch (splitMessage[0].toUpperCase()){
@@ -222,9 +218,10 @@ public class Drone extends Thread {
         }
 
         this.carryingVolume -= this.agentDropAmount;
+
+        String response = sendReceive(String.format("%s:%d:%d:%f:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.agentDropAmount, this.carryingVolume));
         this.agentDropAmount = 0.0;
 
-        String response = sendReceive();
         String[] splitMessage = response.split(":");
 
         switch (splitMessage[0].toUpperCase()){
@@ -254,7 +251,7 @@ public class Drone extends Thread {
         }
         //System.out.println("[Drone " + id + "] Reached base.");
 
-        String response = sendReceive();
+        String response = sendReceive(String.format("%s:%d",this.getStateAsString(), this.id));
         String[] splitMessage = response.split(":");
         switch (splitMessage[0].toUpperCase()){
             case "FINISH":
@@ -281,7 +278,7 @@ public class Drone extends Thread {
             e.printStackTrace();
         }
 
-        String response = sendReceive();
+        String response = sendReceive(String.format("%s:%d",this.getStateAsString(), this.id));
         String[] splitMessage = response.split(":");
         switch (splitMessage[0].toUpperCase()){
             case "FINISH":
@@ -300,9 +297,8 @@ public class Drone extends Thread {
 
     public void handleFault() {
         System.out.println("[Drone " + id + "] FAULT detected. Returning to base...");
-        this.assignedFire = null;
 
-        String response = sendReceive();
+        String response = sendReceive(String.format("%s:%d:%d:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume));
         String[] splitMessage = response.split(":");
         switch (splitMessage[0].toUpperCase()){
             case "FINISH":
@@ -314,16 +310,11 @@ public class Drone extends Thread {
             default:
                 System.out.println("Invalid message: "+response);
         }
+        this.assignedFire = null;
     }
 
-    private String sendReceive(){
+    private String sendReceive(String sendMessage){
         try {
-            String sendMessage;
-            if(this.assignedFire == null){
-                sendMessage = String.format("%s:%d:%f",this.getStateAsString(), this.id, this.carryingVolume);
-            }else{
-                sendMessage = String.format("%s:%d:%d:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume);
-            }
             System.out.println("[Drone " + id + "] Sent: " + sendMessage);
             DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length, schedulerAddress, this.schedulerPort);
             socket.send(sendPacket);
@@ -356,5 +347,9 @@ public class Drone extends Thread {
     public static void main(String[] args) {
         Drone drone = new Drone(6000);
         drone.start();
+        Drone drone1 = new Drone(6000);
+        drone1.start();
+        Drone drone2 = new Drone(6000);
+        drone2.start();
     }
 }

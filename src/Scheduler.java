@@ -69,6 +69,7 @@ public class Scheduler extends Thread {
 
         while(!finish){
             try {
+                //Waits for there to be an available event and drone
                 while (eventQueue.isEmpty() || freeDroneList.isEmpty()) {
                     synchronized (this) {
                         wait();
@@ -80,20 +81,23 @@ public class Scheduler extends Thread {
 
                 //Gets the event with the highest priority
                 Event event = this.eventQueue.take();
-                event.setAgentSent(event.getAgentSent()+15.0); //TODO get rid of 15.0 constant using the amount of agent left in drone tank
-
-                //Checks if event still requires more agent
-                if(event.getAgentSent() < event.getAgentRequired()){
-                    //Add event back to queue if it still requires more agent
-                    this.eventQueue.put(event);
-                }else{
-                    this.fullyServicedEvents.put(event.getId(), event);
-                }
 
                 //Sends the first drone in freeDroneList to the event
+                //TODO can be improved by picking the closest drone instead of just the first
                 for(Integer id: this.freeDroneList){
-                    sendToDrone(event, id);
+                    event.setAgentSent(event.getAgentSent() + (double)allDroneList.get(id).get("volume"));
+
+                    //Checks if event still requires more agent
+                    if(event.getAgentSent() < (event.getAgentRequired() - 0.0001)){
+                        //Add event back to queue if it still requires more agent
+                        this.eventQueue.put(event);
+                    }else{
+                        this.fullyServicedEvents.put(event.getId(), event);
+                    }
+
                     this.freeDroneList.remove(id);
+
+                    sendToDrone(event, id);
                     break;
                 }
             } catch (InterruptedException e) {
@@ -107,6 +111,7 @@ public class Scheduler extends Thread {
             try {
                 DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
 
+                fireIncidentSocket.setSoTimeout(1000);
                 fireIncidentSocket.receive(packet);
                 fireIncidentAddress = packet.getAddress();
                 fireIncidentPort = packet.getPort();
@@ -132,11 +137,11 @@ public class Scheduler extends Thread {
                         System.out.println("Invalid message: "+message);
                 }
             } catch (SocketTimeoutException e) {
-                System.out.println("[Scheduler]: No pending Fire Incidents");
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        fireIncidentSocket.close();
     }
 
     /**
@@ -160,7 +165,6 @@ public class Scheduler extends Thread {
                 String[] splitMessage = message.split(":");
                 switch (splitMessage[0]){
                     case "ONLINE": //ONLINE:DRONE_ID
-                        //TODO change the case when startUp state is implemented
                         HashMap<String, Object> droneHashMap = new HashMap<>();
                         droneHashMap.put("port", packet.getPort());
                         droneHashMap.put("address", packet.getAddress());
@@ -169,48 +173,102 @@ public class Scheduler extends Thread {
                         this.allDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
                         this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
 
-                        //System.out.println("[Scheduler]: Added Drone " +Integer.parseInt(splitMessage[1])+ " to free drone list");
-                        synchronized(this){
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+
+                        // Notify the scheduler (run method) that a drone is available for a new assignment
+                        synchronized (this){
                             notifyAll();
                         }
-                        sendToDrone("OK", packet.getPort(), packet.getAddress());//send response to drone
                         break;
-                    case "En Route":
+                    case "En Route": {
                         //Tells drone how much agent to drop
                         //TODO calculate amount of agent to drop
-                        sendToDrone(String.format("DROP:%f", 15.00), Integer.parseInt(splitMessage[1]));
-                        break;
-                    case "Dropping Agent":
-                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
-                        //TODO needs to check if fire is out
-                        //this.assignedFire.setSeverity(Event.Severity.OUT);
-                        /**
-                         *
-                         synchronized (this) {
-                         eventQueue.remove(Integer.parseInt(splitMessage[2]));
-                         }
-                         this.fireIncidentSocket.send(new DatagramPacket(packet.getData(), packet.getLength(), fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
+                        double agentDropAmount = 15.0;
+                        int eventId = Integer.parseInt(splitMessage[2]);
+                        Event event = null;
 
-                         // Notify the scheduler (run method) that a drone is available for a new assignment
-                         synchronized (this){
-                         notifyAll();
-                         }
-                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
-                         break;
-                         */
+                        //Finds the relevant event
+                        if (this.fullyServicedEvents.containsKey(eventId)) {
+                            event = this.fullyServicedEvents.get(eventId);
+                        } else {
+                            for (Event e : this.eventQueue) {
+                                if (e.getId() == eventId) {
+                                    event = e;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (event.getAgentRequired() < 14.9999) {
+                            agentDropAmount = event.getAgentRequired();
+                        }
+
+                        sendToDrone(String.format("DROP:%f", agentDropAmount), Integer.parseInt(splitMessage[1]));
+                        break;
+                    }
+                    case "Dropping Agent": //Dropping Agent:droneId:eventId:agentDropAmount:carryVolume
+                        //Update allDroneList with proper drone carryVolume
+                        this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume", Double.parseDouble(splitMessage[4]));
+
+                        //TODO can be added later once NEW_EVENT case is added to some sendReceive
+                        //Add drone back to freeDroneList if it still has some agent in tank
+//                        if(Double.parseDouble(splitMessage[4]) > 0.0001){
+//                            this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+//                        }
+
+                        int eventId = Integer.parseInt(splitMessage[2]);
+                        if(this.fullyServicedEvents.containsKey(eventId)){
+                            Event event = this.fullyServicedEvents.get(eventId);
+                            double agentRequired = event.getAgentRequired() - Double.parseDouble(splitMessage[3]);
+                            if(agentRequired < 0.0001){
+                                event.setAgentRequired(0.0);
+                                event.setAgentSent(0.0);
+                                event.setSeverity(Event.Severity.OUT);
+                                this.fullyServicedEvents.remove(eventId);
+                                byte[] msg = ("SUCCESS:"+splitMessage[1]+":"+splitMessage[2]).getBytes();
+                                this.fireIncidentSocket.send(new DatagramPacket(msg, msg.length, fireIncidentAddress, fireIncidentPort));//forward drone messages to FireIncident
+                            }else{
+                                event.setAgentRequired(agentRequired);
+                                event.setAgentSent(event.getAgentSent() - Double.parseDouble(splitMessage[3]));
+                            }
+                        }else{
+                            for(Event event: this.eventQueue){
+                                if(event.getId() == eventId){
+                                    event.setAgentRequired(event.getAgentRequired() - Double.parseDouble(splitMessage[3]));
+                                    event.setAgentSent(event.getAgentSent() - Double.parseDouble(splitMessage[3]));
+                                    break;
+                                }
+                            }
+                        }
+
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
+
+                        //TODO check previous
+                        //Notify the scheduler (run method) that a drone is available for a new assignment
+//                        synchronized (this){
+//                            notifyAll();
+//                        }
                         break;
                     case "Returning To Base":
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     case "Filling Tank":
+                        this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume", 15.0);
+                        //If drone is not in freeDroneList or faultedDroneList then add it to freeDroneList
+                        if (!freeDroneList.contains(Integer.parseInt(splitMessage[1])) && !this.faultedDroneList.contains(Integer.parseInt(splitMessage[1]))){
+                            this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+                        }
+
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
-                        this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+
+                        // Notify the scheduler (run method) that a drone is available for a new assignment
                         synchronized (this){
                             notifyAll();
                         }
                         break;
                     case "Fault":
                         this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
+
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     default:
@@ -226,7 +284,7 @@ public class Scheduler extends Thread {
 
     private void sendToDrone(Event event, int droneId){
         byte[] message = event.createMessage("NEW_EVENT:");
-        System.out.println("[Scheduler] Sent: "+event);
+        System.out.println("[Scheduler] Sent Drone "+droneId+": "+event);
         DatagramPacket packet = new DatagramPacket(message, message.length, (InetAddress) this.allDroneList.get(droneId).get("address"), (int) this.allDroneList.get(droneId).get("port"));
         try {
             droneSocket.send(packet);
@@ -235,18 +293,8 @@ public class Scheduler extends Thread {
         }
     }
 
-    private void sendToDrone(String s, int port, InetAddress address){
-        byte[] data = s.getBytes();
-        DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
-        try {
-            droneSocket.send(packet);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void sendToDrone(String s, int droneId){
-        System.out.println("[Scheduler] Sent: "+s);
+        System.out.println("[Scheduler] Sent Drone "+droneId+": "+s);
         byte[] data = s.getBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length, (InetAddress) this.allDroneList.get(droneId).get("address"), (int) this.allDroneList.get(droneId).get("port"));
         try {

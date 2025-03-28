@@ -1,4 +1,7 @@
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.*;
@@ -15,13 +18,27 @@ public class View extends Thread {
 
     GridBagConstraints gbc;
 
+    Set<Integer> existingDrones = new HashSet<>();
+    HashMap<Integer, Object[]> zoneMap;
+
     View(Scheduler s){
         this.scheduler = s;
         this.gbc = new GridBagConstraints();
         this.frame = new JFrame("GUI NAME HERE");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                // Recalculate all zone positions on resize
+                for (Object[] zoneData : zoneMap.values()) {
+                    map.removeAll();
+                    zoneData[2] = false; // Mark all zones for re-rendering
+                }
+                updateMap();
+            }
+        });
         
-        this.panel = makePanel(Color.gray);
+        this.panel = makePanel(Color.white);
         panel.setLayout(new GridBagLayout());
 
         this.menuBar = new JMenuBar();
@@ -31,24 +48,27 @@ public class View extends Thread {
         menuBar.add(menu);
         frame.setJMenuBar(menuBar);
 
-
-        this.map = makePanel(Color.blue);
-        map.setSize(1200,450);
+        this.zoneMap = new HashMap();
+        this.map = makePanel(Color.white);
+        map.setLayout(null);
+        map.setSize(1200,750);
+        map.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
         this.statusBars = makePanel(Color.red);
         statusBars.setLayout(new BoxLayout(statusBars, BoxLayout.Y_AXIS));
         statusBars.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
         JScrollPane statusBarScroll = new JScrollPane(statusBars);
-        statusBarScroll.setPreferredSize(new Dimension(600,450));
+        statusBarScroll.setPreferredSize(new Dimension(600,150));
+        statusBarScroll.setBorder(BorderFactory.createTitledBorder("Drone Status"));
 
         this.log = makeLogComp();
         JScrollPane logScroll = new JScrollPane(log);
-        logScroll.setPreferredSize(new Dimension(600,450));
+        logScroll.setPreferredSize(new Dimension(600,150));
         logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        logScroll.setBorder(BorderFactory.createTitledBorder("Event Log"));
         
-        addComp(panel, map, 0, 0, 1, 0.45, 2, 1, GridBagConstraints.BOTH);
-        addComp(panel, statusBars, 1, 1, 0.5, 0.45, 1, 1, GridBagConstraints.BOTH);
-        addComp(panel, logScroll, 0, 1, 0.5, 0.45, 1, 1, GridBagConstraints.BOTH);
-        addComp(panel, statusBarScroll, 1, 1, 0, 1, 1, 1, GridBagConstraints.NORTH);
+        addComp(panel, map, 0, 0, 1, 0.7, 2, 1, GridBagConstraints.BOTH);
+        addComp(panel, logScroll, 0, 1, 0.5, 0.3, 1, 1, GridBagConstraints.BOTH);
+        addComp(panel, statusBarScroll, 1, 1, 0.25, 0.3, 1, 1, GridBagConstraints.BOTH);
 
         frame.setContentPane(panel);
         frame.setSize(1200,900);
@@ -120,12 +140,75 @@ public class View extends Thread {
         }
     }
 
-    private void updateMap(){
-
+    private void updateMap() {
+        // Calculate scaling factors based on the first zone (reference point)
+        if (zoneMap.isEmpty() && !scheduler.eventQueue.isEmpty()) {
+            // Initialize with first zone's coordinates
+            Zone firstZone = scheduler.eventQueue.peek().getZone();
+            int[] start = firstZone.getStart();
+            int[] end = firstZone.getEnd();
+            zoneMap.put(firstZone.getId(), new Object[]{start, end, false});
+        }
+    
+        // Add new zones while maintaining relative positioning
+        for (Event event : scheduler.eventQueue) {
+            Zone zone = event.getZone();
+            zoneMap.computeIfAbsent(zone.getId(), k -> {
+                // For new zones, store coordinates and "not rendered" status
+                return new Object[]{zone.getStart(), zone.getEnd(), false};
+            });
+        }
+    
+        // Find the most extreme coordinates to determine scaling
+        int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+        
+        for (Object[] zoneData : zoneMap.values()) {
+            int[] start = (int[]) zoneData[0];
+            int[] end = (int[]) zoneData[1];
+            
+            minX = Math.min(minX, start[0]);
+            maxX = Math.max(maxX, end[0]);
+            minY = Math.min(minY, start[1]);
+            maxY = Math.max(maxY, end[1]);
+        }
+    
+        // Calculate scaling factors with 10% padding
+        double widthPadding = (maxX - minX) * 0.1;
+        double heightPadding = (maxY - minY) * 0.1;
+        double scaleX = map.getWidth() / (maxX - minX + widthPadding);
+        double scaleY = map.getHeight() / (maxY - minY + heightPadding);
+        double scale = Math.min(scaleX, scaleY);
+    
+        // Add only unrendered zones to the map
+        for (Integer zoneId : zoneMap.keySet()) {
+            Object[] zoneData = zoneMap.get(zoneId);
+            boolean rendered = (boolean) zoneData[2];
+            
+            if (!rendered) {
+                int[] start = (int[]) zoneData[0];
+                int[] end = (int[]) zoneData[1];
+                
+                // Calculate scaled positions and dimensions
+                int x = (int) ((start[0] - minX + widthPadding/2) * scale);
+                int y = (int) ((start[1] - minY + heightPadding/2) * scale);
+                int width = (int) ((end[0] - start[0]) * scale);
+                int height = (int) ((end[1] - start[1]) * scale);
+    
+                ZoneLabel zl = new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
+                zl.setBounds(x, y, width, height);
+                map.add(zl);
+                
+                // Mark as rendered
+                zoneData[2] = true;
+            }
+        }
+    
+        map.revalidate();
+        map.repaint();
     }
 
     private void updateDrones(){
-        Set<Integer> existingDrones = new HashSet<>();
         for(Component comp : statusBars.getComponents()){
             if(comp instanceof JPanel){
                 try {
@@ -214,13 +297,7 @@ public class View extends Thread {
                 this.log.append(  ", Location: " + coords[0] + "," + coords[1] + "\n");
             }
             */
-            try {
-                sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
-        this.log.append("Done\n");
         
         //System.exit(0);
     }

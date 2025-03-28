@@ -1,7 +1,4 @@
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-
 import javax.swing.*;
 
 public class View {
@@ -28,12 +25,6 @@ public class View {
         menu.add(start);
         menuBar.add(menu);
         frame.setJMenuBar(menuBar);
-        start.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e){
-                startFile("Main.java");
-            }
-        });
 
 
         this.map = makePanel(Color.blue);
@@ -50,19 +41,6 @@ public class View {
         frame.setSize(600,600);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
-    }
-
-    private void startFile(String filePath) {
-        try{
-            File file = new File("src/Main.java");
-            if(file.exists()){
-                Desktop.getDesktop().open(file);
-            }else{
-                System.out.println("file not found");
-            }
-        }catch(IOException e){
-            e.printStackTrace();
-        }
     }
 
     private JTextArea makeLogComp(){

@@ -1,5 +1,3 @@
-import java.time.LocalTime;
-import java.util.ArrayList;
 
 /**
  * The Main class initializes and starts the firefighting drone system.

@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +21,10 @@ public class View extends Thread {
 
     Set<Integer> existingDrones = new HashSet<>();
     HashMap<Integer, Object[]> zoneMap;
+    HashMap<Integer, JLabel> droneImages = new HashMap<>();
+    ImageIcon droneIcon;
+    HashMap<Integer, Double> droneAngles = new HashMap<>();
+
 
     View(Scheduler s){
         this.scheduler = s;
@@ -31,12 +36,17 @@ public class View extends Thread {
             public void componentResized(ComponentEvent e) {
                 // Recalculate all zone positions on resize
                 for (Object[] zoneData : zoneMap.values()) {
-                    map.removeAll();
                     zoneData[2] = false; // Mark all zones for re-rendering
                 }
+                map.removeAll();
+                droneImages.clear();
                 updateMap();
             }
         });
+
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/assets/Drone.png"));
+        Image scaledImage = originalIcon.getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH);
+        this.droneIcon = new ImageIcon(scaledImage);
         
         this.panel = makePanel(Color.white);
         panel.setLayout(new GridBagLayout());
@@ -141,6 +151,7 @@ public class View extends Thread {
     }
 
     private void updateMap() {
+
         // Calculate scaling factors based on the first zone (reference point)
         if (zoneMap.isEmpty() && !scheduler.eventQueue.isEmpty()) {
             // Initialize with first zone's coordinates
@@ -203,9 +214,54 @@ public class View extends Thread {
                 zoneData[2] = true;
             }
         }
+
+
+        //Update drone positions
+        for(int droneNum : scheduler.allDroneList.keySet()){
+            Integer[] coords = (Integer[]) scheduler.allDroneList.get(droneNum).get("location");
+
+            //calculate scaled position
+            int x = (int) ((coords[0] - minX + widthPadding/2) * scale) - 15;
+            int y = (int) ((coords[0] - minY + heightPadding/2) * scale) - 15;
+
+            //calculate angle
+            Double angle = droneAngles.get(droneNum);
+            if(angle != null){
+                Image rotatedImage = rotateImage(((ImageIcon)droneIcon).getImage(), angle);
+                droneImages.get(droneNum).setIcon(new ImageIcon(rotatedImage));
+            }
+
+            if(!droneImages.containsKey(droneNum)){
+                //create new drone image label
+                JLabel droneLabel = new JLabel(droneIcon);
+                droneLabel.setBounds(x,y, 30, 30);
+                droneLabel.setOpaque(false);
+                map.add(droneLabel);
+                map.add(droneLabel);
+                droneImages.put(droneNum, droneLabel);
+                map.setComponentZOrder(droneLabel, 0);//bring to the front
+            }else{
+                //update existing drone position
+                JLabel droneLabel = droneImages.get(droneNum);
+                droneLabel.setLocation(x,y);
+            }
+        }
+
+        //remove any drones that are no longer active
+        Set<Integer> activeDrones = new HashSet<>(scheduler.allDroneList.keySet());
+        droneImages.keySet().removeIf(droneNum -> !activeDrones.contains(droneNum));
     
         map.revalidate();
         map.repaint();
+    }
+
+    private Image rotateImage(Image image, double angle){
+        BufferedImage buffered = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = buffered.createGraphics();
+        g2d.rotate(Math.toRadians(angle), image.getWidth(null)/2, image.getHeight(null)/2);
+        g2d.drawImage(image, 0, 0, null);
+        g2d.dispose();
+        return buffered;
     }
 
     private void updateDrones(){

@@ -4,15 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-/**
- * TODO for me
- *
- * Add a moveTo method moveTo(targetX, targetY) to be used for return to base and to fire
- * Fix issue with how much agent to drop
- * Add states to Scheduler
- *
- */
-
 public class Drone extends Thread {
     private static int idCounter = 0;
     private int id;
@@ -32,6 +23,8 @@ public class Drone extends Thread {
     private int schedulerPort;
 
     private boolean finish;
+
+    private double[] currentLocation;
 
     public Drone(int schedulerPort) {
         this.id = idCounter++;
@@ -60,6 +53,8 @@ public class Drone extends Thread {
         this.schedulerPort = schedulerPort;
 
         this.finish = false;
+
+        this.currentLocation = new double[]{0,0};
 
     }
 
@@ -188,7 +183,7 @@ public class Drone extends Thread {
                 e.printStackTrace();
             }
         }
-        String response = sendReceive(String.format("%s:%d:%d:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume));
+        String response = sendReceive(String.format("%s:%d:%d:%.2f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume));
         String[] splitMessage = response.split(":");
 
         switch (splitMessage[0].toUpperCase()){
@@ -219,7 +214,7 @@ public class Drone extends Thread {
 
         this.carryingVolume -= this.agentDropAmount;
 
-        String response = sendReceive(String.format("%s:%d:%d:%f:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.agentDropAmount, this.carryingVolume));
+        String response = sendReceive(String.format("%s:%d:%d:%.2f:%.2f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.agentDropAmount, this.carryingVolume));
         this.agentDropAmount = 0.0;
 
         String[] splitMessage = response.split(":");
@@ -298,7 +293,7 @@ public class Drone extends Thread {
     public void handleFault() {
         System.out.println("[Drone " + id + "] FAULT detected. Returning to base...");
 
-        String response = sendReceive(String.format("%s:%d:%d:%f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume));
+        String response = sendReceive(String.format("%s:%d:%d:%.2f",this.getStateAsString(), this.id, this.assignedFire.getId(), this.carryingVolume));
         String[] splitMessage = response.split(":");
         switch (splitMessage[0].toUpperCase()){
             case "FINISH":

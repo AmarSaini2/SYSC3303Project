@@ -244,7 +244,7 @@ public class Scheduler extends Thread {
                             agentDropAmount = event.getAgentRequired();
                         }
 
-                        sendToDrone(String.format("DROP:%f", agentDropAmount), Integer.parseInt(splitMessage[1]));
+                        sendToDrone(String.format("DROP:%.2f", agentDropAmount), Integer.parseInt(splitMessage[1]));
                         break;
                     }
                     case "Dropping Agent": //Dropping Agent:droneId:eventId:agentDropAmount:carryVolume

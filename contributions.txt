@@ -1,5 +1,5 @@
-Samuel, Lo (101230930): Updated the Scheduler
-John, Guo (101233817): Create drone state diagram
-Kaitlyn, Conron (101264263): Update the unit tests
-Yacine, Djaou (100963615): Implemented the Drone state machine
-Amar Saini (101258965): Updated class diagram, sequnec diagram, and README file.
+Samuel, Lo (101230930): Updated the Scheduler, FireIncident, and Drone test files.
+John, Guo (101233817): Implemented drone startup state.
+Kaitlyn, Conron (101264263): Updated class diagram, sequence diagram, state machines, and README.
+Yacine, Djaou (100963615): Updated Drone and DroneFSM to handle faults.
+Amar Saini (101258965): Began implementing a GUI.

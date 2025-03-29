@@ -1,7 +1,7 @@
 import java.util.HashMap;
 import java.util.Map;
 
-interface DroneState{
+interface DroneState {
 
     public void goNextState(Drone drone);
 
@@ -9,31 +9,37 @@ interface DroneState{
 
     public String getStateString();
 
-    //by default, this event should not change state
-    default public void handleFault(Drone drone){};
+    // by default, this event should not change state
+    default public void handleFault(Drone drone) {
+        drone.setState("ReturningToBase");
+    };
 
 }
 
-class DroneIdle implements DroneState{
+class DroneIdle implements DroneState {
     @Override
-    public void goNextState(Drone drone){drone.setState("EnRoute");}
+    public void goNextState(Drone drone) {
+        drone.setState("EnRoute");
+    }
 
     @Override
-    public void action(Drone drone){drone.sleepMode();}
+    public void action(Drone drone) {
+        drone.sleepMode();
+    }
 
     @Override
-    public String getStateString(){
+    public String getStateString() {
         return "Idle";
     }
 }
 
-abstract class DroneActive implements DroneState{
-    public void handleFault(Drone drone){
+abstract class DroneActive implements DroneState {
+    public void handleFault(Drone drone) {
         drone.setState("ReturningToBase");
     };
 }
 
-class DroneStartUp extends DroneActive{
+class DroneStartUp extends DroneActive {
 
     @Override
     public void goNextState(Drone drone) {
@@ -51,71 +57,90 @@ class DroneStartUp extends DroneActive{
     }
 }
 
-class DroneEnRoute extends DroneActive{
+class DroneEnRoute extends DroneActive {
     @Override
-    public void goNextState(Drone drone){drone.setState("DroppingAgent");}
+    public void goNextState(Drone drone) {
+        drone.setState("DroppingAgent");
+    }
 
     @Override
-    public void action(Drone drone){drone.travelToFire();}
+    public void action(Drone drone) {
+        drone.travelToFire();
+    }
 
     @Override
-    public String getStateString(){
+    public String getStateString() {
         return "En Route";
     }
 }
 
-class DroneDroppingAgent extends DroneActive{
+class DroneDroppingAgent extends DroneActive {
     @Override
-    public void goNextState(Drone drone){drone.setState("ReturningToBase");}
+    public void goNextState(Drone drone) {
+        drone.setState("ReturningToBase");
+    }
 
     @Override
-    public void action(Drone drone){drone.extinguishFire();}
+    public void action(Drone drone) {
+        drone.extinguishFire();
+    }
 
     @Override
-    public String getStateString(){
+    public String getStateString() {
         return "Dropping Agent";
     }
 }
 
-class DroneReturningToBase extends DroneActive{
+class DroneReturningToBase extends DroneActive {
     @Override
-    public void goNextState(Drone drone){drone.setState("FillingTank");}
+    public void goNextState(Drone drone) {
+        drone.setState("FillingTank");
+    }
 
     @Override
-    public void action(Drone drone){drone.returnToBase();}
+    public void action(Drone drone) {
+        drone.returnToBase();
+    }
 
     @Override
-    public String getStateString(){
+    public String getStateString() {
         return "Returning To Base";
     }
 }
 
-class DroneFillingTank extends DroneActive{
+class DroneFillingTank extends DroneActive {
     @Override
-    public void goNextState(Drone drone){drone.setState("Idle");}
+    public void goNextState(Drone drone) {
+        drone.setState("Idle");
+    }
 
     @Override
-    public void action(Drone drone){drone.refillTank();}
+    public void action(Drone drone) {
+        drone.refillTank();
+    }
 
     @Override
-    public String getStateString(){
+    public String getStateString() {
         return "Filling Tank";
     }
 }
 
-class DroneFault implements DroneState{
+class DroneFault implements DroneState {
     @Override
-    public void goNextState(Drone drone){drone.setState("ReturningToBase");}
+    public void goNextState(Drone drone) {
+        drone.setState("ReturningToBase");
+    }
 
     @Override
-    public void action(Drone drone){drone.handleFault();}
+    public void action(Drone drone) {
+        drone.handleFault();
+    }
 
     @Override
-    public String getStateString(){
+    public String getStateString() {
         return "Fault";
     }
 }
-
 
 public class DroneFSM {
     public static final Map<String, DroneState> stateTable = new HashMap<>();
@@ -130,7 +155,7 @@ public class DroneFSM {
         stateTable.put("Fault", new DroneFault());
     }
 
-    public static DroneState getState(String stateName){
+    public static DroneState getState(String stateName) {
         return stateTable.get(stateName);
     }
 }

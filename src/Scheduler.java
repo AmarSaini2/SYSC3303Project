@@ -36,7 +36,7 @@ public class Scheduler extends Thread {
     private final CopyOnWriteArrayList<Integer> freeDroneList; // Contains a list of all free drones
     private final CopyOnWriteArrayList<Integer> faultedDroneList; // Contains a list of all faulted drones
     protected boolean finish; // Flag to stop the scheduler when all tasks are complete
-    
+
     private SchedulerState currentState;
     private SchedulerFSM schedulerFSM;
 
@@ -218,6 +218,7 @@ public class Scheduler extends Thread {
                     int droneId = fault.getDroneID();
                     FaultEvent.Type faultType = fault.getFaultType();
 
+                    System.out.println("[Scheduler] Fault Received: " + fault.toString());
                     switch (faultType) {
                         case NOZZLE_JAM:
                             handleNozzleJam(fault);
@@ -420,25 +421,30 @@ public class Scheduler extends Thread {
         int droneId = fault.getDroneID();
         Event event = fault.getEvent();
 
-        sendToDrone("RETURN_TO_BASE", droneId);
-
+        // sendToDrone("RETURN_TO_BASE", droneId);
+        
         eventQueue.put(event);
+        System.out.println("Event requeued: " + event.toString());
 
         faultedDroneList.add(droneId);
         freeDroneList.remove(Integer.valueOf(droneId));
+        System.out.println("[Scheduler] Drone " + droneId + " added to faulted list and removed from free list!");
     }
 
     private void handleStuckDrone(FaultEvent fault) {
         int droneId = fault.getDroneID();
         Event event = fault.getEvent();
-        sendToDrone("RETURN_TO_BASE", droneId);
+        // sendToDrone("RETURN_TO_BASE", droneId);
 
         eventQueue.put(event);
+        System.out.println("Event requeued: " + event.toString());
 
         faultedDroneList.add(droneId);
         freeDroneList.remove(Integer.valueOf(droneId));
 
         System.out.println("[Scheduler] Drone " + droneId + " stuck in flight!");
+        System.out.println("[Scheduler] Drone " + droneId + " added to faulted list and removed from free list!");
+
     }
 
     public static void main(String[] args) {

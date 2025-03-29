@@ -2,7 +2,7 @@
 # Firefighting Drone Swarm
 
 ## Project Overview
-This project focuses on developing a firefighting drone swarm control system that can detect and respond to fire incidents in different zones. It involves simulating drones that receive fire alerts, travel to affected areas, and extinguish fires using water or foam. The system is designed to coordinate multiple drones efficiently using a central scheduler, ensuring timely responses to fire emergencies.
+This project focuses on developing a firefighting drone swarm control system that can detect and respond to fire incidents in different zones. It involves simulating drones that receive fire alerts, travel to affected areas, extinguish fires using water or foam, and handle any faults that may occur effectively. The system is designed to coordinate multiple drones efficiently using a central scheduler, ensuring timely responses to fire emergencies.
 
 There are three main components of project:
 1. **Scheduler** (central controller)
@@ -17,9 +17,11 @@ There are three main components of project:
 - **DroneResponse.java**: Holds fire response data from drones.
 - **DroneTest.java**: Unit tests for the `Drone` class to verify correct behavior.
 - **Event.java**: Represents a fire event, storing details like severity, time, and location.
+- **FaultEvent.java**: Represents an event during which a drone fault occurred.
 - **FireIncident.java**: Simulates fire incidents, sending fire requests to the scheduler, and reading input files.
 - **FireIncidentTest.java**: Unit tests for `FireIncident` to validate event handling.
 - **Scheduler.java**: Central component responsible for receiving fire reports, assigning drones, and managing event queues.
+- **SchedulerFSM.java**: Manages the state of the scheduler.
 - **SchedulerTest.java**: Unit tests for the `Scheduler` class.
 - **Zone.java**: Defines geographical fire zones.
 - **Event_File.csv**: Sample input file containing fire event data.
@@ -68,7 +70,7 @@ There are three main components of project:
 1. **FireIncident** reads fire events from `Event_File.csv` and sends them to **Scheduler**.
 2. **Scheduler** receives fire reports and forwards them to **Drone** Drones.
 3. Drones pick up fire assignments and simulate firefighting.
-4. **Scheduler** updates event status and confirms fire extinguishment.
+4. **Scheduler** updates event status and confirms fire extinguishment, if a drone fault occurs, it stops the drone and re-queues the event.
 5. The system communicates via UDP
 
 ## Team Members
@@ -77,5 +79,4 @@ There are three main components of project:
 - John, Guo
 - Kaitlyn, Conron
 - Yacine, Djaou
-- Joe, MacDougall
 - Samuel, Lo

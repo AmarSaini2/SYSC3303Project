@@ -212,30 +212,14 @@ public class Scheduler extends Thread {
                 droneSocket.setSoTimeout(1000);
                 droneSocket.receive(packet);
 
-                byte[] receivedData = Arrays.copyOfRange(packet.getData(), 0, packet.getLength());
-                FaultEvent fault = FaultEvent.deserializeFaultEvent(receivedData);
-                if (fault != null) {
-                    int droneId = fault.getDroneID();
-                    FaultEvent.Type faultType = fault.getFaultType();
-
-                    System.out.println("[Scheduler] Fault Received: " + fault.toString());
-                    switch (faultType) {
-                        case NOZZLE_JAM:
-                            handleNozzleJam(fault);
-                            break;
-                        case STUCK_IN_FLIGHT:
-                            handleStuckDrone(fault);
-                            break;
-                    }
-                    sendToDrone("OK", droneId);
-                    continue;
-                }
-
                 String message = new String(packet.getData(), 0, packet.getLength());
-                System.out.println("[Scheduler] Received: " + message);
-                logQueue.add("[Scheduler] Received: " + message);
 
                 String[] splitMessage = message.split(":");
+                if(!splitMessage[0].equals("FAULT_EVENT")) {
+                    System.out.println("[Scheduler] Received: " + message);
+                }
+                logQueue.add("[Scheduler] Received: " + message);
+
                 switch (splitMessage[0]) {
                     case "ONLINE": // ONLINE:DRONE_ID
                         HashMap<String, Object> droneHashMap = new HashMap<>();
@@ -280,7 +264,7 @@ public class Scheduler extends Thread {
                         sendToDrone(String.format("DROP:%.2f", agentDropAmount), Integer.parseInt(splitMessage[1]));
                         break;
                     }
-                    case "Dropping Agent": // Dropping Agent:droneId:eventId:agentDropAmount:carryVolume
+                    case "Dropping Agent": {// Dropping Agent:droneId:eventId:agentDropAmount:carryVolume
                         // Update allDroneList with proper drone carryVolume
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume",
                                 Double.parseDouble(splitMessage[4]));
@@ -331,6 +315,7 @@ public class Scheduler extends Thread {
                         // notifyAll();
                         // }
                         break;
+                    }
                     case "Returning To Base":
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
@@ -351,11 +336,46 @@ public class Scheduler extends Thread {
                             notifyAll();
                         }
                         break;
-                    // case "Fault":
-                    // this.faultedDroneList.add(Integer.parseInt(splitMessage[1]));
+                    case "FAULT_EVENT":
+                        byte[] receivedData = Arrays.copyOfRange(packet.getData(), 13+splitMessage[1].length(), packet.getLength());
+                        FaultEvent fault = FaultEvent.deserializeFaultEvent(receivedData);
+                        if (fault != null) {
+                            int droneId = fault.getDroneID();
+                            FaultEvent.Type faultType = fault.getFaultType();
 
-                    // sendToDrone("OK", Integer.parseInt(splitMessage[1]));
-                    // break;
+                            System.out.println("[Scheduler] Fault Received: " + fault.toString());
+                            switch (faultType) {
+                                case NOZZLE_JAM:
+                                    handleNozzleJam(fault);
+                                    break;
+                                case STUCK_IN_FLIGHT:
+                                    handleStuckDrone(fault);
+                                    break;
+                            }
+
+                            //Find the event using the eventId
+                            int eventId = fault.getEvent().getId();
+                            Event event = null;
+                            if (this.fullyServicedEvents.containsKey(eventId)) {
+                                event = this.fullyServicedEvents.get(eventId);
+                            } else {
+                                for (Event e : this.eventQueue) {
+                                    if (e.getId() == eventId) {
+                                        event = e;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            //Calculate the new agentSent for the event
+                            double agentReceived = Double.parseDouble(splitMessage[1]);
+                            double agentSent = event.getAgentSent() - agentReceived;
+                            event.setAgentSent(agentSent);
+
+                            sendToDrone("OK", droneId);
+                            continue;
+                        }
+                        break;
                     default:
                         System.out.println("Invalid message: " + message);
                 }
@@ -444,7 +464,6 @@ public class Scheduler extends Thread {
 
         System.out.println("[Scheduler] Drone " + droneId + " stuck in flight!");
         System.out.println("[Scheduler] Drone " + droneId + " added to faulted list and removed from free list!");
-
     }
 
     public static void main(String[] args) {

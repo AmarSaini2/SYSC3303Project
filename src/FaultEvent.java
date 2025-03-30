@@ -27,6 +27,23 @@ public class FaultEvent implements Serializable {
     public int getDroneID() { return droneID; }
     public Event getEvent() { return event; }
 
+    public byte[] createMessage(String command){
+        byte[] commandBytes = command.getBytes();
+        byte[] serializedEvent = this.serializeFaultEvent();
+
+        byte[] message = new byte[commandBytes.length+serializedEvent.length];
+
+        for(int i = 0; i < commandBytes.length; i++){
+            message[i] = commandBytes[i];
+        }
+
+        for(int i = 0; i < serializedEvent.length; i++){
+            message[commandBytes.length + i] = serializedEvent[i];
+        }
+
+        return message;
+    }
+
     // Serialization method
     public byte[] serializeFaultEvent() {
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();

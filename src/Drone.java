@@ -270,7 +270,7 @@ public class Drone extends Thread {
 
     private void injectFault(FaultEvent.Type faultType) {
         FaultEvent faultEvent = new FaultEvent(LocalTime.now(), faultType, this.id, this.assignedFire);
-        byte[] faultData = faultEvent.serializeFaultEvent();
+        byte[] faultData = faultEvent.createMessage("FAULT_EVENT:"+this.carryingVolume+":");
         try {
             DatagramPacket faultPacket = new DatagramPacket(faultData, faultData.length, schedulerAddress,
                     schedulerPort);

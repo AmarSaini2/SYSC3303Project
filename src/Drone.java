@@ -70,6 +70,7 @@ public class Drone extends Thread {
         if (faultFileName != null && !faultFileName.isEmpty()) {
             loadFaultInstructions(faultFileName);
         }
+
     }
 
     private void loadFaultInstructions(String faultFileName) {
@@ -81,15 +82,20 @@ public class Drone extends Thread {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
+
                 line = line.trim();
                 if (line.isEmpty())
                     continue;
-                String[] parts = line.split("\\s+");
+                // String[] parts = line.split("\\s+");
+                String[] parts = line.split("\\s*,\\s*");
                 if (parts.length >= 2) {
                     String stage = parts[0].toUpperCase();
                     // Use the provided FaultEvent.Type enum.
                     FaultEvent.Type faultType = FaultEvent.Type.valueOf(parts[1].toUpperCase());
+                    System.out
+                            .println("[Drone " + id + "] Fault injection for stage: " + stage + ", type: " + faultType);
                     faultInstructions.put(stage, faultType);
+
                 }
             }
         } catch (IOException e) {
@@ -214,7 +220,7 @@ public class Drone extends Thread {
             return;
         }
 
-        FaultEvent.Type faultToInject = getFaultForStage("TRAVEL");
+        FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("EnRoute").getStateString());
         if (faultToInject != null) {
             System.out.println("[Drone " + id + "] Fault injection triggered for TRAVEL: " + faultToInject);
             injectFault(faultToInject);
@@ -239,6 +245,8 @@ public class Drone extends Thread {
                 e.printStackTrace();
             }
         }
+
+
         String response = sendReceive(String.format("%s:%d:%d:%.2f", this.getStateAsString(), this.id,
                 this.assignedFire.getId(), this.carryingVolume));
         String[] splitMessage = response.split(":");
@@ -274,7 +282,7 @@ public class Drone extends Thread {
 
     public void extinguishFire() {
         // System.out.println("[Drone " + id + "] Dropping firefighting agent...");
-        FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("ExtinguishFire").getStateString());
+        FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("DroppingAgent").getStateString());
         if (faultToInject != null) {
             System.out.println("[Drone " + id + "] Fault injection triggered for ExtinguishFire: " + faultToInject);
             injectFault(faultToInject);
@@ -420,7 +428,7 @@ public class Drone extends Thread {
     }
 
     public static void main(String[] args) {
-        Drone drone = new Drone(6000, "droneFaultInjection_0.txt");
+        Drone drone = new Drone(6000, "src/droneFaultInjection_0.txt");
         drone.start();
         Drone drone1 = new Drone(6000);
         drone1.start();

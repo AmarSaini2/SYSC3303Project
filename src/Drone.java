@@ -17,6 +17,7 @@ public class Drone extends Thread {
     private final HashMap<String, Double> attributes;
     private double carryingVolume;
     private double agentDropAmount;
+    private final int SLEEPMULTIPLIER = 1;
 
     private final Random random;
 
@@ -240,7 +241,7 @@ public class Drone extends Thread {
 
             try {
                 // Sleep for 1 second to simulate the drone's travel time
-                Thread.sleep(1000);
+                Thread.sleep(SLEEPMULTIPLIER);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -292,7 +293,7 @@ public class Drone extends Thread {
         try {
             // TODO check if this makes sense
             double timeRequired = this.agentDropAmount / this.attributes.get("flowRate");
-            Thread.sleep((int) timeRequired * 1000);
+            Thread.sleep((int) timeRequired * SLEEPMULTIPLIER);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -326,7 +327,7 @@ public class Drone extends Thread {
         try {
             // Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
             // TODO change this once moveTo function is implemented
-            Thread.sleep(10);
+            Thread.sleep(SLEEPMULTIPLIER);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -354,7 +355,7 @@ public class Drone extends Thread {
         carryingVolume = attributes.get("maxCapacity");
 
         try {
-            Thread.sleep(20 * 1000);
+            Thread.sleep(20 * SLEEPMULTIPLIER);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -402,7 +403,7 @@ public class Drone extends Thread {
                     schedulerAddress, this.schedulerPort);
             socket.send(sendPacket);
 
-            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
+            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048); //this is erroneous, because it allocates too much space in the byte array, which causes excess garbage data to be assigned to the response
             socket.receive(receivePacket);
             String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
             System.out.println("[Drone " + id + "] Received: " + receiveMessage);

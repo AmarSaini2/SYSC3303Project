@@ -93,7 +93,9 @@ public class FireIncidentTest {
                     DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
 
                     testSocket.receive(receivePacket);
-                    Event event1 = Event.deserializeEvent(receivePacket.getData());
+                    testSocket.receive(receivePacket);
+                    Event event1 = Event
+                            .deserializeEvent(Arrays.copyOfRange(receivePacket.getData(), 10, receivePacket.getLength()));
                     System.out.println("Event 1:");
                     assertEquals(1, event1.getZone().getId());
                     System.out.println("zone: Expected: 1, Actual: " +event1.getZone().getId());
@@ -103,7 +105,8 @@ public class FireIncidentTest {
                     System.out.println("severity: Expected: HIGH, Actual: " +event1.getSeverity());
 
                     testSocket.receive(receivePacket);
-                    Event event2 = Event.deserializeEvent(receivePacket.getData());
+                    Event event2 = Event
+                            .deserializeEvent(Arrays.copyOfRange(receivePacket.getData(), 10, receivePacket.getLength()));
                     System.out.println("Event 2:");
                     assertEquals(2, event2.getZone().getId());
                     System.out.println("zone: Expected: 2, Actual: " +event2.getZone().getId());

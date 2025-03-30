@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.*;
 import java.time.LocalTime;
+import java.util.Arrays;
 
 import org.junit.After;
 import org.junit.jupiter.api.AfterAll;
@@ -46,62 +47,52 @@ public class SchedulerTest {
             try {
                 DatagramSocket testSocket = new DatagramSocket(7000);
 
-                byte[] buffer = event.serializeEvent();
+                byte[] buffer = event.createMessage("NEW_EVENT:");
                 DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, InetAddress.getLocalHost(), 5000);
                 testSocket.send(sendPacket);
 
                 DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
-
                 testSocket.receive(receivePacket);
-                DroneResponse returnedResponse = DroneResponse.deserializeResponse(receivePacket.getData());
-                Event returnedEvent = returnedResponse.getEvent();
-                System.out.println("\nCheck if Scheduler passed the right response to FireIncident: ");
-                assertEquals(DroneResponse.ResponseType.SUCCESS, returnedResponse.getResponseType());
-                System.out.println("response type: Expected: "+DroneResponse.ResponseType.SUCCESS+", Actual: " +returnedResponse.getResponseType());
-                assertEquals(event.getId(), returnedEvent.getId());
-                System.out.println("id: Expected: "+event.getId()+", Actual: " +returnedEvent.getId());
-                assertEquals(event.getZone().getId(), returnedEvent.getZone().getId());;
-                System.out.println("zone id: Expected: "+event.getZone().getId()+", Actual: " +returnedEvent.getZone().getId());
-                assertEquals(event.getType(), returnedEvent.getType());;
-                System.out.println("type: Expected: "+event.getType()+", Actual: " +returnedEvent.getType());
-                assertEquals(event.getSeverity(), returnedEvent.getSeverity());;
-                System.out.println("severity: Expected: "+event.getSeverity()+", Actual: " +returnedEvent.getSeverity());
-                System.out.println();
 
+                String returnedResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                System.out.println(returnedResponse);
+
+                buffer ="FINISH".getBytes();
+                sendPacket = new DatagramPacket(buffer, buffer.length, InetAddress.getLocalHost(), 5000);
+                testSocket.send(sendPacket);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }).start();
 
-        scheduler.start();
+        new Thread(()->scheduler.activeAction()).start();
+
         drone.sendWakeupMessage();
         DatagramSocket socket = drone.getSocket();
         DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
         try {
             socket.receive(receivePacket);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Event returnedEvent = Event.deserializeEvent(receivePacket.getData());
-        System.out.println("\nCheck if Scheduler passed the right event to Drone: ");
-        assertEquals(event.getId(), returnedEvent.getId());
-        System.out.println("id: Expected: "+event.getId()+", Actual: " +returnedEvent.getId());
-        assertEquals(event.getZone().getId(), returnedEvent.getZone().getId());;
-        System.out.println("zone id: Expected: "+event.getZone().getId()+", Actual: " +returnedEvent.getZone().getId());
-        assertEquals(event.getType(), returnedEvent.getType());;
-        System.out.println("type: Expected: "+event.getType()+", Actual: " +returnedEvent.getType());
-        assertEquals(event.getSeverity(), returnedEvent.getSeverity());;
-        System.out.println("severity: Expected: "+event.getSeverity()+", Actual: " +returnedEvent.getSeverity());
-        System.out.println();
+            Event returnedEvent = Event
+                    .deserializeEvent(Arrays.copyOfRange(receivePacket.getData(), 10, receivePacket.getLength()));
+            System.out.println("\nCheck if Scheduler passed the right event to Drone: ");
+            assertEquals(event.getId(), returnedEvent.getId());
+            System.out.println("id: Expected: "+event.getId()+", Actual: " +returnedEvent.getId());
+            assertEquals(event.getZone().getId(), returnedEvent.getZone().getId());;
+            System.out.println("zone id: Expected: "+event.getZone().getId()+", Actual: " +returnedEvent.getZone().getId());
+            assertEquals(event.getType(), returnedEvent.getType());;
+            System.out.println("type: Expected: "+event.getType()+", Actual: " +returnedEvent.getType());
+            assertEquals(event.getSeverity(), returnedEvent.getSeverity());;
+            System.out.println("severity: Expected: "+event.getSeverity()+", Actual: " +returnedEvent.getSeverity());
+            System.out.println();
 
+            byte[] sendMessage = "En Route:0:0:15.00".getBytes();
+            socket.send(new DatagramPacket(sendMessage, sendMessage.length, InetAddress.getLocalHost(), 6000));
 
-        DroneResponse response = new DroneResponse(returnedEvent, 1, DroneResponse.ResponseType.SUCCESS);
-        System.out.println("[Drone 1] Response sent: SUCCESS");
+            socket.receive(receivePacket);
+            String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-        byte[] data = response.serializeResponse();
-        try {
-            DatagramPacket packet = new DatagramPacket(data, data.length, InetAddress.getLocalHost(), 6000);
-            socket.send(packet);
+            System.out.println("\nCheck if Scheduler passed the right event to Drone: ");
+            assertEquals(receiveMessage, "DROP:15.00");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

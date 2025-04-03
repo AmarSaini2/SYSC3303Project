@@ -17,7 +17,7 @@ public class Drone extends Thread {
     private final HashMap<String, Double> attributes;
     private double carryingVolume;
     private double agentDropAmount;
-    private final int SLEEPMULTIPLIER = 1;
+    private final int SLEEPMULTIPLIER = 50;
 
     private final Random random;
 
@@ -209,8 +209,8 @@ public class Drone extends Thread {
 
         // Get the target coordinates
         Zone zone = assignedFire.getZone();
-        double targetX = zone.getStart()[0];
-        double targetY = zone.getEnd()[1];
+        double targetX = (zone.getEnd()[0] - zone.getStart()[0])/2;
+        double targetY = (zone.getEnd()[1] - zone.getStart()[1])/2;
 
         // Calculate the travel time
         int travelTimeSeconds = getTravelTime(assignedFire);
@@ -238,6 +238,7 @@ public class Drone extends Thread {
             double currentX = dxPerSecond * currentSecond;
             double currentY = dyPerSecond * currentSecond;
             System.out.printf("[Drone %d] Traveling... Current position: (%.2f, %.2f)%n", id, currentX, currentY);
+            String locationResponse = sendReceive(String.format("LOCATION:%d:%d:%d", id, (int)currentX, (int)currentY));
 
             try {
                 // Sleep for 1 second to simulate the drone's travel time

@@ -169,7 +169,7 @@ public class Scheduler extends Thread {
                         Event event = Event
                                 .deserializeEvent(Arrays.copyOfRange(packet.getData(), 10, packet.getLength()));
                         System.out.println("[Scheduler]: Event Received: " + event.toString());
-                        logQueue.add("[Scheduler]: Event Received: " + event.toString());
+                        logQueue.add("[Scheduler]: Event Received: " + event);
                         // INSERT INTO PRIORITY QUEUE
                         eventQueue.put(event);
                         synchronized (this) {
@@ -238,6 +238,15 @@ public class Scheduler extends Thread {
                             notifyAll();
                         }
                         break;
+                    case "LOCATION":
+                        int id = Integer.parseInt(splitMessage[1]);
+                        HashMap<String, Object> localHashMap = this.allDroneList.get(id);
+                        Integer[] currentLocation = {Integer.parseInt(splitMessage[2]), Integer.parseInt(splitMessage[3])};
+                        localHashMap.put("location", currentLocation);
+                        this.allDroneList.put(id, localHashMap);
+                        this.sendToDrone("OK", id);
+                        break;
+
                     case "En Route": {
                         // Tells drone how much agent to drop
                         // TODO calculate amount of agent to drop

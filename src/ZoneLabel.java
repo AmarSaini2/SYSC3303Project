@@ -12,6 +12,7 @@ public class ZoneLabel extends JPanel {
         this.zoneColor = zoneColor;
         this.transparency = transparency;
         setOpaque(false); // Make panel transparent
+        this.setName(String.valueOf(zoneNumber));
     }
 
     @Override

@@ -204,7 +204,7 @@ public class Drone extends Thread {
     }
 
     public void moveTo(double[] targetLocation){
-        System.out.printf("Drone %d moving to (%.2f,%.2f)%n", this.id, targetLocation[0], targetLocation[1]);
+        System.out.println(String.format("Drone %d moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
 
         //Get x and y distance from target
         double xDistance = targetLocation[0] - this.currentLocation[0];
@@ -222,16 +222,14 @@ public class Drone extends Thread {
         for (int i = 0; i < secondsRequired; i++){
             this.currentLocation[0] += this.attributes.get("travelSpeed") * xRatio;
             this.currentLocation[1] += this.attributes.get("travelSpeed") * yRatio;
-            if(this.id == 0) {
-                System.out.printf("Drone %d location: (%.2f, %.2f)%n", this.id, this.currentLocation[0], this.currentLocation[1]);
-            }
+            System.out.println(String.format("[Drone %d]: location: (%.2f, %.2f)", this.id, this.currentLocation[0], this.currentLocation[1]));
             try {
                 sleep(SLEEPMULTIPLIER);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        System.out.printf("Drone %d location: (%.2f, %.2f)%n", this.id, targetLocation[0], targetLocation[1]);
+        System.out.println(String.format("Drone %d location: (%.2f, %.2f)", this.id, targetLocation[0], targetLocation[1]));
     }
 
     public void travelToFire() {

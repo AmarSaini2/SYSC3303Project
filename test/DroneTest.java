@@ -67,7 +67,7 @@ public class DroneTest {
 
                 testSocket.receive(receivePacket2);
                 String droneResponse = new String(receivePacket2.getData(), 0, receivePacket2.getLength());
-                assertEquals("En Route:0:0:15.00", droneResponse);
+                assertEquals("LOCATION:0:7:6", droneResponse);
 
 
             } catch (IOException e) {
@@ -92,7 +92,7 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "Dropping Agent:0:0:15.00:0.00");
+            assertEquals(droneResponse, "LOCATION:0:14:12");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -116,7 +116,7 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "Returning To Base:0");
+            assertEquals(droneResponse, "LOCATION:0:21:18");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -140,7 +140,7 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "Filling Tank:0");
+            assertEquals(droneResponse, "LOCATION:0:28:24");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

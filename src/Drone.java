@@ -229,7 +229,7 @@ public class Drone extends Thread {
                 throw new RuntimeException(e);
             }
         }
-        System.out.println(String.format("Drone %d location: (%.2f, %.2f)", this.id, targetLocation[0], targetLocation[1]));
+        System.out.println(String.format("[Drone %d]: location: (%.2f, %.2f)", this.id, targetLocation[0], targetLocation[1]));
     }
 
     public void travelToFire() {

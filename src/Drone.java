@@ -203,50 +203,42 @@ public class Drone extends Thread {
         }
     }
 
+    public void moveTo(double[] targetLocation){
+        System.out.printf("Drone %d moving to (%.2f,%.2f)%n", this.id, targetLocation[0], targetLocation[1]);
+
+        //Get x and y distance from target
+        double xDistance = targetLocation[0] - this.currentLocation[0];
+        double yDistance = targetLocation[1] - this.currentLocation[1];
+
+        //Get the x and y ratios
+        double totalDistance = Math.sqrt(xDistance*xDistance + yDistance*yDistance);
+        double xRatio = xDistance / totalDistance;
+        double yRatio = yDistance / totalDistance;
+
+        //Calculate number of seconds it would take to reach zone
+        int secondsRequired = (int) Math.floor(totalDistance / this.attributes.get("travelSpeed"));
+
+        //Move the drone
+        for (int i = 0; i < secondsRequired; i++){
+            this.currentLocation[0] += this.attributes.get("travelSpeed") * xRatio;
+            this.currentLocation[1] += this.attributes.get("travelSpeed") * yRatio;
+            if(this.id == 0) {
+                System.out.printf("Drone %d location: (%.2f, %.2f)%n", this.id, this.currentLocation[0], this.currentLocation[1]);
+            }
+            try {
+                sleep(SLEEPMULTIPLIER);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        System.out.printf("Drone %d location: (%.2f, %.2f)%n", this.id, targetLocation[0], targetLocation[1]);
+    }
+
     public void travelToFire() {
         // System.out.println("[Drone " + id + "] Traveling to fire at Zone: " +
         // assignedFire.getZone().getId());
-
-        // Get the target coordinates
-        Zone zone = assignedFire.getZone();
-        double targetX = zone.getStart()[0];
-        double targetY = zone.getEnd()[1];
-
-        // Calculate the travel time
-        int travelTimeSeconds = getTravelTime(assignedFire);
-
-        // If the travel time is 0, the drone is already at the fire location
-        if (travelTimeSeconds <= 0) {
-            System.out.println("[Drone " + id + "] Already at the fire location.");
-            return;
-        }
-
-        FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("EnRoute").getStateString());
-        if (faultToInject != null) {
-            System.out.println("[Drone " + id + "] Fault injection triggered for TRAVEL: " + faultToInject);
-            injectFault(faultToInject);
-            return;
-        }
-
-        // Calculate the distance to travel per second in the x and y directions
-        double dxPerSecond = targetX / travelTimeSeconds;
-        double dyPerSecond = targetY / travelTimeSeconds;
-
-        // Simulate the drone's travel to the fire location
-        for (int currentSecond = 1; currentSecond <= travelTimeSeconds; currentSecond++) {
-            // Calculate the current position of the drone
-            double currentX = dxPerSecond * currentSecond;
-            double currentY = dyPerSecond * currentSecond;
-            System.out.printf("[Drone %d] Traveling... Current position: (%.2f, %.2f)%n", id, currentX, currentY);
-
-            try {
-                // Sleep for 1 second to simulate the drone's travel time
-                Thread.sleep(SLEEPMULTIPLIER);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
+        double[] center = assignedFire.getZone().getCenter();
+        moveTo(center);
 
         String response = sendReceive(String.format("%s:%d:%d:%.2f", this.getStateAsString(), this.id,
                 this.assignedFire.getId(), this.carryingVolume));
@@ -324,13 +316,7 @@ public class Drone extends Thread {
 
     public void returnToBase() {
         // System.out.println("[Drone " + id + "] Returning to base...");
-        try {
-            // Thread.sleep(getTravelTime(assignedFire) /* *1000 */);
-            // TODO change this once moveTo function is implemented
-            Thread.sleep(SLEEPMULTIPLIER);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        moveTo(new double[]{0.0,0.0});
         // System.out.println("[Drone " + id + "] Reached base.");
 
         String response = sendReceive(String.format("%s:%d", this.getStateAsString(), this.id));

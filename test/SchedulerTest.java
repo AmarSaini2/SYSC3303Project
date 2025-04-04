@@ -35,6 +35,11 @@ public class SchedulerTest {
      *
      * @throws InterruptedException if the thread is interrupted while waiting.
      */
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> 8f71464f9483e6344fffbe7fa5fa3eb25d6c8ae7
     @Test
     public void testRun() throws InterruptedException {
         Zone zone = new Zone (1, 0,0,700,600);
@@ -98,4 +103,8 @@ public class SchedulerTest {
         //Lets threads finish
         sleep(1000);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 8f71464f9483e6344fffbe7fa5fa3eb25d6c8ae7

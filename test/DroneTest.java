@@ -101,6 +101,54 @@ public class DroneTest {
 
     @Test
     @Order(3)
+    public void testNextState2(){
+        try {
+            DatagramSocket testSocket = workingSocket;
+            DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
+            Zone zone = new Zone (1, 0,0,700,600);
+            Event event = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.LOW);
+            byte[] buffer = event.createMessage("OK:");
+
+            DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, workingDroneAddr, workingDronePort);
+            testSocket.send(sendPacket);
+
+            testSocket.receive(receivePacket);
+            String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+            assertEquals(droneResponse, "Returning To Base:0");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    @Order(3)
+    public void testNextState3(){
+        try {
+            DatagramSocket testSocket = workingSocket;
+            DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
+            Zone zone = new Zone (1, 0,0,700,600);
+            Event event = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.LOW);
+            byte[] buffer = event.createMessage("OK:");
+
+            DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, workingDroneAddr, workingDronePort);
+            testSocket.send(sendPacket);
+
+            testSocket.receive(receivePacket);
+            String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+            assertEquals(droneResponse, "Filling Tank:0");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    @Order(3)
     public void testDroneError(){
         Drone drone = new Drone(6500, "test/droneFaultInjection.csv");
 

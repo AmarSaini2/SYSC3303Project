@@ -24,6 +24,7 @@ public class Scheduler extends Thread {
     private int fireIncidentPort;
 
     protected final ConcurrentHashMap<Integer, Event> fullyServicedEvents;
+    protected final ConcurrentHashMap<Integer, Event> allEvents;
 
     protected final PriorityBlockingQueue<Event> eventQueue;// Queue for fire events
 
@@ -52,6 +53,7 @@ public class Scheduler extends Thread {
 
         this.eventQueue = new PriorityBlockingQueue<>();
         this.fullyServicedEvents = new ConcurrentHashMap<>();
+        this.allEvents = new ConcurrentHashMap<>();
 
         this.logQueue = new ConcurrentLinkedQueue<>();
 
@@ -175,6 +177,7 @@ public class Scheduler extends Thread {
                         logQueue.add("[Scheduler]: Event Received: " + event);
                         // INSERT INTO PRIORITY QUEUE
                         eventQueue.put(event);
+                        this.allEvents.put(event.getId(), event);
                         synchronized (this) {
                             notifyAll();
                         }

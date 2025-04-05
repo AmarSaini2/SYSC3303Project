@@ -244,6 +244,26 @@ public class View extends Thread {
             Object[] zoneData = zoneMap.get(zoneId);
             boolean rendered = (boolean) zoneData[2];
 
+            Event.Severity severity = Event.Severity.OUT;
+            for(Integer eventId: scheduler.allEvents.keySet()){
+                if(scheduler.allEvents.get(eventId).getZone().getId() == zoneId){
+                    severity = scheduler.allEvents.get(eventId).getSeverity();
+                }
+            }
+            Color color = new Color(0, 100, 0, 150);
+            switch (severity){
+                case HIGH:
+                    color = new Color(255, 0, 0, 150);
+                    break;
+                case MODERATE:
+                    color = new Color(255, 76, 0, 150);
+                    break;
+                case LOW:
+                    color = new Color(255, 220, 0, 150);
+                    break;
+            }
+            zl.setZoneColor(color);
+
             if (!rendered) {
                 int[] start = (int[]) zoneData[0];
                 int[] end = (int[]) zoneData[1];

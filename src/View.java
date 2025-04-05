@@ -436,7 +436,7 @@ public class View extends Thread {
 
     @Override
     public void run() {
-        while (!scheduler.finish) {
+        while (!scheduler.fireIncidentFinish || !scheduler.droneFinish) {
             updateLogs();
             updateMap();
             updateDrones();

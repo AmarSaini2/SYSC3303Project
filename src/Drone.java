@@ -137,10 +137,22 @@ public class Drone extends Thread {
 
     @Override
     public void run() {
-        while (!finish) {
+        while (!finish || this.currentState != DroneFSM.getState("Idle")) {
             // Execute the function for the current state
             currentState.action(this);
         }
+
+        //Signal scheduler that the drone is finished
+        String sendMessage = "FINISHED:"+this.id;
+        System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+        DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
+                schedulerAddress, this.schedulerPort);
+        try {
+            socket.send(sendPacket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     /**

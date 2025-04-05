@@ -229,7 +229,13 @@ public class Drone extends Thread {
                 throw new RuntimeException(e);
             }
         }
-        sendReceive(String.format("LOCATION:%d:%d:%d", this.id, (int)targetLocation[0], (int)targetLocation[1]));
+        String s = String.format("LOCATION:%d:%d:%d", this.id, (int)targetLocation[0], (int)targetLocation[1]);
+        DatagramPacket packet = new DatagramPacket(s.getBytes(), s.getBytes().length, schedulerAddress, schedulerPort);
+        try {
+            socket.send(packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void travelToFire() {

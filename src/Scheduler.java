@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.*;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -220,6 +219,8 @@ public class Scheduler extends Thread {
                 }
                 logQueue.add("[Scheduler] Received: " + message);
 
+                HashMap<String, Object> localHashMap;
+                int id;
                 switch (splitMessage[0]) {
                     case "ONLINE": // ONLINE:DRONE_ID
                         HashMap<String, Object> droneHashMap = new HashMap<>();
@@ -227,6 +228,7 @@ public class Scheduler extends Thread {
                         droneHashMap.put("address", packet.getAddress());
                         droneHashMap.put("volume", 15.0);
                         droneHashMap.put("location", new Integer[] { 0, 0 });
+                        droneHashMap.put("state", "Online");
                         this.allDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
                         this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
 
@@ -239,8 +241,8 @@ public class Scheduler extends Thread {
                         }
                         break;
                     case "LOCATION":
-                        int id = Integer.parseInt(splitMessage[1]);
-                        HashMap<String, Object> localHashMap = this.allDroneList.get(id);
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
                         Integer[] currentLocation = {Integer.parseInt(splitMessage[2]), Integer.parseInt(splitMessage[3])};
                         localHashMap.put("location", currentLocation);
                         this.allDroneList.put(id, localHashMap);
@@ -250,6 +252,11 @@ public class Scheduler extends Thread {
                     case "En Route": {
                         // Tells drone how much agent to drop
                         // TODO calculate amount of agent to drop
+                        //update current state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "En Route");
+                        this.allDroneList.put(id, localHashMap);
                         double agentDropAmount = 15.0;
                         int eventId = Integer.parseInt(splitMessage[2]);
                         Event event = null;
@@ -274,6 +281,14 @@ public class Scheduler extends Thread {
                         break;
                     }
                     case "Dropping Agent": {// Dropping Agent:droneId:eventId:agentDropAmount:carryVolume
+
+                        //update current state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Dropping Agent");
+                        this.allDroneList.put(id, localHashMap);
+
+
                         // Update allDroneList with proper drone carryVolume
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume",
                                 Double.parseDouble(splitMessage[4]));
@@ -326,9 +341,20 @@ public class Scheduler extends Thread {
                         break;
                     }
                     case "Returning To Base":
+                        //updating state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Returning to Base");
+                        this.allDroneList.put(id, localHashMap);
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     case "Filling Tank":
+                        //updating state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Filling Tank");
+                        this.allDroneList.put(id, localHashMap);
+
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume", 15.0);
                         // If drone is not in freeDroneList or faultedDroneList then add it to
                         // freeDroneList
@@ -346,6 +372,13 @@ public class Scheduler extends Thread {
                         }
                         break;
                     case "FAULT_EVENT":
+                        //updating  state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "FAULT");
+                        this.allDroneList.put(id, localHashMap);
+
+
                         byte[] receivedData = Arrays.copyOfRange(packet.getData(), 13+splitMessage[1].length(), packet.getLength());
                         FaultEvent fault = FaultEvent.deserializeFaultEvent(receivedData);
                         if (fault != null) {

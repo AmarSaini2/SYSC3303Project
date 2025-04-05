@@ -71,6 +71,7 @@ public class View extends Thread {
     private JPanel createStatusBarsPanel() {
         JPanel statusPanel = createPanel(Color.red);
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
+        statusPanel.setPreferredSize(new Dimension(300, 250));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return statusPanel;
     }
@@ -80,6 +81,7 @@ public class View extends Thread {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
+        textArea.setPreferredSize(new Dimension(600, 250));
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         return textArea;
@@ -103,11 +105,23 @@ public class View extends Thread {
     }
 
     private void addComponentsToPanel(JPanel panel, JComponent map, JComponent log, JComponent statusBars) {
+
+        // Create bottom panel
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+
         JScrollPane logScrollPane = new JScrollPane(log);
         logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        addComponent(panel, map, 0, 0, 1, 0.7, 2, 1, GridBagConstraints.BOTH);
-        addComponent(panel, logScrollPane, 0, 1, 0.5, 0.3, 1, 1, GridBagConstraints.BOTH);
-        addComponent(panel, statusBars, 1, 1, 0.25, 0.3, 1, 1, GridBagConstraints.BOTH);
+        logScrollPane.setPreferredSize(log.getPreferredSize());
+        bottomPanel.add(logScrollPane);
+        bottomPanel.add(statusBars);
+
+        // Create split pane
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, map, bottomPanel);
+        splitPane.setResizeWeight(0.7); // 70% of space goes to map
+        splitPane.setDividerSize(5);
+
+        panel.add(splitPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     private void addComponent(JPanel panel, JComponent comp, int gridX, int gridY, double weightX, double weightY, int gridWidth, int gridHeight, int fill) {
@@ -129,7 +143,7 @@ public class View extends Thread {
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
         tile.setBackground(new Color(240, 240, 240));
-        tile.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        tile.setMaximumSize(new Dimension(300, 100)); // Increased height to accommodate new text
 
         JLabel nameLabel = new JLabel(droneName);
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -140,18 +154,43 @@ public class View extends Thread {
         detailsLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
         detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Add state text area
+        JTextArea stateText = new JTextArea();
+        stateText.setEditable(false); // Make it read-only
+        stateText.setLineWrap(true);
+        stateText.setWrapStyleWord(true);
+        stateText.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        stateText.setBackground(new Color(240, 240, 240));
+        stateText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        //stateText.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        stateText.setText("State: Online"); // Default state text
+
         tile.add(nameLabel);
         tile.add(Box.createRigidArea(new Dimension(0, 5)));
         tile.add(detailsLabel);
+        tile.add(Box.createRigidArea(new Dimension(0, 5)));
+        tile.add(stateText);
 
         return tile;
     }
 
     private void updateLogs() {
         while (!scheduler.logQueue.isEmpty()) {
-            log.append(scheduler.logQueue.remove() + "\n");
-            //log.setCaretPosition(log.getDocument().getLength());//scroll to bottom
+            String currentLog = scheduler.logQueue.remove();
+            String[] splitLog = currentLog.split(":");
+    
+            // Check for specific log messages and update drone states accordingly
+            if (currentLog.contains("LOCATION")) {
+                continue; // Skip location logs
+            }
+    
+            // Append the log to the JTextArea
+            log.append(currentLog + "\n");
+            log.setCaretPosition(log.getDocument().getLength());
         }
+    
+        // Update the drone tiles after processing logs
+        SwingUtilities.invokeLater(this::updateDrones);
     }
 
     private void updateMap() {
@@ -379,6 +418,7 @@ public class View extends Thread {
             ((JLabel) children[2]).setText(
                     String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
             );
+            ((JTextArea) children[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
         }
     }
 

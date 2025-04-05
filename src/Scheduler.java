@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.*;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,6 +24,7 @@ public class Scheduler extends Thread {
     private int fireIncidentPort;
 
     protected final ConcurrentHashMap<Integer, Event> fullyServicedEvents;
+    protected final ConcurrentHashMap<Integer, Event> allEvents;
 
     protected final PriorityBlockingQueue<Event> eventQueue;// Queue for fire events
 
@@ -35,7 +35,9 @@ public class Scheduler extends Thread {
                                                                                      // subsystem
     private final CopyOnWriteArrayList<Integer> freeDroneList; // Contains a list of all free drones
     private final CopyOnWriteArrayList<Integer> faultedDroneList; // Contains a list of all faulted drones
-    protected boolean finish; // Flag to stop the scheduler when all tasks are complete
+    protected boolean fireIncidentFinish; // Flag to stop the scheduler when all tasks are complete
+    protected boolean droneFinish;
+    private int dronesFinished;
 
     private SchedulerState currentState;
     private SchedulerFSM schedulerFSM;
@@ -45,10 +47,13 @@ public class Scheduler extends Thread {
      *
      */
     public Scheduler(int fireIncidentReceivePort, int droneReceivePort) {
-        this.finish = false; // Initially, the scheduler runs continuously
+        this.fireIncidentFinish = false; // Initially, the scheduler runs continuously
+        this.droneFinish = false; // Initially, the scheduler runs continuously
+        this.dronesFinished = 0;
 
         this.eventQueue = new PriorityBlockingQueue<>();
         this.fullyServicedEvents = new ConcurrentHashMap<>();
+        this.allEvents = new ConcurrentHashMap<>();
 
         this.logQueue = new ConcurrentLinkedQueue<>();
 
@@ -85,7 +90,7 @@ public class Scheduler extends Thread {
      */
     @Override
     public void run() {
-        while (!finish) {
+        while (!fireIncidentFinish) {
             System.out.println("[Scheduler] Entering " + getStateAsString() + " state");
             logQueue.add("[Scheduler] Entering " + getStateAsString() + " state");
             this.currentState.action(this);
@@ -113,13 +118,13 @@ public class Scheduler extends Thread {
         new Thread(this::processDroneMessages).start();
         new Thread(this::processFireIncidentMessages).start();
 
-        while (!finish) {
+        while (!fireIncidentFinish) {
             try {
                 // Waits for there to be an available event and drone
                 while (eventQueue.isEmpty() || freeDroneList.isEmpty()) {
                     synchronized (this) {
                         wait();
-                        if (finish) {
+                        if (fireIncidentFinish) {
                             return;
                         }
                     }
@@ -153,7 +158,7 @@ public class Scheduler extends Thread {
     }
 
     private void processFireIncidentMessages() {
-        while (!finish) {
+        while (!fireIncidentFinish) {
             try {
                 DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
 
@@ -172,6 +177,7 @@ public class Scheduler extends Thread {
                         logQueue.add("[Scheduler]: Event Received: " + event);
                         // INSERT INTO PRIORITY QUEUE
                         eventQueue.put(event);
+                        this.allEvents.put(event.getId(), event);
                         synchronized (this) {
                             notifyAll();
                         }
@@ -205,7 +211,7 @@ public class Scheduler extends Thread {
      * drone is free.
      */
     private void processDroneMessages() {
-        while (!finish) { // Runs continuously until the scheduler is stopped
+        while (!droneFinish) { // Runs continuously until the scheduler is stopped
             try {
                 // Waits for a drone to send a response (Blocking call)
                 DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
@@ -220,6 +226,8 @@ public class Scheduler extends Thread {
                 }
                 logQueue.add("[Scheduler] Received: " + message);
 
+                HashMap<String, Object> localHashMap;
+                int id;
                 switch (splitMessage[0]) {
                     case "ONLINE": // ONLINE:DRONE_ID
                         HashMap<String, Object> droneHashMap = new HashMap<>();
@@ -227,6 +235,7 @@ public class Scheduler extends Thread {
                         droneHashMap.put("address", packet.getAddress());
                         droneHashMap.put("volume", 15.0);
                         droneHashMap.put("location", new Integer[] { 0, 0 });
+                        droneHashMap.put("state", "Online");
                         this.allDroneList.put(Integer.parseInt(splitMessage[1]), droneHashMap);
                         this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
 
@@ -239,17 +248,21 @@ public class Scheduler extends Thread {
                         }
                         break;
                     case "LOCATION":
-                        int id = Integer.parseInt(splitMessage[1]);
-                        HashMap<String, Object> localHashMap = this.allDroneList.get(id);
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
                         Integer[] currentLocation = {Integer.parseInt(splitMessage[2]), Integer.parseInt(splitMessage[3])};
                         localHashMap.put("location", currentLocation);
                         this.allDroneList.put(id, localHashMap);
-                        this.sendToDrone("OK", id);
                         break;
 
                     case "En Route": {
                         // Tells drone how much agent to drop
                         // TODO calculate amount of agent to drop
+                        //update current state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "En Route");
+                        this.allDroneList.put(id, localHashMap);
                         double agentDropAmount = 15.0;
                         int eventId = Integer.parseInt(splitMessage[2]);
                         Event event = null;
@@ -274,6 +287,14 @@ public class Scheduler extends Thread {
                         break;
                     }
                     case "Dropping Agent": {// Dropping Agent:droneId:eventId:agentDropAmount:carryVolume
+
+                        //update current state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Dropping Agent");
+                        this.allDroneList.put(id, localHashMap);
+
+
                         // Update allDroneList with proper drone carryVolume
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume",
                                 Double.parseDouble(splitMessage[4]));
@@ -326,9 +347,20 @@ public class Scheduler extends Thread {
                         break;
                     }
                     case "Returning To Base":
+                        //updating state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Returning to Base");
+                        this.allDroneList.put(id, localHashMap);
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     case "Filling Tank":
+                        //updating state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Filling Tank");
+                        this.allDroneList.put(id, localHashMap);
+
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume", 15.0);
                         // If drone is not in freeDroneList or faultedDroneList then add it to
                         // freeDroneList
@@ -346,6 +378,13 @@ public class Scheduler extends Thread {
                         }
                         break;
                     case "FAULT_EVENT":
+                        //updating  state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "FAULT");
+                        this.allDroneList.put(id, localHashMap);
+
+
                         byte[] receivedData = Arrays.copyOfRange(packet.getData(), 13+splitMessage[1].length(), packet.getLength());
                         FaultEvent fault = FaultEvent.deserializeFaultEvent(receivedData);
                         if (fault != null) {
@@ -383,6 +422,12 @@ public class Scheduler extends Thread {
 
                             sendToDrone("OK", droneId);
                             continue;
+                        }
+                        break;
+                    case "FINISHED":
+                        this.dronesFinished++;
+                        if (this.dronesFinished >= this.allDroneList.size()){
+                            this.droneFinish = true;
                         }
                         break;
                     default:
@@ -439,7 +484,7 @@ public class Scheduler extends Thread {
      * - Notifies any waiting threads to avoid deadlocks.
      */
     public synchronized void finishEvents() {
-        this.finish = true; // Stop execution of scheduler and monitoring threads
+        this.fireIncidentFinish = true; // Stop execution of scheduler and monitoring threads
         notifyAll(); // Notify waiting threads to prevent indefinite blocking
         finishDrones();
         System.out.println("[Scheduler] Shutting down...");

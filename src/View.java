@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -5,10 +6,12 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
 public class View extends Thread {
+
     private Scheduler scheduler;
     private JFrame frame;
     private JPanel panel, map, statusBars;
@@ -22,6 +25,7 @@ public class View extends Thread {
     private HashMap<Integer, JLabel> droneImages = new HashMap<>();
     private HashMap<Integer, Double> droneAngles = new HashMap<>();
     private HashMap<Integer, Integer[]> lastKnownLocation = new HashMap<>();
+    private final ReentrantLock logQueueLock = new ReentrantLock();
 
     public View(Scheduler scheduler) {
         this.scheduler = scheduler;
@@ -35,7 +39,7 @@ public class View extends Thread {
         frame.addComponentListener(new ResizeListener());
 
         droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
-        panel = createPanel(Color.white);
+        panel = createPanel(new Color(240, 240, 240)); // Light gray background
         panel.setLayout(new GridBagLayout());
 
         menuBar = createMenuBar();
@@ -67,8 +71,9 @@ public class View extends Thread {
     }
 
     private JPanel createStatusBarsPanel() {
-        JPanel statusPanel = createPanel(Color.red);
+        JPanel statusPanel = createPanel(new Color(255, 255, 255)); // White background
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
+        statusPanel.setPreferredSize(new Dimension(300, 250));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return statusPanel;
     }
@@ -78,6 +83,9 @@ public class View extends Thread {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
+        textArea.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
+        textArea.setBackground(new Color(240, 240, 240)); // Light gray background
+        textArea.setForeground(Color.BLACK); // Black text
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         return textArea;
@@ -87,6 +95,8 @@ public class View extends Thread {
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Controls");
         JMenuItem start = new JMenuItem("Start");
+        start.setBackground(new Color(200, 200, 200)); // Light gray background
+        start.setForeground(Color.BLACK); // Black text
         menu.add(start);
         menuBar.add(menu);
         return menuBar;
@@ -101,23 +111,25 @@ public class View extends Thread {
     }
 
     private void addComponentsToPanel(JPanel panel, JComponent map, JComponent log, JComponent statusBars) {
+        // Create bottom panel
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+        bottomPanel.setBackground(new Color(240, 240, 240)); // Light gray background
+
         JScrollPane logScrollPane = new JScrollPane(log);
         logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        addComponent(panel, map, 0, 0, 1, 0.7, 2, 1, GridBagConstraints.BOTH);
-        addComponent(panel, logScrollPane, 0, 1, 0.5, 0.3, 1, 1, GridBagConstraints.BOTH);
-        addComponent(panel, statusBars, 1, 1, 0.25, 0.3, 1, 1, GridBagConstraints.BOTH);
-    }
+        logScrollPane.setPreferredSize(new Dimension(600, 250));
+        logScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1)); // Add a border to the log scroll pane
+        bottomPanel.add(logScrollPane);
+        bottomPanel.add(statusBars);
 
-    private void addComponent(JPanel panel, JComponent comp, int gridX, int gridY, double weightX, double weightY, int gridWidth, int gridHeight, int fill) {
-        gbc.gridx = gridX;
-        gbc.gridy = gridY;
-        gbc.weightx = weightX;
-        gbc.weighty = weightY;
-        gbc.gridwidth = gridWidth;
-        gbc.gridheight = gridHeight;
-        gbc.fill = fill;
+        // Create split pane
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, map, bottomPanel);
+        splitPane.setResizeWeight(0.7); // 70% of space goes to map
+        splitPane.setDividerSize(5);
+        splitPane.setBorder(BorderFactory.createEmptyBorder()); // Remove default border
 
-        panel.add(comp, gbc);
+        panel.add(splitPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
+                GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     private JPanel makeDroneTile(String droneName, String volume, Integer[] location) {
@@ -126,29 +138,55 @@ public class View extends Thread {
         tile.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        tile.setBackground(new Color(240, 240, 240));
-        tile.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+        tile.setBackground(new Color(255, 255, 255)); // White background for tiles
+        tile.setMaximumSize(new Dimension(300, 100)); // Increased height to accommodate new text
 
         JLabel nameLabel = new JLabel(droneName);
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Modern font
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         String details = String.format("Vol: %s | Loc: (%d,%d)", volume, location[0], location[1]);
         JLabel detailsLabel = new JLabel(details);
-        detailsLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        detailsLabel.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
         detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Add state text area
+        JTextArea stateText = new JTextArea();
+        stateText.setEditable(false); // Make it read-only
+        stateText.setLineWrap(true);
+        stateText.setWrapStyleWord(true);
+        stateText.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
+        stateText.setBackground(new Color(255, 255, 255)); // White background
+        stateText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        stateText.setText("State: Online"); // Default state text
 
         tile.add(nameLabel);
         tile.add(Box.createRigidArea(new Dimension(0, 5)));
         tile.add(detailsLabel);
+        tile.add(Box.createRigidArea(new Dimension(0, 5)));
+        tile.add(stateText);
 
         return tile;
     }
 
     private void updateLogs() {
-        while (!scheduler.logQueue.isEmpty()) {
-            log.append(scheduler.logQueue.remove() + "\n");
-            //log.setCaretPosition(log.getDocument().getLength());//scroll to bottom
+        logQueueLock.lock();
+        try {
+            while (!scheduler.logQueue.isEmpty()) {
+                String currentLog = scheduler.logQueue.remove();
+                String[] splitLog = currentLog.split(":");
+
+                // Check for specific log messages and update drone states accordingly
+                if (currentLog.contains("LOCATION")) {
+                    continue; // Skip location logs
+                }
+
+                // Append the log to the JTextArea
+                log.append(currentLog + "\n");
+                log.setCaretPosition(log.getDocument().getLength());
+            }
+        } finally {
+            logQueueLock.unlock();
         }
     }
 
@@ -163,6 +201,15 @@ public class View extends Thread {
 
         // Add new zones while maintaining relative positioning
         for (Event event : scheduler.eventQueue) {
+            Zone zone = event.getZone();
+            zoneMap.computeIfAbsent(zone.getId(), k -> {
+                // For new zones, store coordinates and "not rendered" status
+                return new Object[]{zone.getStart(), zone.getEnd(), false};
+            });
+        }
+
+        // Repeat for events in the completed queue
+        for (Event event : scheduler.fullyServicedEvents.values()) {
             Zone zone = event.getZone();
             zoneMap.computeIfAbsent(zone.getId(), k -> {
                 // For new zones, store coordinates and "not rendered" status
@@ -197,6 +244,26 @@ public class View extends Thread {
             Object[] zoneData = zoneMap.get(zoneId);
             boolean rendered = (boolean) zoneData[2];
 
+            Event.Severity severity = Event.Severity.OUT;
+            for(Integer eventId: scheduler.allEvents.keySet()){
+                if(scheduler.allEvents.get(eventId).getZone().getId() == zoneId){
+                    severity = scheduler.allEvents.get(eventId).getSeverity();
+                }
+            }
+            Color color = new Color(0, 100, 0, 150);
+            switch (severity){
+                case HIGH:
+                    color = new Color(255, 0, 0, 150);
+                    break;
+                case MODERATE:
+                    color = new Color(255, 76, 0, 150);
+                    break;
+                case LOW:
+                    color = new Color(255, 220, 0, 150);
+                    break;
+            }
+            zl.setZoneColor(color);
+
             if (!rendered) {
                 int[] start = (int[]) zoneData[0];
                 int[] end = (int[]) zoneData[1];
@@ -206,7 +273,6 @@ public class View extends Thread {
                 int y = (int) ((start[1] - minY + heightPadding / 2) * scale);
                 int width = (int) ((end[0] - start[0]) * scale);
                 int height = (int) ((end[1] - start[1]) * scale);
-
 
                 zl.setBounds(x, y, width, height);
                 map.add(zl);
@@ -223,22 +289,23 @@ public class View extends Thread {
 
             // Get last known coordinates
             Integer[] lastCoords = lastKnownLocation.get(droneNum);
-            double lastX = (lastCoords != null) ? lastCoords[0] : coords[0]; // Default to current location
-            double lastY = (lastCoords != null) ? lastCoords[1] : coords[1];
-
-            //get recent coordinates without scaling
-            double currentX = coords[0];
-            double currentY = coords[1];
-
-            // Calculate angle
-            Double lastAngle = (droneAngles.containsKey(droneNum)) ? droneAngles.get(droneNum) : 0.00;
-            Double newAngle = Math.toDegrees(Math.atan2(currentY - lastY, currentX - lastX));
-            if (newAngle < 0) {//rectify to positive values
-                newAngle += 360;
+            if (lastCoords == null) {
+                lastCoords = coords;
+                lastKnownLocation.put(droneNum, lastCoords);
             }
-            Double angleDelta = newAngle - lastAngle;
-            if(angleDelta > 0){
-                droneAngles.replace(droneNum, newAngle);
+
+            // Calculate angle based on movement vector
+            double dx = coords[0] - lastCoords[0];
+            double dy = coords[1] - lastCoords[1];
+
+            // Only update angle if drone has actually moved
+            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+                double newAngle = Math.toDegrees(Math.atan2(dy, dx));
+                if (newAngle < 0) {
+                    newAngle += 360;
+                }
+                droneAngles.put(droneNum, newAngle);
+                lastKnownLocation.put(droneNum, coords);
             }
 
             // Calculate scaled position
@@ -248,32 +315,27 @@ public class View extends Thread {
             if (!droneImages.containsKey(droneNum)) {
                 // Create new drone image label
                 JLabel droneLabel = new JLabel();
-
                 droneLabel.setBounds(x, y, 30, 30);
                 droneLabel.setOpaque(false);
                 droneImages.put(droneNum, droneLabel);
-                droneAngles.put(droneNum, 90.00); // Initialize angle
-                map.add(droneLabel);//add to map
-                map.setComponentZOrder(droneLabel, 0); // Bring to the front
+                map.add(droneLabel);
+                map.setComponentZOrder(droneLabel, 0);
             } else {
                 // Update existing drone position
                 JLabel droneLabel = droneImages.get(droneNum);
                 droneLabel.setLocation(x, y);
-
-                double currentAngle = droneAngles.get(droneNum);
-                //Commented this out since it was polluting my log
-                //System.out.println("Drone " + droneNum + ": " + currentAngle + " new: " + newAngle + " old: " + lastAngle);
-                droneLabel.setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
-                lastKnownLocation.put(droneNum, coords);
             }
-        }
 
+            // Always update the icon with current angle
+            double currentAngle = droneAngles.getOrDefault(droneNum, 0.0);
+            droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
+        }
 
         // Remove any drones that are no longer active
         Set<Integer> activeDrones = new HashSet<>(scheduler.allDroneList.keySet());
         droneImages.keySet().removeIf(droneNum -> {
-            if(!activeDrones.contains(droneNum)){
-                //Remove corresponding label from the map
+            if (!activeDrones.contains(droneNum)) {
+                // Remove corresponding label from the map
                 JLabel droneLabel = droneImages.get(droneNum);
                 map.remove(droneLabel);
                 return true;
@@ -281,22 +343,20 @@ public class View extends Thread {
             return false;
         });
 
-
         map.revalidate();
         map.repaint();
     }
 
-    private ZoneLabel getZoneLabel(int zoneId){
-        for(Component component : map.getComponents()){
-            if(component instanceof ZoneLabel){
+    private ZoneLabel getZoneLabel(int zoneId) {
+        for (Component component : map.getComponents()) {
+            if (component instanceof ZoneLabel) {
                 ZoneLabel zoneLabel = (ZoneLabel) component;
-                if(zoneLabel.getName().equals(String.valueOf(zoneId))){
+                if (zoneLabel.getName().equals(String.valueOf(zoneId))) {
                     return zoneLabel;
                 }
             }
         }
         return new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
-
     }
 
     private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle) {
@@ -309,7 +369,7 @@ public class View extends Thread {
         g2dBase.drawImage(originalIcon.getImage(), 0, 0, null);
 
         // Draw number (not rotated yet)
-        g2dBase.setFont(new Font("SansSerif", Font.BOLD, 12));
+        g2dBase.setFont(new Font("Arial", Font.BOLD, 12)); // Modern font
         g2dBase.setColor(Color.BLACK);
         String droneNumberStr = String.valueOf(droneNum);
         FontMetrics fm = g2dBase.getFontMetrics();
@@ -329,7 +389,7 @@ public class View extends Thread {
         g2dRotated.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         // Rotate around center
-        g2dRotated.rotate(Math.toRadians(angle), 15, 15);
+        g2dRotated.rotate(Math.toRadians(angle + 90), 15, 15);
         g2dRotated.drawImage(baseImage, 0, 0, null);
         g2dRotated.dispose();
 
@@ -337,6 +397,7 @@ public class View extends Thread {
     }
 
     private void updateDrones() {
+        existingDrones.clear();
         for (Component comp : statusBars.getComponents()) {
             if (comp instanceof JPanel) {
                 try {
@@ -374,6 +435,7 @@ public class View extends Thread {
             ((JLabel) children[2]).setText(
                     String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
             );
+            ((JTextArea) children[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
         }
     }
 
@@ -394,7 +456,7 @@ public class View extends Thread {
 
     @Override
     public void run() {
-        while (!scheduler.finish) {
+        while (!scheduler.fireIncidentFinish || !scheduler.droneFinish) {
             updateLogs();
             updateMap();
             updateDrones();
@@ -402,14 +464,13 @@ public class View extends Thread {
     }
 
     private class ResizeListener extends ComponentAdapter {
+
         @Override
         public void componentResized(ComponentEvent e) {
             // Recalculate all zone positions on resize
             for (Object[] zoneData : zoneMap.values()) {
                 zoneData[2] = false; // Mark all zones for re-rendering
             }
-            //map.removeAll();
-            //droneImages.clear();
             updateMap();
             updateDrones();
             updateLogs();
@@ -419,5 +480,6 @@ public class View extends Thread {
     public static void main(String[] args) {
         // Entry point for the application
         // You would typically initialize the Scheduler and start the View here
+        
     }
 }

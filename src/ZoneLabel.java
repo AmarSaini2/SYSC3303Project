@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class ZoneLabel extends JPanel {
     private final int zoneNumber;
-    private final Color zoneColor;
+    private Color zoneColor;
     private final float transparency;
     
     public ZoneLabel(int zoneNumber, Color zoneColor, float transparency){
@@ -13,6 +13,10 @@ public class ZoneLabel extends JPanel {
         this.transparency = transparency;
         setOpaque(false); // Make panel transparent
         this.setName(String.valueOf(zoneNumber));
+    }
+
+    protected void setZoneColor(Color zoneColor){
+        this.zoneColor = zoneColor;
     }
 
     @Override

@@ -1,0 +1,839 @@
+21:34:24.381:[Scheduler] Entering Idle state
+21:34:24.382:[Drone 0] Sent: ONLINE:0
+21:34:24.382:[Drone 2] Sent: ONLINE:2
+21:34:24.382:[Drone 1] Sent: ONLINE:1
+21:34:24.385:[FireIncidentSubsystem]: Sent Packet to Scheduler containing: ACTIVATE
+21:34:24.385:[Scheduler] Entering Active state
+21:34:24.386:[Scheduler] Received: ONLINE:1
+21:34:24.387:[Scheduler] Sent Drone 1: OK
+21:34:24.387:[Scheduler] Received: ONLINE:2
+21:34:24.387:[Drone 1] Received: OK
+21:34:24.387:[Scheduler] Sent Drone 2: OK
+21:34:24.387:[Drone 1] IDLE - Waiting for assignment...
+21:34:24.388:[Drone 2] Received: OK
+21:34:24.388:[Scheduler] Received: ONLINE:0
+21:34:24.388:[Drone 2] IDLE - Waiting for assignment...
+21:34:24.388:[Scheduler] Sent Drone 0: OK
+21:34:24.388:[Drone 0] Received: OK
+21:34:24.388:[Drone 0] IDLE - Waiting for assignment...
+21:34:24.424:[FireIncidentSubsystem]: Sent Packet to Scheduler containing: Event [id: 0, time: 21:34:24, zone:1, type: FIRE_DETECTED, severity: HIGH]
+21:34:24.424:[FireIncidentSubsystem]: Sent Packet to Scheduler containing: Event [id: 1, time: 21:34:24, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+21:34:24.425:[FireIncidentSubsystem]: Sent Packet to Scheduler containing: Event [id: 2, time: 21:34:24, zone:3, type: FIRE_DETECTED, severity: LOW]
+21:34:24.425:[FireIncidentSubsystem]: Sent Packet to Scheduler containing: Event [id: 3, time: 21:34:24, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+21:34:24.430:[Scheduler]: Event Received: Event [id: 0, time: 21:34:24, zone:1, type: FIRE_DETECTED, severity: HIGH]
+21:34:24.430:[Scheduler]: Added event to eventQueue
+21:34:24.431:[Scheduler] Sent Drone 1: Event [id: 0, time: 21:34:24, zone:1, type: FIRE_DETECTED, severity: HIGH]
+21:34:24.431:[Scheduler]: Event Received: Event [id: 1, time: 21:34:24, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+21:34:24.431:[Scheduler] Sent Drone 2: Event [id: 0, time: 21:34:24, zone:1, type: FIRE_DETECTED, severity: HIGH]
+21:34:24.431:[Scheduler]: Added event to eventQueue
+21:34:24.431:[Scheduler] Sent Drone 0: Event [id: 1, time: 21:34:24, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+21:34:24.431:[Drone 1] Received: Event [id: 0, time: 21:34:24, zone:1, type: FIRE_DETECTED, severity: HIGH]
+21:34:24.432:[Drone 2] Received: Event [id: 0, time: 21:34:24, zone:1, type: FIRE_DETECTED, severity: HIGH]
+21:34:24.432:[Scheduler]: Event Received: Event [id: 2, time: 21:34:24, zone:3, type: FIRE_DETECTED, severity: LOW]
+21:34:24.432:[Drone 0] Received: Event [id: 1, time: 21:34:24, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+21:34:24.432:[Scheduler]: Added event to eventQueue
+21:34:24.432:Drone 2 moving to (250.00,250.00)
+21:34:24.432:[Scheduler]: Event Received: Event [id: 3, time: 21:34:24, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+21:34:24.432:Drone 0 moving to (750.00,250.00)
+21:34:24.432:Drone 1 moving to (250.00,250.00)
+21:34:24.432:[Drone 0] Sent: LOCATION:0:11:3
+21:34:24.433:[Scheduler]: Added event to eventQueue
+21:34:24.433:[Drone 2] Sent: LOCATION:2:8:8
+21:34:24.433:[Scheduler] Received: LOCATION:0:11:3
+21:34:24.433:[Drone 1] Sent: LOCATION:1:8:8
+21:34:24.433:[Scheduler] Sent Drone 0: OK
+21:34:24.433:[Scheduler] Received: LOCATION:2:8:8
+21:34:24.433:[Drone 0] Received: OK
+21:34:24.434:[Scheduler] Sent Drone 2: OK
+21:34:24.434:[Drone 2] Received: OK
+21:34:24.434:[Scheduler] Received: LOCATION:1:8:8
+21:34:24.434:[Scheduler] Sent Drone 1: OK
+21:34:24.434:[Drone 1] Received: OK
+21:34:24.491:[Drone 2] Sent: LOCATION:2:16:16
+21:34:24.491:[Drone 1] Sent: LOCATION:1:16:16
+21:34:24.491:[Drone 0] Sent: LOCATION:0:22:7
+21:34:24.491:[Scheduler] Received: LOCATION:2:16:16
+21:34:24.491:[Scheduler] Sent Drone 2: OK
+21:34:24.491:[Drone 2] Received: OK
+21:34:24.491:[Scheduler] Received: LOCATION:1:16:16
+21:34:24.492:[Scheduler] Sent Drone 1: OK
+21:34:24.492:[Drone 1] Received: OK
+21:34:24.492:[Scheduler] Received: LOCATION:0:22:7
+21:34:24.492:[Scheduler] Sent Drone 0: OK
+21:34:24.492:[Drone 0] Received: OK
+21:34:24.543:[Drone 0] Sent: LOCATION:0:34:11
+21:34:24.543:[Scheduler] Received: LOCATION:0:34:11
+21:34:24.544:[Scheduler] Sent Drone 0: OK
+21:34:24.544:[Drone 0] Received: OK
+21:34:24.554:[Drone 1] Sent: LOCATION:1:25:25
+21:34:24.554:[Drone 2] Sent: LOCATION:2:25:25
+21:34:24.554:[Scheduler] Received: LOCATION:1:25:25
+21:34:24.554:[Scheduler] Sent Drone 1: OK
+21:34:24.554:[Drone 1] Received: OK
+21:34:24.555:[Scheduler] Received: LOCATION:2:25:25
+21:34:24.555:[Scheduler] Sent Drone 2: OK
+21:34:24.555:[Drone 2] Received: OK
+21:34:24.602:[Drone 0] Sent: LOCATION:0:45:15
+21:34:24.602:[Scheduler] Received: LOCATION:0:45:15
+21:34:24.602:[Scheduler] Sent Drone 0: OK
+21:34:24.603:[Drone 0] Received: OK
+21:34:24.605:[Drone 1] Sent: LOCATION:1:33:33
+21:34:24.605:[Scheduler] Received: LOCATION:1:33:33
+21:34:24.605:[Scheduler] Sent Drone 1: OK
+21:34:24.605:[Drone 1] Received: OK
+21:34:24.617:[Drone 2] Sent: LOCATION:2:33:33
+21:34:24.617:[Scheduler] Received: LOCATION:2:33:33
+21:34:24.618:[Scheduler] Sent Drone 2: OK
+21:34:24.618:[Drone 2] Received: OK
+21:34:24.656:[Drone 1] Sent: LOCATION:1:42:42
+21:34:24.656:[Scheduler] Received: LOCATION:1:42:42
+21:34:24.656:[Scheduler] Sent Drone 1: OK
+21:34:24.656:[Drone 1] Received: OK
+21:34:24.664:[Drone 0] Sent: LOCATION:0:56:18
+21:34:24.664:[Scheduler] Received: LOCATION:0:56:18
+21:34:24.664:[Scheduler] Sent Drone 0: OK
+21:34:24.664:[Drone 0] Received: OK
+21:34:24.679:[Drone 2] Sent: LOCATION:2:42:42
+21:34:24.679:[Scheduler] Received: LOCATION:2:42:42
+21:34:24.679:[Scheduler] Sent Drone 2: OK
+21:34:24.679:[Drone 2] Received: OK
+21:34:24.710:[Drone 1] Sent: LOCATION:1:50:50
+21:34:24.710:[Scheduler] Received: LOCATION:1:50:50
+21:34:24.710:[Scheduler] Sent Drone 1: OK
+21:34:24.710:[Drone 1] Received: OK
+21:34:24.726:[Drone 0] Sent: LOCATION:0:68:22
+21:34:24.726:[Scheduler] Received: LOCATION:0:68:22
+21:34:24.726:[Scheduler] Sent Drone 0: OK
+21:34:24.726:[Drone 0] Received: OK
+21:34:24.742:[Drone 2] Sent: LOCATION:2:50:50
+21:34:24.742:[Scheduler] Received: LOCATION:2:50:50
+21:34:24.742:[Scheduler] Sent Drone 2: OK
+21:34:24.742:[Drone 2] Received: OK
+21:34:24.774:[Drone 1] Sent: LOCATION:1:59:59
+21:34:24.774:[Scheduler] Received: LOCATION:1:59:59
+21:34:24.774:[Scheduler] Sent Drone 1: OK
+21:34:24.774:[Drone 1] Received: OK
+21:34:24.777:[Drone 0] Sent: LOCATION:0:79:26
+21:34:24.777:[Scheduler] Received: LOCATION:0:79:26
+21:34:24.777:[Scheduler] Sent Drone 0: OK
+21:34:24.777:[Drone 0] Received: OK
+21:34:24.794:[Drone 2] Sent: LOCATION:2:59:59
+21:34:24.794:[Scheduler] Received: LOCATION:2:59:59
+21:34:24.794:[Scheduler] Sent Drone 2: OK
+21:34:24.794:[Drone 2] Received: OK
+21:34:24.828:[Drone 0] Sent: LOCATION:0:91:30
+21:34:24.828:[Scheduler] Received: LOCATION:0:91:30
+21:34:24.828:[Scheduler] Sent Drone 0: OK
+21:34:24.829:[Drone 0] Received: OK
+21:34:24.838:[Drone 1] Sent: LOCATION:1:67:67
+21:34:24.838:[Scheduler] Received: LOCATION:1:67:67
+21:34:24.838:[Scheduler] Sent Drone 1: OK
+21:34:24.839:[Drone 1] Received: OK
+21:34:24.846:[Drone 2] Sent: LOCATION:2:67:67
+21:34:24.846:[Scheduler] Received: LOCATION:2:67:67
+21:34:24.846:[Scheduler] Sent Drone 2: OK
+21:34:24.846:[Drone 2] Received: OK
+21:34:24.880:[Drone 0] Sent: LOCATION:0:102:34
+21:34:24.880:[Scheduler] Received: LOCATION:0:102:34
+21:34:24.880:[Scheduler] Sent Drone 0: OK
+21:34:24.880:[Drone 0] Received: OK
+21:34:24.902:[Drone 2] Sent: LOCATION:2:76:76
+21:34:24.902:[Drone 1] Sent: LOCATION:1:76:76
+21:34:24.902:[Scheduler] Received: LOCATION:2:76:76
+21:34:24.902:[Scheduler] Sent Drone 2: OK
+21:34:24.902:[Drone 2] Received: OK
+21:34:24.902:[Scheduler] Received: LOCATION:1:76:76
+21:34:24.902:[Scheduler] Sent Drone 1: OK
+21:34:24.903:[Drone 1] Received: OK
+21:34:24.931:[Drone 0] Sent: LOCATION:0:113:37
+21:34:24.931:[Scheduler] Received: LOCATION:0:113:37
+21:34:24.931:[Scheduler] Sent Drone 0: OK
+21:34:24.931:[Drone 0] Received: OK
+21:34:24.966:[Drone 1] Sent: LOCATION:1:84:84
+21:34:24.966:[Drone 2] Sent: LOCATION:2:84:84
+21:34:24.966:[Scheduler] Received: LOCATION:1:84:84
+21:34:24.966:[Scheduler] Sent Drone 1: OK
+21:34:24.966:[Drone 1] Received: OK
+21:34:24.966:[Scheduler] Received: LOCATION:2:84:84
+21:34:24.966:[Scheduler] Sent Drone 2: OK
+21:34:24.966:[Drone 2] Received: OK
+21:34:24.982:[Drone 0] Sent: LOCATION:0:125:41
+21:34:24.982:[Scheduler] Received: LOCATION:0:125:41
+21:34:24.982:[Scheduler] Sent Drone 0: OK
+21:34:24.982:[Drone 0] Received: OK
+21:34:25.030:[Drone 1] Sent: LOCATION:1:93:93
+21:34:25.030:[Drone 2] Sent: LOCATION:2:93:93
+21:34:25.030:[Scheduler] Received: LOCATION:1:93:93
+21:34:25.030:[Scheduler] Sent Drone 1: OK
+21:34:25.031:[Drone 1] Received: OK
+21:34:25.031:[Scheduler] Received: LOCATION:2:93:93
+21:34:25.031:[Scheduler] Sent Drone 2: OK
+21:34:25.031:[Drone 2] Received: OK
+21:34:25.046:[Drone 0] Sent: LOCATION:0:136:45
+21:34:25.046:[Scheduler] Received: LOCATION:0:136:45
+21:34:25.046:[Scheduler] Sent Drone 0: OK
+21:34:25.046:[Drone 0] Received: OK
+21:34:25.094:[Drone 2] Sent: LOCATION:2:101:101
+21:34:25.094:[Drone 1] Sent: LOCATION:1:101:101
+21:34:25.094:[Scheduler] Received: LOCATION:2:101:101
+21:34:25.094:[Scheduler] Sent Drone 2: OK
+21:34:25.094:[Drone 2] Received: OK
+21:34:25.094:[Scheduler] Received: LOCATION:1:101:101
+21:34:25.094:[Scheduler] Sent Drone 1: OK
+21:34:25.095:[Drone 1] Received: OK
+21:34:25.098:[Drone 0] Sent: LOCATION:0:147:49
+21:34:25.098:[Scheduler] Received: LOCATION:0:147:49
+21:34:25.098:[Scheduler] Sent Drone 0: OK
+21:34:25.098:[Drone 0] Received: OK
+21:34:25.146:[Drone 2] Sent: LOCATION:2:110:110
+21:34:25.146:[Scheduler] Received: LOCATION:2:110:110
+21:34:25.146:[Scheduler] Sent Drone 2: OK
+21:34:25.146:[Drone 2] Received: OK
+21:34:25.156:[Drone 0] Sent: LOCATION:0:159:53
+21:34:25.156:[Drone 1] Sent: LOCATION:1:110:110
+21:34:25.156:[Scheduler] Received: LOCATION:0:159:53
+21:34:25.156:[Scheduler] Sent Drone 0: OK
+21:34:25.156:[Drone 0] Received: OK
+21:34:25.157:[Scheduler] Received: LOCATION:1:110:110
+21:34:25.157:[Scheduler] Sent Drone 1: OK
+21:34:25.157:[Drone 1] Received: OK
+21:34:25.204:[Drone 2] Sent: LOCATION:2:118:118
+21:34:25.204:[Scheduler] Received: LOCATION:2:118:118
+21:34:25.204:[Scheduler] Sent Drone 2: OK
+21:34:25.204:[Drone 2] Received: OK
+21:34:25.219:[Drone 1] Sent: LOCATION:1:118:118
+21:34:25.219:[Drone 0] Sent: LOCATION:0:170:56
+21:34:25.219:[Scheduler] Received: LOCATION:1:118:118
+21:34:25.219:[Scheduler] Sent Drone 1: OK
+21:34:25.219:[Drone 1] Received: OK
+21:34:25.219:[Scheduler] Received: LOCATION:0:170:56
+21:34:25.220:[Scheduler] Sent Drone 0: OK
+21:34:25.220:[Drone 0] Received: OK
+21:34:25.267:[Drone 2] Sent: LOCATION:2:127:127
+21:34:25.267:[Scheduler] Received: LOCATION:2:127:127
+21:34:25.267:[Scheduler] Sent Drone 2: OK
+21:34:25.267:[Drone 2] Received: OK
+21:34:25.282:[Drone 1] Sent: LOCATION:1:127:127
+21:34:25.282:[Drone 0] Sent: LOCATION:0:182:60
+21:34:25.282:[Scheduler] Received: LOCATION:1:127:127
+21:34:25.282:[Scheduler] Sent Drone 1: OK
+21:34:25.282:[Drone 1] Received: OK
+21:34:25.282:[Scheduler] Received: LOCATION:0:182:60
+21:34:25.282:[Scheduler] Sent Drone 0: OK
+21:34:25.282:[Drone 0] Received: OK
+21:34:25.330:[Drone 2] Sent: LOCATION:2:135:135
+21:34:25.330:[Scheduler] Received: LOCATION:2:135:135
+21:34:25.330:[Scheduler] Sent Drone 2: OK
+21:34:25.330:[Drone 2] Received: OK
+21:34:25.346:[Drone 0] Sent: LOCATION:0:193:64
+21:34:25.346:[Drone 1] Sent: LOCATION:1:135:135
+21:34:25.346:[Scheduler] Received: LOCATION:0:193:64
+21:34:25.346:[Scheduler] Sent Drone 0: OK
+21:34:25.346:[Drone 0] Received: OK
+21:34:25.346:[Scheduler] Received: LOCATION:1:135:135
+21:34:25.346:[Scheduler] Sent Drone 1: OK
+21:34:25.347:[Drone 1] Received: OK
+21:34:25.382:[Drone 2] Sent: LOCATION:2:144:144
+21:34:25.382:[Scheduler] Received: LOCATION:2:144:144
+21:34:25.382:[Scheduler] Sent Drone 2: OK
+21:34:25.382:[Drone 2] Received: OK
+21:34:25.397:[Drone 0] Sent: LOCATION:0:204:68
+21:34:25.397:[Scheduler] Received: LOCATION:0:204:68
+21:34:25.397:[Scheduler] Sent Drone 0: OK
+21:34:25.397:[Drone 0] Received: OK
+21:34:25.409:[Drone 1] Sent: LOCATION:1:144:144
+21:34:25.409:[Scheduler] Received: LOCATION:1:144:144
+21:34:25.409:[Scheduler] Sent Drone 1: OK
+21:34:25.409:[Drone 1] Received: OK
+21:34:25.441:[Drone 2] Sent: LOCATION:2:152:152
+21:34:25.441:[Scheduler] Received: LOCATION:2:152:152
+21:34:25.441:[Scheduler] Sent Drone 2: OK
+21:34:25.441:[Drone 2] Received: OK
+21:34:25.457:[Drone 0] Sent: LOCATION:0:216:72
+21:34:25.457:[Scheduler] Received: LOCATION:0:216:72
+21:34:25.457:[Scheduler] Sent Drone 0: OK
+21:34:25.457:[Drone 0] Received: OK
+21:34:25.460:[Drone 1] Sent: LOCATION:1:152:152
+21:34:25.460:[Scheduler] Received: LOCATION:1:152:152
+21:34:25.460:[Scheduler] Sent Drone 1: OK
+21:34:25.460:[Drone 1] Received: OK
+21:34:25.492:[Drone 2] Sent: LOCATION:2:161:161
+21:34:25.492:[Scheduler] Received: LOCATION:2:161:161
+21:34:25.492:[Scheduler] Sent Drone 2: OK
+21:34:25.493:[Drone 2] Received: OK
+21:34:25.521:[Drone 0] Sent: LOCATION:0:227:75
+21:34:25.521:[Drone 1] Sent: LOCATION:1:161:161
+21:34:25.521:[Scheduler] Received: LOCATION:0:227:75
+21:34:25.521:[Scheduler] Sent Drone 0: OK
+21:34:25.521:[Drone 0] Received: OK
+21:34:25.521:[Scheduler] Received: LOCATION:1:161:161
+21:34:25.521:[Scheduler] Sent Drone 1: OK
+21:34:25.522:[Drone 1] Received: OK
+21:34:25.544:[Drone 2] Sent: LOCATION:2:169:169
+21:34:25.544:[Scheduler] Received: LOCATION:2:169:169
+21:34:25.544:[Scheduler] Sent Drone 2: OK
+21:34:25.544:[Drone 2] Received: OK
+21:34:25.573:[Drone 0] Sent: LOCATION:0:239:79
+21:34:25.573:[Scheduler] Received: LOCATION:0:239:79
+21:34:25.573:[Scheduler] Sent Drone 0: OK
+21:34:25.573:[Drone 0] Received: OK
+21:34:25.583:[Drone 1] Sent: LOCATION:1:169:169
+21:34:25.583:[Scheduler] Received: LOCATION:1:169:169
+21:34:25.583:[Scheduler] Sent Drone 1: OK
+21:34:25.583:[Drone 1] Received: OK
+21:34:25.599:[Drone 2] Sent: LOCATION:2:178:178
+21:34:25.599:[Scheduler] Received: LOCATION:2:178:178
+21:34:25.599:[Scheduler] Sent Drone 2: OK
+21:34:25.599:[Drone 2] Received: OK
+21:34:25.631:[Drone 0] Sent: LOCATION:0:250:83
+21:34:25.631:[Scheduler] Received: LOCATION:0:250:83
+21:34:25.631:[Scheduler] Sent Drone 0: OK
+21:34:25.631:[Drone 0] Received: OK
+21:34:25.647:[Drone 1] Sent: LOCATION:1:178:178
+21:34:25.647:[Scheduler] Received: LOCATION:1:178:178
+21:34:25.647:[Scheduler] Sent Drone 1: OK
+21:34:25.647:[Drone 1] Received: OK
+21:34:25.663:[Drone 2] Sent: LOCATION:2:186:186
+21:34:25.663:[Scheduler] Received: LOCATION:2:186:186
+21:34:25.663:[Scheduler] Sent Drone 2: OK
+21:34:25.663:[Drone 2] Received: OK
+21:34:25.682:[Drone 0] Sent: LOCATION:0:261:87
+21:34:25.682:[Scheduler] Received: LOCATION:0:261:87
+21:34:25.682:[Scheduler] Sent Drone 0: OK
+21:34:25.682:[Drone 0] Received: OK
+21:34:25.711:[Drone 1] Sent: LOCATION:1:186:186
+21:34:25.711:[Scheduler] Received: LOCATION:1:186:186
+21:34:25.711:[Scheduler] Sent Drone 1: OK
+21:34:25.711:[Drone 1] Received: OK
+21:34:25.726:[Drone 2] Sent: LOCATION:2:195:195
+21:34:25.726:[Scheduler] Received: LOCATION:2:195:195
+21:34:25.726:[Scheduler] Sent Drone 2: OK
+21:34:25.726:[Drone 2] Received: OK
+21:34:25.741:[Drone 0] Sent: LOCATION:0:273:91
+21:34:25.741:[Scheduler] Received: LOCATION:0:273:91
+21:34:25.741:[Scheduler] Sent Drone 0: OK
+21:34:25.741:[Drone 0] Received: OK
+21:34:25.773:[Drone 1] Sent: LOCATION:1:195:195
+21:34:25.773:[Scheduler] Received: LOCATION:1:195:195
+21:34:25.773:[Scheduler] Sent Drone 1: OK
+21:34:25.773:[Drone 1] Received: OK
+21:34:25.789:[Drone 2] Sent: LOCATION:2:203:203
+21:34:25.789:[Scheduler] Received: LOCATION:2:203:203
+21:34:25.789:[Scheduler] Sent Drone 2: OK
+21:34:25.789:[Drone 2] Received: OK
+21:34:25.792:[Drone 0] Sent: LOCATION:0:284:94
+21:34:25.792:[Scheduler] Received: LOCATION:0:284:94
+21:34:25.792:[Scheduler] Sent Drone 0: OK
+21:34:25.792:[Drone 0] Received: OK
+21:34:25.837:[Drone 1] Sent: LOCATION:1:203:203
+21:34:25.837:[Scheduler] Received: LOCATION:1:203:203
+21:34:25.837:[Scheduler] Sent Drone 1: OK
+21:34:25.837:[Drone 1] Received: OK
+21:34:25.852:[Drone 0] Sent: LOCATION:0:295:98
+21:34:25.852:[Drone 2] Sent: LOCATION:2:212:212
+21:34:25.852:[Scheduler] Received: LOCATION:0:295:98
+21:34:25.852:[Scheduler] Sent Drone 0: OK
+21:34:25.852:[Drone 0] Received: OK
+21:34:25.852:[Scheduler] Received: LOCATION:2:212:212
+21:34:25.852:[Scheduler] Sent Drone 2: OK
+21:34:25.852:[Drone 2] Received: OK
+21:34:25.888:[Drone 1] Sent: LOCATION:1:212:212
+21:34:25.888:[Scheduler] Received: LOCATION:1:212:212
+21:34:25.888:[Scheduler] Sent Drone 1: OK
+21:34:25.888:[Drone 1] Received: OK
+21:34:25.915:[Drone 2] Sent: LOCATION:2:220:220
+21:34:25.915:[Drone 0] Sent: LOCATION:0:307:102
+21:34:25.915:[Scheduler] Received: LOCATION:2:220:220
+21:34:25.915:[Scheduler] Sent Drone 2: OK
+21:34:25.915:[Drone 2] Received: OK
+21:34:25.915:[Scheduler] Received: LOCATION:0:307:102
+21:34:25.915:[Scheduler] Sent Drone 0: OK
+21:34:25.915:[Drone 0] Received: OK
+21:34:25.947:[Drone 1] Sent: LOCATION:1:220:220
+21:34:25.947:[Scheduler] Received: LOCATION:1:220:220
+21:34:25.947:[Scheduler] Sent Drone 1: OK
+21:34:25.947:[Drone 1] Received: OK
+21:34:25.966:[Drone 2] Sent: LOCATION:2:229:229
+21:34:25.966:[Scheduler] Received: LOCATION:2:229:229
+21:34:25.966:[Scheduler] Sent Drone 2: OK
+21:34:25.966:[Drone 2] Received: OK
+21:34:25.979:[Drone 0] Sent: LOCATION:0:318:106
+21:34:25.979:[Scheduler] Received: LOCATION:0:318:106
+21:34:25.979:[Scheduler] Sent Drone 0: OK
+21:34:25.979:[Drone 0] Received: OK
+21:34:26.011:[Drone 1] Sent: LOCATION:1:229:229
+21:34:26.011:[Scheduler] Received: LOCATION:1:229:229
+21:34:26.011:[Scheduler] Sent Drone 1: OK
+21:34:26.011:[Drone 1] Received: OK
+21:34:26.027:[Drone 2] Sent: LOCATION:2:237:237
+21:34:26.027:[Scheduler] Received: LOCATION:2:237:237
+21:34:26.027:[Scheduler] Sent Drone 2: OK
+21:34:26.027:[Drone 2] Received: OK
+21:34:26.030:[Drone 0] Sent: LOCATION:0:330:110
+21:34:26.030:[Scheduler] Received: LOCATION:0:330:110
+21:34:26.030:[Scheduler] Sent Drone 0: OK
+21:34:26.030:[Drone 0] Received: OK
+21:34:26.075:[Drone 1] Sent: LOCATION:1:237:237
+21:34:26.075:[Scheduler] Received: LOCATION:1:237:237
+21:34:26.075:[Scheduler] Sent Drone 1: OK
+21:34:26.075:[Drone 1] Received: OK
+21:34:26.081:[Drone 0] Sent: LOCATION:0:341:113
+21:34:26.081:[Scheduler] Received: LOCATION:0:341:113
+21:34:26.081:[Scheduler] Sent Drone 0: OK
+21:34:26.081:[Drone 0] Received: OK
+21:34:26.091:[Drone 2] Sent: LOCATION:2:246:246
+21:34:26.091:[Scheduler] Received: LOCATION:2:246:246
+21:34:26.091:[Scheduler] Sent Drone 2: OK
+21:34:26.091:[Drone 2] Received: OK
+21:34:26.138:[Drone 0] Sent: LOCATION:0:352:117
+21:34:26.138:[Drone 1] Sent: LOCATION:1:246:246
+21:34:26.138:[Scheduler] Received: LOCATION:1:246:246
+21:34:26.138:[Scheduler] Sent Drone 1: OK
+21:34:26.138:[Drone 1] Received: OK
+21:34:26.138:[Scheduler] Received: LOCATION:0:352:117
+21:34:26.138:[Scheduler] Sent Drone 0: OK
+21:34:26.138:[Drone 0] Received: OK
+21:34:26.154:[Drone 2] Sent: LOCATION:2:250:250
+21:34:26.154:[Scheduler] Received: LOCATION:2:250:250
+21:34:26.154:[Scheduler] Sent Drone 2: OK
+21:34:26.154:[Drone 2] Received: OK
+21:34:26.155:[Drone 2] Sent: En Route:2:0:15.00
+21:34:26.155:[Scheduler] Received: En Route:2:0:15.00
+21:34:26.155:[Scheduler] Sent Drone 2: DROP:15.00
+21:34:26.155:[Drone 2] Received: DROP:15.00
+21:34:26.202:[Drone 1] Sent: LOCATION:1:250:250
+21:34:26.202:[Drone 0] Sent: LOCATION:0:364:121
+21:34:26.202:[Scheduler] Received: LOCATION:1:250:250
+21:34:26.203:[Scheduler] Sent Drone 1: OK
+21:34:26.203:[Drone 1] Received: OK
+21:34:26.203:[Scheduler] Received: LOCATION:0:364:121
+21:34:26.204:[Drone 1] Sent: En Route:1:0:15.00
+21:34:26.204:[Scheduler] Sent Drone 0: OK
+21:34:26.204:[Drone 0] Received: OK
+21:34:26.204:[Scheduler] Received: En Route:1:0:15.00
+21:34:26.204:[Scheduler] Sent Drone 1: DROP:15.00
+21:34:26.204:[Drone 1] Received: DROP:15.00
+21:34:26.266:[Drone 0] Sent: LOCATION:0:375:125
+21:34:26.266:[Scheduler] Received: LOCATION:0:375:125
+21:34:26.266:[Scheduler] Sent Drone 0: OK
+21:34:26.266:[Drone 0] Received: OK
+21:34:26.329:[Drone 0] Sent: LOCATION:0:387:129
+21:34:26.329:[Scheduler] Received: LOCATION:0:387:129
+21:34:26.329:[Scheduler] Sent Drone 0: OK
+21:34:26.329:[Drone 0] Received: OK
+21:34:26.392:[Drone 0] Sent: LOCATION:0:398:132
+21:34:26.392:[Scheduler] Received: LOCATION:0:398:132
+21:34:26.392:[Scheduler] Sent Drone 0: OK
+21:34:26.392:[Drone 0] Received: OK
+21:34:26.456:[Drone 0] Sent: LOCATION:0:409:136
+21:34:26.456:[Scheduler] Received: LOCATION:0:409:136
+21:34:26.456:[Scheduler] Sent Drone 0: OK
+21:34:26.457:[Drone 0] Received: OK
+21:34:26.520:[Drone 0] Sent: LOCATION:0:421:140
+21:34:26.520:[Scheduler] Received: LOCATION:0:421:140
+21:34:26.520:[Scheduler] Sent Drone 0: OK
+21:34:26.520:[Drone 0] Received: OK
+21:34:26.584:[Drone 0] Sent: LOCATION:0:432:144
+21:34:26.584:[Scheduler] Received: LOCATION:0:432:144
+21:34:26.584:[Scheduler] Sent Drone 0: OK
+21:34:26.584:[Drone 0] Received: OK
+21:34:26.635:[Drone 0] Sent: LOCATION:0:443:147
+21:34:26.635:[Scheduler] Received: LOCATION:0:443:147
+21:34:26.635:[Scheduler] Sent Drone 0: OK
+21:34:26.635:[Drone 0] Received: OK
+21:34:26.687:[Drone 0] Sent: LOCATION:0:455:151
+21:34:26.687:[Scheduler] Received: LOCATION:0:455:151
+21:34:26.688:[Scheduler] Sent Drone 0: OK
+21:34:26.688:[Drone 0] Received: OK
+21:34:26.740:[Drone 0] Sent: LOCATION:0:466:155
+21:34:26.740:[Scheduler] Received: LOCATION:0:466:155
+21:34:26.740:[Scheduler] Sent Drone 0: OK
+21:34:26.740:[Drone 0] Received: OK
+21:34:26.756:[Drone 2] Sent: Dropping Agent:2:0:15.00:0.00
+21:34:26.756:[Scheduler] Received: Dropping Agent:2:0:15.00:0.00
+21:34:26.756:[Scheduler] Sent Drone 2: OK
+21:34:26.756:[Drone 2] Received: OK
+21:34:26.757:Drone 2 moving to (0.00,0.00)
+21:34:26.757:[Drone 2] Sent: LOCATION:2:237:237
+21:34:26.757:[Scheduler] Received: LOCATION:2:237:237
+21:34:26.757:[Scheduler] Sent Drone 2: OK
+21:34:26.757:[Drone 2] Received: OK
+21:34:26.804:[Drone 0] Sent: LOCATION:0:478:159
+21:34:26.804:[Scheduler] Received: LOCATION:0:478:159
+21:34:26.805:[Scheduler] Sent Drone 0: OK
+21:34:26.805:[Drone 1] Sent: Dropping Agent:1:0:15.00:0.00
+21:34:26.805:[Drone 0] Received: OK
+21:34:26.805:[Scheduler] Received: Dropping Agent:1:0:15.00:0.00
+21:34:26.805:[Scheduler] Sent Drone 1: OK
+21:34:26.805:[FireIncidentSubsystem] Drone 1 successfully extinguished fire: 0
+21:34:26.805:[Drone 1] Received: OK
+21:34:26.805:Drone 1 moving to (0.00,0.00)
+21:34:26.806:[Drone 1] Sent: LOCATION:1:237:237
+21:34:26.806:[Scheduler] Received: LOCATION:1:237:237
+21:34:26.806:[Scheduler] Sent Drone 1: OK
+21:34:26.806:[Drone 1] Received: OK
+21:34:26.820:[Drone 2] Sent: LOCATION:2:229:229
+21:34:26.820:[Scheduler] Received: LOCATION:2:229:229
+21:34:26.820:[Scheduler] Sent Drone 2: OK
+21:34:26.820:[Drone 2] Received: OK
+21:34:26.867:[Drone 0] Sent: LOCATION:0:489:163
+21:34:26.867:[Drone 1] Sent: LOCATION:1:229:229
+21:34:26.867:[Scheduler] Received: LOCATION:0:489:163
+21:34:26.867:[Scheduler] Sent Drone 0: OK
+21:34:26.867:[Drone 0] Received: OK
+21:34:26.867:[Scheduler] Received: LOCATION:1:229:229
+21:34:26.867:[Scheduler] Sent Drone 1: OK
+21:34:26.867:[Drone 1] Received: OK
+21:34:26.883:[Drone 2] Sent: LOCATION:2:220:220
+21:34:26.883:[Scheduler] Received: LOCATION:2:220:220
+21:34:26.883:[Scheduler] Sent Drone 2: OK
+21:34:26.883:[Drone 2] Received: OK
+21:34:26.931:[Drone 1] Sent: LOCATION:1:220:220
+21:34:26.931:[Drone 0] Sent: LOCATION:0:500:166
+21:34:26.931:[Scheduler] Received: LOCATION:1:220:220
+21:34:26.931:[Scheduler] Sent Drone 1: OK
+21:34:26.931:[Drone 1] Received: OK
+21:34:26.931:[Scheduler] Received: LOCATION:0:500:166
+21:34:26.931:[Scheduler] Sent Drone 0: OK
+21:34:26.931:[Drone 0] Received: OK
+21:34:26.947:[Drone 2] Sent: LOCATION:2:212:212
+21:34:26.947:[Scheduler] Received: LOCATION:2:212:212
+21:34:26.947:[Scheduler] Sent Drone 2: OK
+21:34:26.947:[Drone 2] Received: OK
+21:34:26.982:[Drone 1] Sent: LOCATION:1:212:212
+21:34:26.982:[Scheduler] Received: LOCATION:1:212:212
+21:34:26.982:[Scheduler] Sent Drone 1: OK
+21:34:26.982:[Drone 1] Received: OK
+21:34:26.994:[Drone 0] Sent: LOCATION:0:512:170
+21:34:26.994:[Scheduler] Received: LOCATION:0:512:170
+21:34:26.994:[Scheduler] Sent Drone 0: OK
+21:34:26.994:[Drone 0] Received: OK
+21:34:27.009:[Drone 2] Sent: LOCATION:2:203:203
+21:34:27.009:[Scheduler] Received: LOCATION:2:203:203
+21:34:27.009:[Scheduler] Sent Drone 2: OK
+21:34:27.010:[Drone 2] Received: OK
+21:34:27.033:[Drone 1] Sent: LOCATION:1:203:203
+21:34:27.033:[Scheduler] Received: LOCATION:1:203:203
+21:34:27.033:[Scheduler] Sent Drone 1: OK
+21:34:27.033:[Drone 1] Received: OK
+21:34:27.057:[Drone 0] Sent: LOCATION:0:523:174
+21:34:27.057:[Scheduler] Received: LOCATION:0:523:174
+21:34:27.057:[Scheduler] Sent Drone 0: OK
+21:34:27.057:[Drone 0] Received: OK
+21:34:27.062:[Drone 2] Sent: LOCATION:2:195:195
+21:34:27.062:[Scheduler] Received: LOCATION:2:195:195
+21:34:27.062:[Scheduler] Sent Drone 2: OK
+21:34:27.063:[Drone 2] Received: OK
+21:34:27.085:[Drone 1] Sent: LOCATION:1:195:195
+21:34:27.085:[Scheduler] Received: LOCATION:1:195:195
+21:34:27.085:[Scheduler] Sent Drone 1: OK
+21:34:27.086:[Drone 1] Received: OK
+21:34:27.109:[Drone 0] Sent: LOCATION:0:535:178
+21:34:27.109:[Scheduler] Received: LOCATION:0:535:178
+21:34:27.109:[Scheduler] Sent Drone 0: OK
+21:34:27.109:[Drone 0] Received: OK
+21:34:27.121:[Drone 2] Sent: LOCATION:2:186:186
+21:34:27.121:[Scheduler] Received: LOCATION:2:186:186
+21:34:27.121:[Scheduler] Sent Drone 2: OK
+21:34:27.121:[Drone 2] Received: OK
+21:34:27.137:[Drone 1] Sent: LOCATION:1:186:186
+21:34:27.137:[Scheduler] Received: LOCATION:1:186:186
+21:34:27.137:[Scheduler] Sent Drone 1: OK
+21:34:27.137:[Drone 1] Received: OK
+21:34:27.169:[Drone 0] Sent: LOCATION:0:546:182
+21:34:27.169:[Scheduler] Received: LOCATION:0:546:182
+21:34:27.169:[Scheduler] Sent Drone 0: OK
+21:34:27.169:[Drone 0] Received: OK
+21:34:27.172:[Drone 2] Sent: LOCATION:2:178:178
+21:34:27.172:[Scheduler] Received: LOCATION:2:178:178
+21:34:27.172:[Scheduler] Sent Drone 2: OK
+21:34:27.172:[Drone 2] Received: OK
+21:34:27.188:[Drone 1] Sent: LOCATION:1:178:178
+21:34:27.188:[Scheduler] Received: LOCATION:1:178:178
+21:34:27.188:[Scheduler] Sent Drone 1: OK
+21:34:27.188:[Drone 1] Received: OK
+21:34:27.233:[Drone 2] Sent: LOCATION:2:169:169
+21:34:27.233:[Drone 0] Sent: LOCATION:0:557:185
+21:34:27.233:[Scheduler] Received: LOCATION:2:169:169
+21:34:27.233:[Scheduler] Sent Drone 2: OK
+21:34:27.233:[Drone 2] Received: OK
+21:34:27.233:[Scheduler] Received: LOCATION:0:557:185
+21:34:27.233:[Scheduler] Sent Drone 0: OK
+21:34:27.233:[Drone 0] Received: OK
+21:34:27.249:[Drone 1] Sent: LOCATION:1:169:169
+21:34:27.249:[Scheduler] Received: LOCATION:1:169:169
+21:34:27.249:[Scheduler] Sent Drone 1: OK
+21:34:27.249:[Drone 1] Received: OK
+21:34:27.284:[Drone 2] Sent: LOCATION:2:161:161
+21:34:27.284:[Scheduler] Received: LOCATION:2:161:161
+21:34:27.284:[Scheduler] Sent Drone 2: OK
+21:34:27.284:[Drone 2] Received: OK
+21:34:27.296:[Drone 0] Sent: LOCATION:0:569:189
+21:34:27.296:[Scheduler] Received: LOCATION:0:569:189
+21:34:27.296:[Scheduler] Sent Drone 0: OK
+21:34:27.296:[Drone 0] Received: OK
+21:34:27.312:[Drone 1] Sent: LOCATION:1:161:161
+21:34:27.312:[Scheduler] Received: LOCATION:1:161:161
+21:34:27.312:[Scheduler] Sent Drone 1: OK
+21:34:27.312:[Drone 1] Received: OK
+21:34:27.344:[Drone 2] Sent: LOCATION:2:152:152
+21:34:27.344:[Scheduler] Received: LOCATION:2:152:152
+21:34:27.344:[Scheduler] Sent Drone 2: OK
+21:34:27.344:[Drone 2] Received: OK
+21:34:27.347:[Drone 0] Sent: LOCATION:0:580:193
+21:34:27.347:[Scheduler] Received: LOCATION:0:580:193
+21:34:27.347:[Scheduler] Sent Drone 0: OK
+21:34:27.347:[Drone 0] Received: OK
+21:34:27.375:[Drone 1] Sent: LOCATION:1:152:152
+21:34:27.375:[Scheduler] Received: LOCATION:1:152:152
+21:34:27.375:[Scheduler] Sent Drone 1: OK
+21:34:27.375:[Drone 1] Received: OK
+21:34:27.406:[Drone 2] Sent: LOCATION:2:144:144
+21:34:27.406:[Drone 0] Sent: LOCATION:0:591:197
+21:34:27.406:[Scheduler] Received: LOCATION:2:144:144
+21:34:27.406:[Scheduler] Sent Drone 2: OK
+21:34:27.406:[Drone 2] Received: OK
+21:34:27.406:[Scheduler] Received: LOCATION:0:591:197
+21:34:27.406:[Scheduler] Sent Drone 0: OK
+21:34:27.406:[Drone 0] Received: OK
+21:34:27.438:[Drone 1] Sent: LOCATION:1:144:144
+21:34:27.438:[Scheduler] Received: LOCATION:1:144:144
+21:34:27.438:[Scheduler] Sent Drone 1: OK
+21:34:27.438:[Drone 1] Received: OK
+21:34:27.457:[Drone 2] Sent: LOCATION:2:135:135
+21:34:27.457:[Scheduler] Received: LOCATION:2:135:135
+21:34:27.457:[Scheduler] Sent Drone 2: OK
+21:34:27.457:[Drone 2] Received: OK
+21:34:27.470:[Drone 0] Sent: LOCATION:0:603:201
+21:34:27.470:[Scheduler] Received: LOCATION:0:603:201
+21:34:27.470:[Scheduler] Sent Drone 0: OK
+21:34:27.470:[Drone 0] Received: OK
+21:34:27.502:[Drone 1] Sent: LOCATION:1:135:135
+21:34:27.502:[Scheduler] Received: LOCATION:1:135:135
+21:34:27.502:[Scheduler] Sent Drone 1: OK
+21:34:27.502:[Drone 1] Received: OK
+21:34:27.508:[Drone 2] Sent: LOCATION:2:127:127
+21:34:27.508:[Scheduler] Received: LOCATION:2:127:127
+21:34:27.508:[Scheduler] Sent Drone 2: OK
+21:34:27.508:[Drone 2] Received: OK
+21:34:27.534:[Drone 0] Sent: LOCATION:0:614:204
+21:34:27.534:[Scheduler] Received: LOCATION:0:614:204
+21:34:27.534:[Scheduler] Sent Drone 0: OK
+21:34:27.534:[Drone 0] Received: OK
+21:34:27.566:[Drone 2] Sent: LOCATION:2:118:118
+21:34:27.566:[Drone 1] Sent: LOCATION:1:127:127
+21:34:27.566:[Scheduler] Received: LOCATION:2:118:118
+21:34:27.566:[Scheduler] Sent Drone 2: OK
+21:34:27.566:[Drone 2] Received: OK
+21:34:27.566:[Scheduler] Received: LOCATION:1:127:127
+21:34:27.566:[Scheduler] Sent Drone 1: OK
+21:34:27.566:[Drone 1] Received: OK
+21:34:27.598:[Drone 0] Sent: LOCATION:0:626:208
+21:34:27.598:[Scheduler] Received: LOCATION:0:626:208
+21:34:27.598:[Scheduler] Sent Drone 0: OK
+21:34:27.598:[Drone 0] Received: OK
+21:34:27.617:[Drone 2] Sent: LOCATION:2:110:110
+21:34:27.617:[Scheduler] Received: LOCATION:2:110:110
+21:34:27.617:[Scheduler] Sent Drone 2: OK
+21:34:27.617:[Drone 2] Received: OK
+21:34:27.630:[Drone 1] Sent: LOCATION:1:118:118
+21:34:27.630:[Scheduler] Received: LOCATION:1:118:118
+21:34:27.630:[Scheduler] Sent Drone 1: OK
+21:34:27.630:[Drone 1] Received: OK
+21:34:27.650:[Drone 0] Sent: LOCATION:0:637:212
+21:34:27.650:[Scheduler] Received: LOCATION:0:637:212
+21:34:27.650:[Scheduler] Sent Drone 0: OK
+21:34:27.650:[Drone 0] Received: OK
+21:34:27.668:[Drone 2] Sent: LOCATION:2:101:101
+21:34:27.668:[Scheduler] Received: LOCATION:2:101:101
+21:34:27.668:[Scheduler] Sent Drone 2: OK
+21:34:27.668:[Drone 2] Received: OK
+21:34:27.681:[Drone 1] Sent: LOCATION:1:110:110
+21:34:27.681:[Scheduler] Received: LOCATION:1:110:110
+21:34:27.681:[Scheduler] Sent Drone 1: OK
+21:34:27.681:[Drone 1] Received: OK
+21:34:27.709:[Drone 0] Sent: LOCATION:0:648:216
+21:34:27.709:[Scheduler] Received: LOCATION:0:648:216
+21:34:27.709:[Scheduler] Sent Drone 0: OK
+21:34:27.709:[Drone 0] Received: OK
+21:34:27.725:[Drone 2] Sent: LOCATION:2:93:93
+21:34:27.725:[Scheduler] Received: LOCATION:2:93:93
+21:34:27.725:[Scheduler] Sent Drone 2: OK
+21:34:27.725:[Drone 2] Received: OK
+21:34:27.741:[Drone 1] Sent: LOCATION:1:101:101
+21:34:27.741:[Scheduler] Received: LOCATION:1:101:101
+21:34:27.741:[Scheduler] Sent Drone 1: OK
+21:34:27.741:[Drone 1] Received: OK
+21:34:27.760:[Drone 0] Sent: LOCATION:0:660:220
+21:34:27.760:[Scheduler] Received: LOCATION:0:660:220
+21:34:27.760:[Scheduler] Sent Drone 0: OK
+21:34:27.760:[Drone 0] Received: OK
+21:34:27.777:[Drone 2] Sent: LOCATION:2:84:84
+21:34:27.777:[Scheduler] Received: LOCATION:2:84:84
+21:34:27.777:[Scheduler] Sent Drone 2: OK
+21:34:27.777:[Drone 2] Received: OK
+21:34:27.802:[Drone 1] Sent: LOCATION:1:93:93
+21:34:27.802:[Scheduler] Received: LOCATION:1:93:93
+21:34:27.802:[Scheduler] Sent Drone 1: OK
+21:34:27.802:[Drone 1] Received: OK
+21:34:27.818:[Drone 0] Sent: LOCATION:0:671:223
+21:34:27.818:[Scheduler] Received: LOCATION:0:671:223
+21:34:27.818:[Scheduler] Sent Drone 0: OK
+21:34:27.818:[Drone 0] Received: OK
+21:34:27.834:[Drone 2] Sent: LOCATION:2:76:76
+21:34:27.834:[Scheduler] Received: LOCATION:2:76:76
+21:34:27.834:[Scheduler] Sent Drone 2: OK
+21:34:27.834:[Drone 2] Received: OK
+21:34:27.866:[Drone 1] Sent: LOCATION:1:84:84
+21:34:27.866:[Scheduler] Received: LOCATION:1:84:84
+21:34:27.866:[Scheduler] Sent Drone 1: OK
+21:34:27.866:[Drone 1] Received: OK
+21:34:27.882:[Drone 0] Sent: LOCATION:0:683:227
+21:34:27.882:[Scheduler] Received: LOCATION:0:683:227
+21:34:27.882:[Scheduler] Sent Drone 0: OK
+21:34:27.882:[Drone 0] Received: OK
+21:34:27.898:[Drone 2] Sent: LOCATION:2:67:67
+21:34:27.898:[Scheduler] Received: LOCATION:2:67:67
+21:34:27.898:[Scheduler] Sent Drone 2: OK
+21:34:27.898:[Drone 2] Received: OK
+21:34:27.930:[Drone 1] Sent: LOCATION:1:76:76
+21:34:27.930:[Scheduler] Received: LOCATION:1:76:76
+21:34:27.930:[Scheduler] Sent Drone 1: OK
+21:34:27.930:[Drone 1] Received: OK
+21:34:27.946:[Drone 0] Sent: LOCATION:0:694:231
+21:34:27.946:[Scheduler] Received: LOCATION:0:694:231
+21:34:27.946:[Scheduler] Sent Drone 0: OK
+21:34:27.946:[Drone 0] Received: OK
+21:34:27.949:[Drone 2] Sent: LOCATION:2:59:59
+21:34:27.949:[Scheduler] Received: LOCATION:2:59:59
+21:34:27.949:[Scheduler] Sent Drone 2: OK
+21:34:27.949:[Drone 2] Received: OK
+21:34:27.982:[Drone 1] Sent: LOCATION:1:67:67
+21:34:27.982:[Scheduler] Received: LOCATION:1:67:67
+21:34:27.982:[Scheduler] Sent Drone 1: OK
+21:34:27.982:[Drone 1] Received: OK
+21:34:28.009:[Drone 0] Sent: LOCATION:0:705:235
+21:34:28.009:[Drone 2] Sent: LOCATION:2:50:50
+21:34:28.009:[Scheduler] Received: LOCATION:0:705:235
+21:34:28.009:[Scheduler] Sent Drone 0: OK
+21:34:28.009:[Drone 0] Received: OK
+21:34:28.009:[Scheduler] Received: LOCATION:2:50:50
+21:34:28.009:[Scheduler] Sent Drone 2: OK
+21:34:28.009:[Drone 2] Received: OK
+21:34:28.041:[Drone 1] Sent: LOCATION:1:59:59
+21:34:28.041:[Scheduler] Received: LOCATION:1:59:59
+21:34:28.041:[Scheduler] Sent Drone 1: OK
+21:34:28.041:[Drone 1] Received: OK
+21:34:28.060:[Drone 0] Sent: LOCATION:0:717:239
+21:34:28.060:[Scheduler] Received: LOCATION:0:717:239
+21:34:28.060:[Scheduler] Sent Drone 0: OK
+21:34:28.060:[Drone 0] Received: OK
+21:34:28.072:[Drone 2] Sent: LOCATION:2:42:42
+21:34:28.072:[Scheduler] Received: LOCATION:2:42:42
+21:34:28.072:[Scheduler] Sent Drone 2: OK
+21:34:28.072:[Drone 2] Received: OK
+21:34:28.092:[Drone 1] Sent: LOCATION:1:50:50
+21:34:28.092:[Scheduler] Received: LOCATION:1:50:50
+21:34:28.092:[Scheduler] Sent Drone 1: OK
+21:34:28.092:[Drone 1] Received: OK
+21:34:28.120:[Drone 0] Sent: LOCATION:0:728:242
+21:34:28.120:[Scheduler] Received: LOCATION:0:728:242
+21:34:28.120:[Scheduler] Sent Drone 0: OK
+21:34:28.120:[Drone 0] Received: OK
+21:34:28.136:[Drone 2] Sent: LOCATION:2:33:33
+21:34:28.136:[Scheduler] Received: LOCATION:2:33:33
+21:34:28.136:[Scheduler] Sent Drone 2: OK
+21:34:28.136:[Drone 2] Received: OK
+21:34:28.152:[Drone 1] Sent: LOCATION:1:42:42
+21:34:28.152:[Scheduler] Received: LOCATION:1:42:42
+21:34:28.152:[Scheduler] Sent Drone 1: OK
+21:34:28.153:[Drone 1] Received: OK
+21:34:28.184:[Drone 0] Sent: LOCATION:0:739:246
+21:34:28.184:[Scheduler] Received: LOCATION:0:739:246
+21:34:28.184:[Scheduler] Sent Drone 0: OK
+21:34:28.184:[Drone 0] Received: OK
+21:34:28.199:[Drone 2] Sent: LOCATION:2:25:25
+21:34:28.199:[Scheduler] Received: LOCATION:2:25:25
+21:34:28.199:[Scheduler] Sent Drone 2: OK
+21:34:28.199:[Drone 2] Received: OK
+21:34:28.204:[Drone 1] Sent: LOCATION:1:33:33
+21:34:28.204:[Scheduler] Received: LOCATION:1:33:33
+21:34:28.204:[Scheduler] Sent Drone 1: OK
+21:34:28.204:[Drone 1] Received: OK
+21:34:28.235:[Drone 0] Sent: LOCATION:0:750:250
+21:34:28.235:[Scheduler] Received: LOCATION:0:750:250
+21:34:28.235:[Scheduler] Sent Drone 0: OK
+21:34:28.235:[Drone 0] Received: OK
+21:34:28.235:[Drone 0] Sent: En Route:0:1:15.00
+21:34:28.236:[Scheduler] Received: En Route:0:1:15.00
+21:34:28.236:[Scheduler] Sent Drone 0: DROP:15.00
+21:34:28.236:[Drone 0] Received: DROP:15.00
+21:34:28.250:[Drone 2] Sent: LOCATION:2:16:16
+21:34:28.250:[Scheduler] Received: LOCATION:2:16:16
+21:34:28.250:[Scheduler] Sent Drone 2: OK
+21:34:28.250:[Drone 2] Received: OK
+21:34:28.263:[Drone 1] Sent: LOCATION:1:25:25
+21:34:28.263:[Scheduler] Received: LOCATION:1:25:25
+21:34:28.263:[Scheduler] Sent Drone 1: OK
+21:34:28.263:[Drone 1] Received: OK
+21:34:28.311:[Drone 2] Sent: LOCATION:2:8:8
+21:34:28.311:[Scheduler] Received: LOCATION:2:8:8
+21:34:28.311:[Scheduler] Sent Drone 2: OK
+21:34:28.311:[Drone 2] Received: OK
+21:34:28.327:[Drone 1] Sent: LOCATION:1:16:16
+21:34:28.327:[Scheduler] Received: LOCATION:1:16:16
+21:34:28.327:[Scheduler] Sent Drone 1: OK
+21:34:28.327:[Drone 1] Received: OK
+21:34:28.375:[Drone 2] Sent: LOCATION:2:0:0
+21:34:28.375:[Scheduler] Received: LOCATION:2:0:0
+21:34:28.375:[Scheduler] Sent Drone 2: OK
+21:34:28.375:[Drone 2] Received: OK
+21:34:28.391:[Drone 1] Sent: LOCATION:1:8:8
+21:34:28.391:[Scheduler] Received: LOCATION:1:8:8
+21:34:28.391:[Scheduler] Sent Drone 1: OK
+21:34:28.391:[Drone 1] Received: OK
+21:34:28.427:[Drone 2] Sent: LOCATION:2:0:0
+21:34:28.427:[Scheduler] Received: LOCATION:2:0:0
+21:34:28.427:[Scheduler] Sent Drone 2: OK
+21:34:28.427:[Drone 2] Received: OK
+21:34:28.427:[Drone 2] Sent: Returning To Base:2
+21:34:28.427:[Scheduler] Received: Returning To Base:2
+21:34:28.427:[Scheduler] Sent Drone 2: OK
+21:34:28.427:[Drone 2] Received: OK
+21:34:28.455:[Drone 1] Sent: LOCATION:1:0:0
+21:34:28.455:[Scheduler] Received: LOCATION:1:0:0
+21:34:28.455:[Scheduler] Sent Drone 1: OK
+21:34:28.455:[Drone 1] Received: OK
+21:34:28.506:[Drone 1] Sent: LOCATION:1:0:0
+21:34:28.506:[Scheduler] Received: LOCATION:1:0:0
+21:34:28.506:[Scheduler] Sent Drone 1: OK
+21:34:28.506:[Drone 1] Received: OK
+21:34:28.506:[Drone 1] Sent: Returning To Base:1
+21:34:28.506:[Scheduler] Received: Returning To Base:1
+21:34:28.506:[Scheduler] Sent Drone 1: OK
+21:34:28.506:[Drone 1] Received: OK
+21:34:28.851:[Drone 0] Sent: Dropping Agent:0:1:15.00:0.00
+21:34:28.851:[Scheduler] Received: Dropping Agent:0:1:15.00:0.00
+21:34:28.851:[Scheduler] Sent Drone 0: OK
+21:34:28.851:[Drone 0] Received: OK
+21:34:28.851:Drone 0 moving to (0.00,0.00)
+21:34:28.851:[Drone 0] Sent: LOCATION:0:728:242
+21:34:28.851:[Scheduler] Received: LOCATION:0:728:242
+21:34:28.851:[Scheduler] Sent Drone 0: OK
+21:34:28.851:[Drone 0] Received: OK
+21:34:28.902:[Drone 0] Sent: LOCATION:0:717:239
+21:34:28.902:[Scheduler] Received: LOCATION:0:717:239
+21:34:28.902:[Scheduler] Sent Drone 0: OK
+21:34:28.902:[Drone 0] Received: OK
+21:34:28.962:[Drone 0] Sent: LOCATION:0:705:235
+21:34:28.962:[Scheduler] Received: LOCATION:0:705:235
+21:34:28.962:[Scheduler] Sent Drone 0: OK
+21:34:28.962:[Drone 0] Received: OK
+21:34:29.024:[Drone 0] Sent: LOCATION:0:694:231
+21:34:29.024:[Scheduler] Received: LOCATION:0:694:231
+21:34:29.024:[Scheduler] Sent Drone 0: OK
+21:34:29.024:[Drone 0] Received: OK
+21:34:29.088:[Drone 0] Sent: LOCATION:0:683:227
+21:34:29.088:[Scheduler] Received: LOCATION:0:683:227
+21:34:29.088:[Scheduler] Sent Drone 0: OK
+21:34:29.088:[Drone 0] Received: OK

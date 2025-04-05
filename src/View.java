@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -9,6 +10,7 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
 public class View extends Thread {
+
     private Scheduler scheduler;
     private JFrame frame;
     private JPanel panel, map, statusBars;
@@ -208,7 +210,6 @@ public class View extends Thread {
                 int width = (int) ((end[0] - start[0]) * scale);
                 int height = (int) ((end[1] - start[1]) * scale);
 
-
                 zl.setBounds(x, y, width, height);
                 map.add(zl);
 
@@ -224,22 +225,23 @@ public class View extends Thread {
 
             // Get last known coordinates
             Integer[] lastCoords = lastKnownLocation.get(droneNum);
-            double lastX = (lastCoords != null) ? lastCoords[0] : coords[0]; // Default to current location
-            double lastY = (lastCoords != null) ? lastCoords[1] : coords[1];
-
-            //get recent coordinates without scaling
-            double currentX = coords[0];
-            double currentY = coords[1];
-
-            // Calculate angle
-            Double lastAngle = (droneAngles.containsKey(droneNum)) ? droneAngles.get(droneNum) : 0.00;
-            Double newAngle = Math.toDegrees(Math.atan2(currentY - lastY, currentX - lastX));
-            if (newAngle < 0) {//rectify to positive values
-                newAngle += 360;
+            if (lastCoords == null) {
+                lastCoords = coords;
+                lastKnownLocation.put(droneNum, lastCoords);
             }
-            Double angleDelta = newAngle - lastAngle;
-            if(angleDelta > 0){
-                droneAngles.replace(droneNum, newAngle);
+
+            // Calculate angle based on movement vector
+            double dx = coords[0] - lastCoords[0];
+            double dy = coords[1] - lastCoords[1];
+
+            // Only update angle if drone has actually moved
+            if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+                double newAngle = Math.toDegrees(Math.atan2(dy, dx));
+                if (newAngle < 0) {
+                    newAngle += 360;
+                }
+                droneAngles.put(droneNum, newAngle);
+                lastKnownLocation.put(droneNum, coords);
             }
 
             // Calculate scaled position
@@ -249,31 +251,26 @@ public class View extends Thread {
             if (!droneImages.containsKey(droneNum)) {
                 // Create new drone image label
                 JLabel droneLabel = new JLabel();
-
                 droneLabel.setBounds(x, y, 30, 30);
                 droneLabel.setOpaque(false);
                 droneImages.put(droneNum, droneLabel);
-                droneAngles.put(droneNum, 90.00); // Initialize angle
-                map.add(droneLabel);//add to map
-                map.setComponentZOrder(droneLabel, 0); // Bring to the front
+                map.add(droneLabel);
+                map.setComponentZOrder(droneLabel, 0);
             } else {
                 // Update existing drone position
                 JLabel droneLabel = droneImages.get(droneNum);
                 droneLabel.setLocation(x, y);
-
-                double currentAngle = droneAngles.get(droneNum);
-                //Commented this out since it was polluting my log
-                //System.out.println("Drone " + droneNum + ": " + currentAngle + " new: " + newAngle + " old: " + lastAngle);
-                droneLabel.setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
-                lastKnownLocation.put(droneNum, coords);
             }
-        }
 
+            // Always update the icon with current angle
+            double currentAngle = droneAngles.getOrDefault(droneNum, 0.0);
+            droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
+        }
 
         // Remove any drones that are no longer active
         Set<Integer> activeDrones = new HashSet<>(scheduler.allDroneList.keySet());
         droneImages.keySet().removeIf(droneNum -> {
-            if(!activeDrones.contains(droneNum)){
+            if (!activeDrones.contains(droneNum)) {
                 //Remove corresponding label from the map
                 JLabel droneLabel = droneImages.get(droneNum);
                 map.remove(droneLabel);
@@ -282,16 +279,15 @@ public class View extends Thread {
             return false;
         });
 
-
         map.revalidate();
         map.repaint();
     }
 
-    private ZoneLabel getZoneLabel(int zoneId){
-        for(Component component : map.getComponents()){
-            if(component instanceof ZoneLabel){
+    private ZoneLabel getZoneLabel(int zoneId) {
+        for (Component component : map.getComponents()) {
+            if (component instanceof ZoneLabel) {
                 ZoneLabel zoneLabel = (ZoneLabel) component;
-                if(zoneLabel.getName().equals(String.valueOf(zoneId))){
+                if (zoneLabel.getName().equals(String.valueOf(zoneId))) {
                     return zoneLabel;
                 }
             }
@@ -330,7 +326,7 @@ public class View extends Thread {
         g2dRotated.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         // Rotate around center
-        g2dRotated.rotate(Math.toRadians(angle), 15, 15);
+        g2dRotated.rotate(Math.toRadians(angle + 90), 15, 15);
         g2dRotated.drawImage(baseImage, 0, 0, null);
         g2dRotated.dispose();
 
@@ -403,6 +399,7 @@ public class View extends Thread {
     }
 
     private class ResizeListener extends ComponentAdapter {
+
         @Override
         public void componentResized(ComponentEvent e) {
             // Recalculate all zone positions on resize

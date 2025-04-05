@@ -39,7 +39,7 @@ public class View extends Thread {
         frame.addComponentListener(new ResizeListener());
 
         droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
-        panel = createPanel(Color.white);
+        panel = createPanel(new Color(240, 240, 240)); // Light gray background
         panel.setLayout(new GridBagLayout());
 
         menuBar = createMenuBar();
@@ -71,7 +71,7 @@ public class View extends Thread {
     }
 
     private JPanel createStatusBarsPanel() {
-        JPanel statusPanel = createPanel(Color.red);
+        JPanel statusPanel = createPanel(new Color(255, 255, 255)); // White background
         statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
         statusPanel.setPreferredSize(new Dimension(300, 250));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -83,7 +83,9 @@ public class View extends Thread {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
-        //textArea.setPreferredSize(new Dimension(600, 250));
+        textArea.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
+        textArea.setBackground(new Color(240, 240, 240)); // Light gray background
+        textArea.setForeground(Color.BLACK); // Black text
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         return textArea;
@@ -93,6 +95,8 @@ public class View extends Thread {
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Controls");
         JMenuItem start = new JMenuItem("Start");
+        start.setBackground(new Color(200, 200, 200)); // Light gray background
+        start.setForeground(Color.BLACK); // Black text
         menu.add(start);
         menuBar.add(menu);
         return menuBar;
@@ -107,13 +111,14 @@ public class View extends Thread {
     }
 
     private void addComponentsToPanel(JPanel panel, JComponent map, JComponent log, JComponent statusBars) {
-
         // Create bottom panel
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+        bottomPanel.setBackground(new Color(240, 240, 240)); // Light gray background
 
         JScrollPane logScrollPane = new JScrollPane(log);
         logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        logScrollPane.setPreferredSize(new Dimension(600 ,250));
+        logScrollPane.setPreferredSize(new Dimension(600, 250));
+        logScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1)); // Add a border to the log scroll pane
         bottomPanel.add(logScrollPane);
         bottomPanel.add(statusBars);
 
@@ -121,21 +126,10 @@ public class View extends Thread {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, map, bottomPanel);
         splitPane.setResizeWeight(0.7); // 70% of space goes to map
         splitPane.setDividerSize(5);
+        splitPane.setBorder(BorderFactory.createEmptyBorder()); // Remove default border
 
         panel.add(splitPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-    }
-
-    private void addComponent(JPanel panel, JComponent comp, int gridX, int gridY, double weightX, double weightY, int gridWidth, int gridHeight, int fill) {
-        gbc.gridx = gridX;
-        gbc.gridy = gridY;
-        gbc.weightx = weightX;
-        gbc.weighty = weightY;
-        gbc.gridwidth = gridWidth;
-        gbc.gridheight = gridHeight;
-        gbc.fill = fill;
-
-        panel.add(comp, gbc);
     }
 
     private JPanel makeDroneTile(String droneName, String volume, Integer[] location) {
@@ -144,16 +138,16 @@ public class View extends Thread {
         tile.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        tile.setBackground(new Color(240, 240, 240));
+        tile.setBackground(new Color(255, 255, 255)); // White background for tiles
         tile.setMaximumSize(new Dimension(300, 100)); // Increased height to accommodate new text
 
         JLabel nameLabel = new JLabel(droneName);
-        nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Modern font
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         String details = String.format("Vol: %s | Loc: (%d,%d)", volume, location[0], location[1]);
         JLabel detailsLabel = new JLabel(details);
-        detailsLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        detailsLabel.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
         detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Add state text area
@@ -161,11 +155,10 @@ public class View extends Thread {
         stateText.setEditable(false); // Make it read-only
         stateText.setLineWrap(true);
         stateText.setWrapStyleWord(true);
-        stateText.setFont(new Font("SansSerif", Font.PLAIN, 10));
-        stateText.setBackground(new Color(240, 240, 240));
+        stateText.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
+        stateText.setBackground(new Color(255, 255, 255)); // White background
         stateText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        //stateText.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        stateText.setText("Online"); // Default state text
+        stateText.setText("State: Online"); // Default state text
 
         tile.add(nameLabel);
         tile.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -182,20 +175,17 @@ public class View extends Thread {
             while (!scheduler.logQueue.isEmpty()) {
                 String currentLog = scheduler.logQueue.remove();
                 String[] splitLog = currentLog.split(":");
-        
+
                 // Check for specific log messages and update drone states accordingly
                 if (currentLog.contains("LOCATION")) {
                     continue; // Skip location logs
                 }
-        
+
                 // Append the log to the JTextArea
                 log.append(currentLog + "\n");
                 log.setCaretPosition(log.getDocument().getLength());
             }
-        
-            //scheduler.logQueue.clear();
-
-        }finally{
+        } finally {
             logQueueLock.unlock();
         }
     }
@@ -218,7 +208,7 @@ public class View extends Thread {
             });
         }
 
-        //repeat for events in the completed queue
+        // Repeat for events in the completed queue
         for (Event event : scheduler.fullyServicedEvents.values()) {
             Zone zone = event.getZone();
             zoneMap.computeIfAbsent(zone.getId(), k -> {
@@ -325,7 +315,7 @@ public class View extends Thread {
         Set<Integer> activeDrones = new HashSet<>(scheduler.allDroneList.keySet());
         droneImages.keySet().removeIf(droneNum -> {
             if (!activeDrones.contains(droneNum)) {
-                //Remove corresponding label from the map
+                // Remove corresponding label from the map
                 JLabel droneLabel = droneImages.get(droneNum);
                 map.remove(droneLabel);
                 return true;
@@ -347,7 +337,6 @@ public class View extends Thread {
             }
         }
         return new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
-
     }
 
     private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle) {
@@ -360,7 +349,7 @@ public class View extends Thread {
         g2dBase.drawImage(originalIcon.getImage(), 0, 0, null);
 
         // Draw number (not rotated yet)
-        g2dBase.setFont(new Font("SansSerif", Font.BOLD, 12));
+        g2dBase.setFont(new Font("Arial", Font.BOLD, 12)); // Modern font
         g2dBase.setColor(Color.BLACK);
         String droneNumberStr = String.valueOf(droneNum);
         FontMetrics fm = g2dBase.getFontMetrics();
@@ -394,9 +383,7 @@ public class View extends Thread {
                 try {
                     String name = ((JLabel) ((JPanel) comp).getComponent(0)).getText();
                     int droneNum = Integer.parseInt(name.replace("Drone ", ""));
-                    if(!existingDrones.contains(droneNum)){
-                        existingDrones.add(droneNum);
-                    }
+                    existingDrones.add(droneNum);
                 } catch (Exception e) {
                     // Handle potential parsing errors
                 }
@@ -464,8 +451,6 @@ public class View extends Thread {
             for (Object[] zoneData : zoneMap.values()) {
                 zoneData[2] = false; // Mark all zones for re-rendering
             }
-            //map.removeAll();
-            //droneImages.clear();
             updateMap();
             updateDrones();
             updateLogs();
@@ -475,5 +460,6 @@ public class View extends Thread {
     public static void main(String[] args) {
         // Entry point for the application
         // You would typically initialize the Scheduler and start the View here
+        
     }
 }

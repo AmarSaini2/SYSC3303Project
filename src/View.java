@@ -471,9 +471,10 @@ public class View extends Thread {
             for (Object[] zoneData : zoneMap.values()) {
                 zoneData[2] = false; // Mark all zones for re-rendering
             }
-            updateMap();
-            updateDrones();
-            updateLogs();
+            //Commented out since it was adding to many extra drones to the states bar
+//            updateMap();
+//            updateDrones();
+//            updateLogs();
         }
     }
 

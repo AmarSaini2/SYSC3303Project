@@ -172,6 +172,15 @@ public class View extends Thread {
             });
         }
 
+        //repeat for events in the completed queue
+        for (Event event : scheduler.fullyServicedEvents.values()) {
+            Zone zone = event.getZone();
+            zoneMap.computeIfAbsent(zone.getId(), k -> {
+                // For new zones, store coordinates and "not rendered" status
+                return new Object[]{zone.getStart(), zone.getEnd(), false};
+            });
+        }
+
         // Find the most extreme coordinates to determine scaling
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;

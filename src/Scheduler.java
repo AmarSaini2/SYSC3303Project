@@ -246,7 +246,6 @@ public class Scheduler extends Thread {
                         Integer[] currentLocation = {Integer.parseInt(splitMessage[2]), Integer.parseInt(splitMessage[3])};
                         localHashMap.put("location", currentLocation);
                         this.allDroneList.put(id, localHashMap);
-                        this.sendToDrone("OK", id);
                         break;
 
                     case "En Route": {

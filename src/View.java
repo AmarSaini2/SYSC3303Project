@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
@@ -24,6 +25,7 @@ public class View extends Thread {
     private HashMap<Integer, JLabel> droneImages = new HashMap<>();
     private HashMap<Integer, Double> droneAngles = new HashMap<>();
     private HashMap<Integer, Integer[]> lastKnownLocation = new HashMap<>();
+    private final ReentrantLock logQueueLock = new ReentrantLock();
 
     public View(Scheduler scheduler) {
         this.scheduler = scheduler;
@@ -81,7 +83,7 @@ public class View extends Thread {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
-        textArea.setPreferredSize(new Dimension(600, 250));
+        //textArea.setPreferredSize(new Dimension(600, 250));
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         return textArea;
@@ -111,7 +113,7 @@ public class View extends Thread {
 
         JScrollPane logScrollPane = new JScrollPane(log);
         logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        logScrollPane.setPreferredSize(log.getPreferredSize());
+        logScrollPane.setPreferredSize(new Dimension(600 ,250));
         bottomPanel.add(logScrollPane);
         bottomPanel.add(statusBars);
 
@@ -163,7 +165,7 @@ public class View extends Thread {
         stateText.setBackground(new Color(240, 240, 240));
         stateText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         //stateText.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        stateText.setText("State: Online"); // Default state text
+        stateText.setText("Online"); // Default state text
 
         tile.add(nameLabel);
         tile.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -175,22 +177,27 @@ public class View extends Thread {
     }
 
     private void updateLogs() {
-        while (!scheduler.logQueue.isEmpty()) {
-            String currentLog = scheduler.logQueue.remove();
-            String[] splitLog = currentLog.split(":");
-    
-            // Check for specific log messages and update drone states accordingly
-            if (currentLog.contains("LOCATION")) {
-                continue; // Skip location logs
+        logQueueLock.lock();
+        try {
+            while (!scheduler.logQueue.isEmpty()) {
+                String currentLog = scheduler.logQueue.remove();
+                String[] splitLog = currentLog.split(":");
+        
+                // Check for specific log messages and update drone states accordingly
+                if (currentLog.contains("LOCATION")) {
+                    continue; // Skip location logs
+                }
+        
+                // Append the log to the JTextArea
+                log.append(currentLog + "\n");
+                log.setCaretPosition(log.getDocument().getLength());
             }
-    
-            // Append the log to the JTextArea
-            log.append(currentLog + "\n");
-            log.setCaretPosition(log.getDocument().getLength());
+        
+            //scheduler.logQueue.clear();
+
+        }finally{
+            logQueueLock.unlock();
         }
-    
-        // Update the drone tiles after processing logs
-        SwingUtilities.invokeLater(this::updateDrones);
     }
 
     private void updateMap() {
@@ -381,12 +388,15 @@ public class View extends Thread {
     }
 
     private void updateDrones() {
+        existingDrones.clear();
         for (Component comp : statusBars.getComponents()) {
             if (comp instanceof JPanel) {
                 try {
                     String name = ((JLabel) ((JPanel) comp).getComponent(0)).getText();
                     int droneNum = Integer.parseInt(name.replace("Drone ", ""));
-                    existingDrones.add(droneNum);
+                    if(!existingDrones.contains(droneNum)){
+                        existingDrones.add(droneNum);
+                    }
                 } catch (Exception e) {
                     // Handle potential parsing errors
                 }

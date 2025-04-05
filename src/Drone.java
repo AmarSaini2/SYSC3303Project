@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class Drone extends Thread {
+
     private static int idCounter = 0;
     private int id;
 
@@ -62,7 +64,7 @@ public class Drone extends Thread {
 
         this.finish = false;
 
-        this.currentLocation = new double[] { 0, 0 };
+        this.currentLocation = new double[]{0, 0};
 
     }
 
@@ -85,8 +87,9 @@ public class Drone extends Thread {
             while ((line = br.readLine()) != null) {
 
                 line = line.trim();
-                if (line.isEmpty())
+                if (line.isEmpty()) {
                     continue;
+                }
                 // String[] parts = line.split("\\s+");
                 String[] parts = line.split("\\s*,\\s*");
                 if (parts.length >= 2) {
@@ -145,13 +148,12 @@ public class Drone extends Thread {
      */
     private int getTravelTime(Event fire) {
         Zone zone = fire.getZone();
-        double distance = Math.sqrt(zone.getStart()[0] * zone.getStart()[0] +
-                zone.getEnd()[1] * zone.getEnd()[1]);
+        double distance = Math.sqrt(zone.getStart()[0] * zone.getStart()[0]
+                + zone.getEnd()[1] * zone.getEnd()[1]);
         return (int) (distance / attributes.get("travelSpeed"));
     }
 
     // ========== STATE HANDLING FUNCTIONS ==========
-
     protected void sendWakeupMessage() {
         try {
             String sendMessage = "ONLINE:" + this.id;
@@ -203,7 +205,7 @@ public class Drone extends Thread {
         }
     }
 
-    public void moveTo(double[] targetLocation){
+    public void moveTo(double[] targetLocation) {
         System.out.println(String.format("Drone %d moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
 
         //Get x and y distance from target
@@ -211,7 +213,7 @@ public class Drone extends Thread {
         double yDistance = targetLocation[1] - this.currentLocation[1];
 
         //Get the x and y ratios
-        double totalDistance = Math.sqrt(xDistance*xDistance + yDistance*yDistance);
+        double totalDistance = Math.sqrt(xDistance * xDistance + yDistance * yDistance);
         double xRatio = xDistance / totalDistance;
         double yRatio = yDistance / totalDistance;
 
@@ -219,22 +221,18 @@ public class Drone extends Thread {
         int secondsRequired = (int) Math.floor(totalDistance / this.attributes.get("travelSpeed"));
 
         //Move the drone
-        for (int i = 0; i < secondsRequired; i++){
+        for (int i = 0; i < secondsRequired; i++) {
             this.currentLocation[0] += this.attributes.get("travelSpeed") * xRatio;
             this.currentLocation[1] += this.attributes.get("travelSpeed") * yRatio;
-            sendReceive(String.format("LOCATION:%d:%d:%d", this.id, (int)this.currentLocation[0], (int)this.currentLocation[1]));
+            String s = String.format("LOCATION:%d:%d:%d", this.id, (int)this.currentLocation[0], (int)this.currentLocation[1]);
+            DatagramPacket packet = new DatagramPacket(s.getBytes(), s.getBytes().length, schedulerAddress, schedulerPort);
+            //sendReceive(String.format("LOCATION:%d:%d:%d", this.id, (int)this.currentLocation[0], (int)this.currentLocation[1]));
             try {
+                socket.send(packet);
                 sleep(SLEEPMULTIPLIER);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }
-        String s = String.format("LOCATION:%d:%d:%d", this.id, (int)targetLocation[0], (int)targetLocation[1]);
-        DatagramPacket packet = new DatagramPacket(s.getBytes(), s.getBytes().length, schedulerAddress, schedulerPort);
-        try {
-            socket.send(packet);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -267,7 +265,7 @@ public class Drone extends Thread {
 
     private void injectFault(FaultEvent.Type faultType) {
         FaultEvent faultEvent = new FaultEvent(LocalTime.now(), faultType, this.id, this.assignedFire);
-        byte[] faultData = faultEvent.createMessage("FAULT_EVENT:"+this.carryingVolume+":");
+        byte[] faultData = faultEvent.createMessage("FAULT_EVENT:" + this.carryingVolume + ":");
         try {
             DatagramPacket faultPacket = new DatagramPacket(faultData, faultData.length, schedulerAddress,
                     schedulerPort);
@@ -321,7 +319,7 @@ public class Drone extends Thread {
 
     public void returnToBase() {
         // System.out.println("[Drone " + id + "] Returning to base...");
-        moveTo(new double[]{0.0,0.0});
+        moveTo(new double[]{0.0, 0.0});
         // System.out.println("[Drone " + id + "] Reached base.");
 
         String response = sendReceive(String.format("%s:%d", this.getStateAsString(), this.id));

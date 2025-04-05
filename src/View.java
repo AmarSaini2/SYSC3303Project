@@ -182,7 +182,6 @@ public class View extends Thread {
             maxX = Math.max(maxX, end[0]);
             minY = Math.min(minY, start[1]);
             maxY = Math.max(maxY, end[1]);
-            maxY = Math.max(maxY, end[1]);
         }
 
         // Calculate scaling factors with 10% padding

@@ -67,7 +67,7 @@ public class DroneTest {
 
                 testSocket.receive(receivePacket2);
                 String droneResponse = new String(receivePacket2.getData(), 0, receivePacket2.getLength());
-                assertEquals("En Route:0:0:15.00", droneResponse);
+                assertEquals("LOCATION:0:7:6", droneResponse);
 
 
             } catch (IOException e) {
@@ -92,7 +92,55 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "Dropping Agent:0:0:15.00:0.00");
+            assertEquals(droneResponse, "LOCATION:0:14:12");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    @Order(3)
+    public void testNextState2(){
+        try {
+            DatagramSocket testSocket = workingSocket;
+            DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
+            Zone zone = new Zone (1, 0,0,700,600);
+            Event event = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.LOW);
+            byte[] buffer = event.createMessage("OK:");
+
+            DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, workingDroneAddr, workingDronePort);
+            testSocket.send(sendPacket);
+
+            testSocket.receive(receivePacket);
+            String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+            assertEquals(droneResponse, "LOCATION:0:21:18");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    @Order(3)
+    public void testNextState3(){
+        try {
+            DatagramSocket testSocket = workingSocket;
+            DatagramPacket receivePacket = new DatagramPacket(new byte[1024], 1024);
+
+            Zone zone = new Zone (1, 0,0,700,600);
+            Event event = new Event(LocalTime.now(), zone, Event.Type.FIRE_DETECTED, Event.Severity.LOW);
+            byte[] buffer = event.createMessage("OK:");
+
+            DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, workingDroneAddr, workingDronePort);
+            testSocket.send(sendPacket);
+
+            testSocket.receive(receivePacket);
+            String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
+
+            assertEquals(droneResponse, "LOCATION:0:28:24");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

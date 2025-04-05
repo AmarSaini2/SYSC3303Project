@@ -9,105 +9,106 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
 public class View extends Thread {
-    Scheduler scheduler;
-    JFrame frame;
-    JPanel panel, map, statusBars;
-    JTextArea log;
-    JMenu menu;
-    JMenuBar menuBar;
-    JMenuItem start;
+    private Scheduler scheduler;
+    private JFrame frame;
+    private JPanel panel, map, statusBars;
+    private JTextArea log;
+    private JMenuBar menuBar;
+    private ImageIcon droneIcon;
 
-    GridBagConstraints gbc;
+    private GridBagConstraints gbc;
+    private Set<Integer> existingDrones = new HashSet<>();
+    private HashMap<Integer, Object[]> zoneMap = new HashMap<>();
+    private HashMap<Integer, JLabel> droneImages = new HashMap<>();
+    private HashMap<Integer, Double> droneAngles = new HashMap<>();
+    private HashMap<Integer, Integer[]> lastKnownLocation = new HashMap<>();
 
-    Set<Integer> existingDrones = new HashSet<>();
-    HashMap<Integer, Object[]> zoneMap;
-    HashMap<Integer, JLabel> droneImages = new HashMap<>();
-    ImageIcon droneIcon;
-    HashMap<Integer, Double> droneAngles = new HashMap<>();
-
-
-    View(Scheduler s){
-        this.scheduler = s;
+    public View(Scheduler scheduler) {
+        this.scheduler = scheduler;
         this.gbc = new GridBagConstraints();
-        this.frame = new JFrame("GUI NAME HERE");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                // Recalculate all zone positions on resize
-                for (Object[] zoneData : zoneMap.values()) {
-                    zoneData[2] = false; // Mark all zones for re-rendering
-                }
-                map.removeAll();
-                droneImages.clear();
-                updateMap();
-            }
-        });
+        initializeUI();
+    }
 
-        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/assets/Drone.png"));
-        Image scaledImage = originalIcon.getImage().getScaledInstance(30,30,Image.SCALE_SMOOTH);
-        this.droneIcon = new ImageIcon(scaledImage);
-        
-        this.panel = makePanel(Color.white);
+    private void initializeUI() {
+        frame = new JFrame("Drone Control Panel");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.addComponentListener(new ResizeListener());
+
+        droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
+        panel = createPanel(Color.white);
         panel.setLayout(new GridBagLayout());
 
-        this.menuBar = new JMenuBar();
-        this.menu = new JMenu("Controls");
-        this.start = new JMenuItem("Start");
-        menu.add(start);
-        menuBar.add(menu);
+        menuBar = createMenuBar();
         frame.setJMenuBar(menuBar);
 
-        this.zoneMap = new HashMap();
-        this.map = makePanel(Color.white);
-        map.setLayout(null);
-        map.setSize(1200,750);
-        map.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
-        this.statusBars = makePanel(Color.red);
-        statusBars.setLayout(new BoxLayout(statusBars, BoxLayout.Y_AXIS));
-        statusBars.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        JScrollPane statusBarScroll = new JScrollPane(statusBars);
-        statusBarScroll.setPreferredSize(new Dimension(600,150));
-        statusBarScroll.setBorder(BorderFactory.createTitledBorder("Drone Status"));
+        map = createMapPanel();
+        statusBars = createStatusBarsPanel();
+        log = createLogComponent();
 
-        this.log = makeLogComp();
-        JScrollPane logScroll = new JScrollPane(log);
-        logScroll.setPreferredSize(new Dimension(600,150));
-        logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        logScroll.setBorder(BorderFactory.createTitledBorder("Event Log"));
-        
-        addComp(panel, map, 0, 0, 1, 0.7, 2, 1, GridBagConstraints.BOTH);
-        addComp(panel, logScroll, 0, 1, 0.5, 0.3, 1, 1, GridBagConstraints.BOTH);
-        addComp(panel, statusBarScroll, 1, 1, 0.25, 0.3, 1, 1, GridBagConstraints.BOTH);
-
+        addComponentsToPanel(panel, map, log, statusBars);
         frame.setContentPane(panel);
-        frame.setSize(1200,900);
+        frame.setSize(1200, 900);
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
     }
 
-    private JTextArea makeLogComp(){
+    private ImageIcon createScaledIcon(String path, int width, int height) {
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource(path));
+        Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaledImage);
+    }
+
+    private JPanel createMapPanel() {
+        JPanel mapPanel = createPanel(Color.white);
+        mapPanel.setLayout(null);
+        mapPanel.setSize(1200, 450);
+        mapPanel.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY, 2));
+        return mapPanel;
+    }
+
+    private JPanel createStatusBarsPanel() {
+        JPanel statusPanel = createPanel(Color.red);
+        statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
+        statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        return statusPanel;
+    }
+
+    private JTextArea createLogComponent() {
         JTextArea textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
-
-        DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        
         return textArea;
     }
 
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menu = new JMenu("Controls");
+        JMenuItem start = new JMenuItem("Start");
+        menu.add(start);
+        menuBar.add(menu);
+        return menuBar;
+    }
 
-    private JPanel makePanel(Color c){
+    private JPanel createPanel(Color color) {
         JPanel panel = new JPanel();
         panel.setOpaque(true);
-        panel.setBackground(c);
-        panel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+        panel.setBackground(color);
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         return panel;
     }
 
-    private void addComp(JPanel panel, JComponent comp, int gridX, int gridY, double weightX, double weightY, int gridWidth, int gridHeight, int fill){
+    private void addComponentsToPanel(JPanel panel, JComponent map, JComponent log, JComponent statusBars) {
+        JScrollPane logScrollPane = new JScrollPane(log);
+        logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        addComponent(panel, map, 0, 0, 1, 0.7, 2, 1, GridBagConstraints.BOTH);
+        addComponent(panel, logScrollPane, 0, 1, 0.5, 0.3, 1, 1, GridBagConstraints.BOTH);
+        addComponent(panel, statusBars, 1, 1, 0.25, 0.3, 1, 1, GridBagConstraints.BOTH);
+    }
+
+    private void addComponent(JPanel panel, JComponent comp, int gridX, int gridY, double weightX, double weightY, int gridWidth, int gridHeight, int fill) {
         gbc.gridx = gridX;
         gbc.gridy = gridY;
         gbc.weightx = weightX;
@@ -119,14 +120,14 @@ public class View extends Thread {
         panel.add(comp, gbc);
     }
 
-    private JPanel makeDroneTile(String droneName, String volume, Integer[] location){
+    private JPanel makeDroneTile(String droneName, String volume, Integer[] location) {
         JPanel tile = new JPanel();
         tile.setLayout(new BoxLayout(tile, BoxLayout.Y_AXIS));
         tile.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
-            BorderFactory.createEmptyBorder(10,10,10,10)));
-        tile.setBackground(new Color(240,240,240));
-        tile.setMaximumSize(new Dimension(Integer.MAX_VALUE,80));
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        tile.setBackground(new Color(240, 240, 240));
+        tile.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
         JLabel nameLabel = new JLabel(droneName);
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -138,29 +139,28 @@ public class View extends Thread {
         detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         tile.add(nameLabel);
-        tile.add(Box.createRigidArea(new Dimension(0,5)));
+        tile.add(Box.createRigidArea(new Dimension(0, 5)));
         tile.add(detailsLabel);
 
         return tile;
     }
 
-    private void updateLogs(){
-        while(!scheduler.logQueue.isEmpty()){
+    private void updateLogs() {
+        while (!scheduler.logQueue.isEmpty()) {
             log.append(scheduler.logQueue.remove() + "\n");
+            //log.setCaretPosition(log.getDocument().getLength());//scroll to bottom
         }
     }
 
     private void updateMap() {
-
         // Calculate scaling factors based on the first zone (reference point)
         if (zoneMap.isEmpty() && !scheduler.eventQueue.isEmpty()) {
-            // Initialize with first zone's coordinates
             Zone firstZone = scheduler.eventQueue.peek().getZone();
             int[] start = firstZone.getStart();
             int[] end = firstZone.getEnd();
             zoneMap.put(firstZone.getId(), new Object[]{start, end, false});
         }
-    
+
         // Add new zones while maintaining relative positioning
         for (Event event : scheduler.eventQueue) {
             Zone zone = event.getZone();
@@ -169,125 +169,195 @@ public class View extends Thread {
                 return new Object[]{zone.getStart(), zone.getEnd(), false};
             });
         }
-    
+
         // Find the most extreme coordinates to determine scaling
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
-        
+
         for (Object[] zoneData : zoneMap.values()) {
             int[] start = (int[]) zoneData[0];
             int[] end = (int[]) zoneData[1];
-            
+
             minX = Math.min(minX, start[0]);
             maxX = Math.max(maxX, end[0]);
             minY = Math.min(minY, start[1]);
             maxY = Math.max(maxY, end[1]);
         }
-    
+
         // Calculate scaling factors with 10% padding
         double widthPadding = (maxX - minX) * 0.1;
         double heightPadding = (maxY - minY) * 0.1;
         double scaleX = map.getWidth() / (maxX - minX + widthPadding);
         double scaleY = map.getHeight() / (maxY - minY + heightPadding);
         double scale = Math.min(scaleX, scaleY);
-    
+
         // Add only unrendered zones to the map
         for (Integer zoneId : zoneMap.keySet()) {
+            ZoneLabel zl = getZoneLabel(zoneId);
             Object[] zoneData = zoneMap.get(zoneId);
             boolean rendered = (boolean) zoneData[2];
-            
+
             if (!rendered) {
                 int[] start = (int[]) zoneData[0];
                 int[] end = (int[]) zoneData[1];
-                
+
                 // Calculate scaled positions and dimensions
-                int x = (int) ((start[0] - minX + widthPadding/2) * scale);
-                int y = (int) ((start[1] - minY + heightPadding/2) * scale);
+                int x = (int) ((start[0] - minX + widthPadding / 2) * scale);
+                int y = (int) ((start[1] - minY + heightPadding / 2) * scale);
                 int width = (int) ((end[0] - start[0]) * scale);
                 int height = (int) ((end[1] - start[1]) * scale);
-    
-                ZoneLabel zl = new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
+
+
                 zl.setBounds(x, y, width, height);
                 map.add(zl);
-                
+
                 // Mark as rendered
                 zoneData[2] = true;
             }
         }
 
+        // Update drone positions
+        for (int droneNum : scheduler.allDroneList.keySet()) {
+            Object coordsObj = scheduler.allDroneList.get(droneNum).get("location");
+            Integer[] coords = (Integer[]) coordsObj;
 
-        //Update drone positions
-        for(int droneNum : scheduler.allDroneList.keySet()){
-            Integer[] coords = (Integer[]) scheduler.allDroneList.get(droneNum).get("location");
+            // Get last known coordinates
+            Integer[] lastCoords = lastKnownLocation.get(droneNum);
+            double lastX = (lastCoords != null) ? lastCoords[0] : coords[0]; // Default to current location
+            double lastY = (lastCoords != null) ? lastCoords[1] : coords[1];
 
-            //calculate scaled position
-            int x = (int) ((coords[0] - minX + widthPadding/2) * scale) - 15;
-            int y = (int) ((coords[0] - minY + heightPadding/2) * scale) - 15;
+            //get recent coordinates without scaling
+            double currentX = coords[0];
+            double currentY = coords[1];
 
-            //calculate angle
-            Double angle = droneAngles.get(droneNum);
-            if(angle != null){
-                Image rotatedImage = rotateImage(((ImageIcon)droneIcon).getImage(), angle);
-                droneImages.get(droneNum).setIcon(new ImageIcon(rotatedImage));
+            // Calculate angle
+            Double lastAngle = (droneAngles.containsKey(droneNum)) ? droneAngles.get(droneNum) : 0.00;
+            Double newAngle = Math.toDegrees(Math.atan2(currentY - lastY, currentX - lastX));
+            if (newAngle < 0) {//rectify to positive values
+                newAngle += 360;
+            }
+            Double angleDelta = newAngle - lastAngle;
+            if(angleDelta > 0){
+                droneAngles.replace(droneNum, newAngle);
             }
 
-            if(!droneImages.containsKey(droneNum)){
-                //create new drone image label
-                JLabel droneLabel = new JLabel(droneIcon);
-                droneLabel.setBounds(x,y, 30, 30);
+            // Calculate scaled position
+            int x = (int) ((coords[0] - minX + widthPadding / 2) * scale) - 15;
+            int y = (int) ((coords[1] - minY + heightPadding / 2) * scale) - 15;
+
+            if (!droneImages.containsKey(droneNum)) {
+                // Create new drone image label
+                JLabel droneLabel = new JLabel();
+
+                droneLabel.setBounds(x, y, 30, 30);
                 droneLabel.setOpaque(false);
-                map.add(droneLabel);
-                map.add(droneLabel);
                 droneImages.put(droneNum, droneLabel);
-                map.setComponentZOrder(droneLabel, 0);//bring to the front
-            }else{
-                //update existing drone position
+                droneAngles.put(droneNum, 90.00); // Initialize angle
+                map.add(droneLabel);//add to map
+                map.setComponentZOrder(droneLabel, 0); // Bring to the front
+            } else {
+                // Update existing drone position
                 JLabel droneLabel = droneImages.get(droneNum);
-                droneLabel.setLocation(x,y);
+                droneLabel.setLocation(x, y);
+
+                double currentAngle = droneAngles.get(droneNum);
+                System.out.println("Drone " + droneNum + ": " + currentAngle + " new: " + newAngle + " old: " + lastAngle);
+                droneLabel.setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
+                lastKnownLocation.put(droneNum, coords);
             }
         }
 
-        //remove any drones that are no longer active
+
+        // Remove any drones that are no longer active
         Set<Integer> activeDrones = new HashSet<>(scheduler.allDroneList.keySet());
-        droneImages.keySet().removeIf(droneNum -> !activeDrones.contains(droneNum));
-    
+        droneImages.keySet().removeIf(droneNum -> {
+            if(!activeDrones.contains(droneNum)){
+                //Remove corresponding label from the map
+                JLabel droneLabel = droneImages.get(droneNum);
+                map.remove(droneLabel);
+                return true;
+            }
+            return false;
+        });
+
+
         map.revalidate();
         map.repaint();
     }
 
-    private Image rotateImage(Image image, double angle){
-        BufferedImage buffered = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = buffered.createGraphics();
-        g2d.rotate(Math.toRadians(angle), image.getWidth(null)/2, image.getHeight(null)/2);
-        g2d.drawImage(image, 0, 0, null);
-        g2d.dispose();
-        return buffered;
-    }
-
-    private void updateDrones(){
-        for(Component comp : statusBars.getComponents()){
-            if(comp instanceof JPanel){
-                try {
-                    String name = ((JLabel)((JPanel)comp).getComponent(0)).getText();
-                    int droneNum = Integer.parseInt(name.replace("Drone ", ""));
-                    existingDrones.add(droneNum);
-                } catch (Exception e) {}
+    private ZoneLabel getZoneLabel(int zoneId){
+        for(Component component : map.getComponents()){
+            if(component instanceof ZoneLabel){
+                ZoneLabel zoneLabel = (ZoneLabel) component;
+                if(zoneLabel.getName().equals(String.valueOf(zoneId))){
+                    return zoneLabel;
                 }
             }
-        
+        }
+        return new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
 
-        for(int droneNum: scheduler.allDroneList.keySet()){
+    }
+
+    private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle) {
+        // Create base image (unrotated)
+        BufferedImage baseImage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2dBase = baseImage.createGraphics();
+
+        // Draw drone icon (centered)
+        ImageIcon originalIcon = createScaledIcon("/assets/Drone.png", 30, 30);
+        g2dBase.drawImage(originalIcon.getImage(), 0, 0, null);
+
+        // Draw number (not rotated yet)
+        g2dBase.setFont(new Font("SansSerif", Font.BOLD, 12));
+        g2dBase.setColor(Color.BLACK);
+        String droneNumberStr = String.valueOf(droneNum);
+        FontMetrics fm = g2dBase.getFontMetrics();
+        int textWidth = fm.stringWidth(droneNumberStr);
+        int textHeight = fm.getAscent();
+        int x = (30 - textWidth) / 2;
+        int y = (30 + textHeight) / 2 - 2;
+        g2dBase.drawString(droneNumberStr, x, y);
+        g2dBase.dispose();
+
+        // Now rotate the complete image
+        BufferedImage rotatedImage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2dRotated = rotatedImage.createGraphics();
+
+        // Set rendering hints for better quality
+        g2dRotated.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2dRotated.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+        // Rotate around center
+        g2dRotated.rotate(Math.toRadians(angle), 15, 15);
+        g2dRotated.drawImage(baseImage, 0, 0, null);
+        g2dRotated.dispose();
+
+        return new ImageIcon(rotatedImage);
+    }
+
+    private void updateDrones() {
+        for (Component comp : statusBars.getComponents()) {
+            if (comp instanceof JPanel) {
+                try {
+                    String name = ((JLabel) ((JPanel) comp).getComponent(0)).getText();
+                    int droneNum = Integer.parseInt(name.replace("Drone ", ""));
+                    existingDrones.add(droneNum);
+                } catch (Exception e) {
+                    // Handle potential parsing errors
+                }
+            }
+        }
+
+        for (int droneNum : scheduler.allDroneList.keySet()) {
             String volume = scheduler.allDroneList.get(droneNum).get("volume").toString();
             Integer[] coords = (Integer[]) scheduler.allDroneList.get(droneNum).get("location");
 
-            if(existingDrones.contains(droneNum)){
+            if (existingDrones.contains(droneNum)) {
                 updateDroneTile(droneNum, volume, coords);
-            }else{
-                statusBars.add(makeDroneTile("Drone " + droneNum,volume,coords));
-                statusBars.add(Box.createRigidArea(new Dimension(0,5)));
+            } else {
+                statusBars.add(makeDroneTile("Drone " + droneNum, volume, coords));
+                statusBars.add(Box.createRigidArea(new Dimension(0, 5)));
             }
-
-            
         }
 
         statusBars.revalidate();
@@ -299,9 +369,9 @@ public class View extends Thread {
         if (tile != null) {
             // Update the labels
             Component[] children = tile.getComponents();
-            ((JLabel)children[0]).setText("Drone " + droneNumber);  // Name
-            ((JLabel)children[2]).setText(
-                String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
+            ((JLabel) children[0]).setText("Drone " + droneNumber);  // Name
+            ((JLabel) children[2]).setText(
+                    String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
             );
         }
     }
@@ -309,11 +379,11 @@ public class View extends Thread {
     private JPanel findDroneTile(int droneNumber) {
         for (Component comp : statusBars.getComponents()) {
             if (comp instanceof JPanel) {
-                Component[] children = ((JPanel)comp).getComponents();
+                Component[] children = ((JPanel) comp).getComponents();
                 if (children.length > 0 && children[0] instanceof JLabel) {
-                    String labelText = ((JLabel)children[0]).getText();
+                    String labelText = ((JLabel) children[0]).getText();
                     if (labelText.equals("Drone " + droneNumber)) {
-                        return (JPanel)comp;
+                        return (JPanel) comp;
                     }
                 }
             }
@@ -321,44 +391,32 @@ public class View extends Thread {
         return null;
     }
 
-
     @Override
-    public void run(){
-        while(!scheduler.finish){
-
+    public void run() {
+        while (!scheduler.finish) {
             updateLogs();
             updateMap();
             updateDrones();
-
-            /*
-            pending and completed events (need to only update new values)
-            this.log.append("\nOngoing Events:\n");
-            for(Event e: scheduler.eventQueue){
-                this.log.append(e + "\n");
-            }
-
-            this.log.append("Completed Events:\n");
-            for(Entry<Integer, Event> entry : scheduler.fullyServicedEvents.entrySet()){
-                this.log.append(entry.toString() + "\n");
-            }
-
-            this.log.append("\n------------------------------------\n");
-
-            */
-            /*Drone data (volume is not being passed from drone to scheduler)
-            for(int droneNum : scheduler.allDroneList.keySet()){
-                String volume = scheduler.allDroneList.get(droneNum).get("volume").toString();
-                Integer[] coords = (Integer[]) scheduler.allDroneList.get(droneNum).get("location");
-                this.log.append("Drone: " + droneNum + " -> Volume: " + volume);
-                this.log.append(  ", Location: " + coords[0] + "," + coords[1] + "\n");
-            }
-            */
         }
-        
-        //System.exit(0);
+    }
+
+    private class ResizeListener extends ComponentAdapter {
+        @Override
+        public void componentResized(ComponentEvent e) {
+            // Recalculate all zone positions on resize
+            for (Object[] zoneData : zoneMap.values()) {
+                zoneData[2] = false; // Mark all zones for re-rendering
+            }
+            //map.removeAll();
+            //droneImages.clear();
+            updateMap();
+            updateDrones();
+            updateLogs();
+        }
     }
 
     public static void main(String[] args) {
+        // Entry point for the application
+        // You would typically initialize the Scheduler and start the View here
     }
-
 }

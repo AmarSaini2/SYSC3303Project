@@ -17,7 +17,7 @@ public class Drone extends Thread {
     private final HashMap<String, Double> attributes;
     private double carryingVolume;
     private double agentDropAmount;
-    private final int SLEEPMULTIPLIER = 1;
+    private final int SLEEPMULTIPLIER = 50;
 
     private final Random random;
 
@@ -235,6 +235,48 @@ public class Drone extends Thread {
     public void travelToFire() {
         // System.out.println("[Drone " + id + "] Traveling to fire at Zone: " +
         // assignedFire.getZone().getId());
+
+        // Get the target coordinates
+        Zone zone = assignedFire.getZone();
+        double targetX = (zone.getEnd()[0] - zone.getStart()[0])/2;
+        double targetY = (zone.getEnd()[1] - zone.getStart()[1])/2;
+
+        // Calculate the travel time
+        int travelTimeSeconds = getTravelTime(assignedFire);
+
+        // If the travel time is 0, the drone is already at the fire location
+        if (travelTimeSeconds <= 0) {
+            System.out.println("[Drone " + id + "] Already at the fire location.");
+            return;
+        }
+
+        FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("EnRoute").getStateString());
+        if (faultToInject != null) {
+            System.out.println("[Drone " + id + "] Fault injection triggered for TRAVEL: " + faultToInject);
+            injectFault(faultToInject);
+            return;
+        }
+
+        // Calculate the distance to travel per second in the x and y directions
+        double dxPerSecond = targetX / travelTimeSeconds;
+        double dyPerSecond = targetY / travelTimeSeconds;
+
+        // Simulate the drone's travel to the fire location
+        for (int currentSecond = 1; currentSecond <= travelTimeSeconds; currentSecond++) {
+            // Calculate the current position of the drone
+            double currentX = dxPerSecond * currentSecond;
+            double currentY = dyPerSecond * currentSecond;
+            System.out.printf("[Drone %d] Traveling... Current position: (%.2f, %.2f)%n", id, currentX, currentY);
+            String locationResponse = sendReceive(String.format("LOCATION:%d:%d:%d", id, (int)currentX, (int)currentY));
+
+            try {
+                // Sleep for 1 second to simulate the drone's travel time
+                Thread.sleep(SLEEPMULTIPLIER);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         double[] center = assignedFire.getZone().getCenter();
         moveTo(center);
 

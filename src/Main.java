@@ -17,9 +17,12 @@
  */
 public class Main {
     public static void main(String[] args) {
-        Drone drone0 = new Drone(6000, "src/droneFaultInjection_0.txt");
+       // Drone drone0 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone0 = new Drone(6000);
         Drone drone1 = new Drone(6000);
         Drone drone2 = new Drone(6000);
+
+        TimeStampDaemon.startDaemon();
 
         // Create the scheduler which will manage drone assignments and event processing
         Scheduler scheduler = new Scheduler(5000, 6000);
@@ -58,6 +61,12 @@ public class Main {
             drone2.join();
         } catch (InterruptedException e) {
             e.printStackTrace(); // Handle any interruption in thread execution
+        }
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }

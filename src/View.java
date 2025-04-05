@@ -261,7 +261,8 @@ public class View extends Thread {
                 droneLabel.setLocation(x, y);
 
                 double currentAngle = droneAngles.get(droneNum);
-                System.out.println("Drone " + droneNum + ": " + currentAngle + " new: " + newAngle + " old: " + lastAngle);
+                //Commented this out since it was polluting my log
+                //System.out.println("Drone " + droneNum + ": " + currentAngle + " new: " + newAngle + " old: " + lastAngle);
                 droneLabel.setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
                 lastKnownLocation.put(droneNum, coords);
             }

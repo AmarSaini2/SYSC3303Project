@@ -51,4 +51,10 @@ public class Zone implements Serializable {
     public int[] getEnd() {
         return end;
     }
+
+    public double[] getCenter() {
+        double zoneX = this.start[0] + (double) (this.end[0] - this.start[0]) /2;
+        double zoneY = this.start[1] + (double) (this.end[1] - this.start[1]) /2;
+        return new double[]{zoneX, zoneY};
+    }
 }

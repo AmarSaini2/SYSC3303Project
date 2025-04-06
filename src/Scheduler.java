@@ -280,7 +280,6 @@ public class Scheduler extends Thread {
                         localHashMap.put("state", "Dropping Agent");
                         this.allDroneList.put(id, localHashMap);
 
-                        double agentDropAmount = Double.parseDouble(splitMessage[3]);
                         int eventId = Integer.parseInt(splitMessage[2]);
                         Event event = null;
 
@@ -296,6 +295,7 @@ public class Scheduler extends Thread {
                             }
                         }
 
+                        double agentDropAmount = Double.parseDouble(splitMessage[3]);
                         if ((event.getAgentRequired()-event.getAgentDropping()) < (agentDropAmount+0.0001)) {
                             agentDropAmount = (event.getAgentRequired()-event.getAgentDropping()) ;
                         }
@@ -344,9 +344,21 @@ public class Scheduler extends Thread {
                         } else {
                             for (Event event : this.eventQueue) {
                                 if (event.getId() == eventId) {
-                                    event.setAgentRequired(
-                                            event.getAgentRequired() - Double.parseDouble(splitMessage[3]));
-                                    event.setAgentSent(event.getAgentSent() - Double.parseDouble(splitMessage[3]));
+                                    double agentRequired = event.getAgentRequired() - Double.parseDouble(splitMessage[3]);
+                                    if (agentRequired < 0.0001) {
+                                        event.setAgentRequired(0.0);
+                                        event.setAgentSent(0.0);
+                                        event.setAgentDropping(0.0);
+                                        event.setSeverity(Event.Severity.OUT);
+                                        this.fullyServicedEvents.remove(eventId);
+                                        byte[] msg = ("SUCCESS:" + splitMessage[1] + ":" + splitMessage[2]).getBytes();
+                                        this.fireIncidentSocket.send(
+                                                new DatagramPacket(msg, msg.length, fireIncidentAddress, fireIncidentPort));
+                                    } else {
+                                        event.setAgentRequired(agentRequired);
+                                        event.setAgentSent(event.getAgentSent() - Double.parseDouble(splitMessage[3]));
+                                        event.setAgentDropping(event.getAgentDropping() - Double.parseDouble(splitMessage[3]));
+                                    }
                                     break;
                                 }
                             }
@@ -401,7 +413,7 @@ public class Scheduler extends Thread {
                         this.allDroneList.put(id, localHashMap);
 
 
-                        byte[] receivedData = Arrays.copyOfRange(packet.getData(), 13+splitMessage[1].length(), packet.getLength());
+                        byte[] receivedData = Arrays.copyOfRange(packet.getData(), 15+splitMessage[2].length(), packet.getLength());
                         FaultEvent fault = FaultEvent.deserializeFaultEvent(receivedData);
                         if (fault != null) {
                             int droneId = fault.getDroneID();
@@ -422,6 +434,7 @@ public class Scheduler extends Thread {
                             Event event = null;
                             if (this.fullyServicedEvents.containsKey(eventId)) {
                                 event = this.fullyServicedEvents.get(eventId);
+                                this.fullyServicedEvents.remove(event.getId());
                             } else {
                                 for (Event e : this.eventQueue) {
                                     if (e.getId() == eventId) {
@@ -432,13 +445,32 @@ public class Scheduler extends Thread {
                             }
 
                             //Calculate the new agentSent for the event
-                            double agentReceived = Double.parseDouble(splitMessage[1]);
+                            double agentReceived = Double.parseDouble(splitMessage[2]);
                             double agentSent = event.getAgentSent() - agentReceived;
                             event.setAgentSent(agentSent);
+
+                            double agentDropAmount = agentReceived;
+                            if ((event.getAgentRequired()-event.getAgentDropping()) < (agentDropAmount+0.0001)) {
+                                agentDropAmount = (event.getAgentRequired()-event.getAgentDropping()) ;
+                            }
+
+                            event.setAgentDropping(event.getAgentDropping() - agentDropAmount);
+
+                            eventQueue.put(event);
+                            System.out.println("Event requeued: " + event.toString());
 
                             sendToDrone("OK", droneId);
                             continue;
                         }
+                        break;
+                    case "Fault":
+                        //updating state for gui
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Idle");
+                        this.allDroneList.put(id, localHashMap);
+
+                        sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
                     case "FINISHED":
                         this.dronesFinished++;
@@ -515,12 +547,9 @@ public class Scheduler extends Thread {
         Event event = fault.getEvent();
 
         // sendToDrone("RETURN_TO_BASE", droneId);
-        
-        eventQueue.put(event);
-        System.out.println("Event requeued: " + event.toString());
 
         faultedDroneList.add(droneId);
-        freeDroneList.remove(Integer.valueOf(droneId));
+        freeDroneList.remove((Integer) droneId);
         System.out.println("[Scheduler], Drone " + droneId + " added to faulted list and removed from free list!");
     }
 
@@ -529,11 +558,8 @@ public class Scheduler extends Thread {
         Event event = fault.getEvent();
         // sendToDrone("RETURN_TO_BASE", droneId);
 
-        eventQueue.put(event);
-        System.out.println("Event requeued: " + event.toString());
-
         faultedDroneList.add(droneId);
-        freeDroneList.remove(Integer.valueOf(droneId));
+        freeDroneList.add(droneId);
 
         System.out.println("[Scheduler], Drone " + droneId + " stuck in flight!");
         System.out.println("[Scheduler], Drone " + droneId + " added to faulted list and removed from free list!");

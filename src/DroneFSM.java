@@ -38,7 +38,7 @@ class DroneIdle implements DroneState {
 
 abstract class DroneActive implements DroneState {
     public void handleFault(Drone drone) {
-        drone.setState("ReturningToBase");
+        drone.setState("Fault");
     };
 }
 

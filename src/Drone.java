@@ -225,6 +225,15 @@ public class Drone extends Thread {
     public void moveTo(double[] targetLocation) {
         System.out.println(String.format("Drone %d, moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
 
+        if(currentState == DroneFSM.getState("EnRoute")){
+            FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("EnRoute").getStateString());
+            if (faultToInject != null) {
+                System.out.println("[Drone " + id + "] Fault injection triggered for TRAVEL: " + faultToInject);
+                injectFault(faultToInject);
+                return;
+            }
+        }
+
         //Get x and y distance from target
         double xDistance = targetLocation[0] - this.currentLocation[0];
         double yDistance = targetLocation[1] - this.currentLocation[1];
@@ -237,13 +246,19 @@ public class Drone extends Thread {
         //Calculate number of seconds it would take to reach zone
         int secondsRequired = (int) Math.floor(totalDistance / this.attributes.get("travelSpeed"));
 
+        if(secondsRequired == 0){
+            return;
+        }
+
         //Move the drone
         for (int i = 0; i < secondsRequired; i++) {
             this.currentLocation[0] += this.attributes.get("travelSpeed") * xRatio;
             this.currentLocation[1] += this.attributes.get("travelSpeed") * yRatio;
             String s = String.format("LOCATION:%d:%d:%d", this.id, (int)this.currentLocation[0], (int)this.currentLocation[1]);
+            if(i == (secondsRequired-1)){
+                s = String.format("LOCATION:%d:%d:%d", this.id, (int)targetLocation[0], (int)targetLocation[1]);
+            }
             DatagramPacket packet = new DatagramPacket(s.getBytes(), s.getBytes().length, schedulerAddress, schedulerPort);
-            //sendReceive(String.format("LOCATION:%d:%d:%d", this.id, (int)this.currentLocation[0], (int)this.currentLocation[1]));
             try {
                 socket.send(packet);
                 sleep(SLEEPMULTIPLIER);
@@ -304,7 +319,7 @@ public class Drone extends Thread {
 
     private void injectFault(FaultEvent.Type faultType) {
         FaultEvent faultEvent = new FaultEvent(LocalTime.now(), faultType, this.id, this.assignedFire);
-        byte[] faultData = faultEvent.createMessage("FAULT_EVENT:" + this.carryingVolume + ":");
+        byte[] faultData = faultEvent.createMessage("FAULT_EVENT:" +this.id+ ":"+ this.carryingVolume + ":");
         try {
             DatagramPacket faultPacket = new DatagramPacket(faultData, faultData.length, schedulerAddress,
                     schedulerPort);
@@ -427,6 +442,7 @@ public class Drone extends Thread {
 
     private String sendReceive(String sendMessage) {
         try {
+            socket.setSoTimeout(0);
             System.out.println("[Drone " + id + "], Sent: " + sendMessage);
             DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
                     schedulerAddress, this.schedulerPort);

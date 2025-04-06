@@ -31,6 +31,8 @@ public class Event implements Comparable<Event>, Serializable {
     private double agentRequired;
 
     private double agentSent;
+
+    private double agentDropping;
     /**
      * Constructs an Event instance. The identifier is created from an internal
      * static variable to ensure unique id values.
@@ -80,6 +82,13 @@ public class Event implements Comparable<Event>, Serializable {
         this.agentRequired = agentRequired;
     }
 
+    public double getAgentDropping(){
+        return this.agentDropping;
+    }
+
+    public void setAgentDropping(Double agentDropping){
+        this.agentDropping = agentDropping;
+    }
     /**
      * Retrieves the severity level of the event.
      *

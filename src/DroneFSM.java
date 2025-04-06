@@ -14,6 +14,9 @@ interface DroneState {
         drone.setState("ReturningToBase");
     };
 
+    // by default, this event should not change state
+    default public void handleNewEvent(Drone drone) {};
+
 }
 
 class DroneIdle implements DroneState {
@@ -35,7 +38,7 @@ class DroneIdle implements DroneState {
 
 abstract class DroneActive implements DroneState {
     public void handleFault(Drone drone) {
-        drone.setState("ReturningToBase");
+        drone.setState("Fault");
     };
 }
 
@@ -96,6 +99,9 @@ class DroneReturningToBase extends DroneActive {
     public void goNextState(Drone drone) {
         drone.setState("FillingTank");
     }
+
+    @Override
+    public void handleNewEvent(Drone drone){drone.setState("EnRoute");}
 
     @Override
     public void action(Drone drone) {

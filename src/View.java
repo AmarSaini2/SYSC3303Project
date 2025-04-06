@@ -1,5 +1,7 @@
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
@@ -38,7 +40,7 @@ public class View extends Thread {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.addComponentListener(new ResizeListener());
 
-        droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
+        droneIcon = createScaledIcon("/assets/defaultDrone.png", 30, 30);
         panel = createPanel(new Color(240, 240, 240)); // Light gray background
         panel.setLayout(new GridBagLayout());
 
@@ -93,13 +95,34 @@ public class View extends Thread {
 
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Controls");
-        JMenuItem start = new JMenuItem("Start");
-        start.setBackground(new Color(200, 200, 200)); // Light gray background
-        start.setForeground(Color.BLACK); // Black text
-        menu.add(start);
-        menuBar.add(menu);
+        JRadioButton cuteMode = new JRadioButton("cute mode");
+        cuteMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Toggle cute mode on/off based on button state
+                if (cuteMode.isSelected()) {
+                    enableCuteMode();
+                } else {
+                    disableCuteMode();
+                }
+            }
+        });
+        menuBar.add(cuteMode);
         return menuBar;
+    }
+
+    private void enableCuteMode() {
+        //drone images change
+        //background images change
+        droneIcon = createScaledIcon("/assets/altDrone0.png", 30, 30);
+    }
+    
+    private void disableCuteMode() {
+        // Restore default visual settings here
+        // Example:
+        // droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
+        // panel.setBackground(new Color(240, 240, 240)); // Original light gray
+        droneIcon = createScaledIcon("/assets/defaultDrone.png", 30, 30);
     }
 
     private JPanel createPanel(Color color) {
@@ -133,14 +156,16 @@ public class View extends Thread {
     }
 
     private JPanel makeDroneTile(String droneName, String volume, Integer[] location) {
-        JPanel tile = new JPanel();
-        tile.setLayout(new BoxLayout(tile, BoxLayout.Y_AXIS));
-        tile.setBorder(BorderFactory.createCompoundBorder(
+        //make info panel (right side)
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        tile.setBackground(new Color(255, 255, 255)); // White background for tiles
-        tile.setMaximumSize(new Dimension(300, 100)); // Increased height to accommodate new text
+        infoPanel.setBackground(new Color(255, 255, 255)); // White background for tiles
+        infoPanel.setMaximumSize(new Dimension(300, 100)); // Increased height to accommodate new text
 
+        // Add info components
         JLabel nameLabel = new JLabel(droneName);
         nameLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Modern font
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -150,23 +175,32 @@ public class View extends Thread {
         detailsLabel.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
         detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Add state text area
-        JTextArea stateText = new JTextArea();
-        stateText.setEditable(false); // Make it read-only
-        stateText.setLineWrap(true);
-        stateText.setWrapStyleWord(true);
+        JLabel stateText = new JLabel("Online");
         stateText.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
-        stateText.setBackground(new Color(255, 255, 255)); // White background
-        stateText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        stateText.setText("State: Online"); // Default state text
+        stateText.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        tile.add(nameLabel);
-        tile.add(Box.createRigidArea(new Dimension(0, 5)));
-        tile.add(detailsLabel);
-        tile.add(Box.createRigidArea(new Dimension(0, 5)));
-        tile.add(stateText);
+        infoPanel.add(nameLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5))); // Vertical spacing
+        infoPanel.add(detailsLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5))); // Vertical spacing
+        infoPanel.add(stateText);
 
-        return tile;
+        // Create the main panel with icon on left and info on right
+        JPanel dronePanel = new JPanel();
+        dronePanel.setLayout(new BoxLayout(dronePanel, BoxLayout.X_AXIS));
+        dronePanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.black, 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+        // Add drone icon (left side)
+        int droneId = Integer.parseInt(droneName.substring(droneName.indexOf(" ") + 1));
+        JLabel icon = new JLabel(droneImages.get(droneId).getIcon());
+        icon.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10)); // Right margin for the icon
+
+        dronePanel.add(icon);
+        dronePanel.add(infoPanel);
+
+        return dronePanel;
     }
 
     private void updateLogs() {
@@ -245,13 +279,13 @@ public class View extends Thread {
             boolean rendered = (boolean) zoneData[2];
 
             Event.Severity severity = Event.Severity.OUT;
-            for(Integer eventId: scheduler.allEvents.keySet()){
-                if(scheduler.allEvents.get(eventId).getZone().getId() == zoneId){
+            for (Integer eventId : scheduler.allEvents.keySet()) {
+                if (scheduler.allEvents.get(eventId).getZone().getId() == zoneId) {
                     severity = scheduler.allEvents.get(eventId).getSeverity();
                 }
             }
             Color color = new Color(0, 100, 0, 150);
-            switch (severity){
+            switch (severity) {
                 case HIGH:
                     color = new Color(255, 0, 0, 150);
                     break;
@@ -365,8 +399,7 @@ public class View extends Thread {
         Graphics2D g2dBase = baseImage.createGraphics();
 
         // Draw drone icon (centered)
-        ImageIcon originalIcon = createScaledIcon("/assets/Drone.png", 30, 30);
-        g2dBase.drawImage(originalIcon.getImage(), 0, 0, null);
+        g2dBase.drawImage(droneIcon.getImage(), 0, 0, null);
 
         // Draw number (not rotated yet)
         g2dBase.setFont(new Font("Arial", Font.BOLD, 12)); // Modern font
@@ -400,12 +433,25 @@ public class View extends Thread {
         existingDrones.clear();
         for (Component comp : statusBars.getComponents()) {
             if (comp instanceof JPanel) {
-                try {
-                    String name = ((JLabel) ((JPanel) comp).getComponent(0)).getText();
-                    int droneNum = Integer.parseInt(name.replace("Drone ", ""));
-                    existingDrones.add(droneNum);
-                } catch (Exception e) {
-                    // Handle potential parsing errors
+                JPanel dronePanel = (JPanel) comp;
+                // Check if this panel has our expected structure (icon + info panel)
+                if (dronePanel.getComponentCount() == 2 && 
+                    dronePanel.getComponent(1) instanceof JPanel) {
+                    
+                    try {
+                        JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+                        // The name label is the first component in the info panel
+                        String name = ((JLabel) infoPanel.getComponent(0)).getText();
+                        int droneNum = Integer.parseInt(name.replace("Drone ", ""));
+                        existingDrones.add(droneNum);
+
+                        JLabel icon = (JLabel) dronePanel.getComponent(0);
+                        icon.setIcon(droneImages.get(droneNum).getIcon());
+                    } catch (Exception e) {
+                        // Handle potential parsing errors (malformed drone name or component structure)
+                        System.err.println("Error parsing drone panel: " + e.getMessage());
+                        // You might want to log this error or handle it differently
+                    }
                 }
             }
         }
@@ -427,26 +473,40 @@ public class View extends Thread {
     }
 
     private void updateDroneTile(int droneNumber, String newVolume, Integer[] newLocation) {
-        JPanel tile = findDroneTile(droneNumber);
-        if (tile != null) {
-            // Update the labels
-            Component[] children = tile.getComponents();
-            ((JLabel) children[0]).setText("Drone " + droneNumber);  // Name
-            ((JLabel) children[2]).setText(
+        JPanel dronePanel = findDroneTile(droneNumber);
+        if (dronePanel != null) {
+            // The info panel is the second component (index 1) of the dronePanel
+            JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+            
+            // Get all components from the info panel (which has the Y_AXIS layout)
+            Component[] infoComponents = infoPanel.getComponents();
+            
+            // Update the labels - note these are now at indices 0, 2, 4 in the infoPanel
+            ((JLabel) infoComponents[0]).setText("Drone " + droneNumber);  // Name
+            ((JLabel) infoComponents[2]).setText(
                     String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
             );
-            ((JTextArea) children[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
+            ((JLabel) infoComponents[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
         }
     }
-
+    
     private JPanel findDroneTile(int droneNumber) {
         for (Component comp : statusBars.getComponents()) {
             if (comp instanceof JPanel) {
-                Component[] children = ((JPanel) comp).getComponents();
-                if (children.length > 0 && children[0] instanceof JLabel) {
-                    String labelText = ((JLabel) children[0]).getText();
-                    if (labelText.equals("Drone " + droneNumber)) {
-                        return (JPanel) comp;
+                JPanel dronePanel = (JPanel) comp;
+                // Check if this panel has our expected structure (icon + info panel)
+                if (dronePanel.getComponentCount() == 2 && 
+                    dronePanel.getComponent(1) instanceof JPanel) {
+                    
+                    JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+                    Component[] infoComponents = infoPanel.getComponents();
+                    
+                    // Check if the first component of infoPanel is our drone name label
+                    if (infoComponents.length > 0 && infoComponents[0] instanceof JLabel) {
+                        String labelText = ((JLabel) infoComponents[0]).getText();
+                        if (labelText.equals("Drone " + droneNumber)) {
+                            return dronePanel;
+                        }
                     }
                 }
             }
@@ -481,6 +541,6 @@ public class View extends Thread {
     public static void main(String[] args) {
         // Entry point for the application
         // You would typically initialize the Scheduler and start the View here
-        
+
     }
 }

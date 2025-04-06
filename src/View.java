@@ -27,6 +27,7 @@ public class View extends Thread {
     private HashMap<Integer, JLabel> droneImages = new HashMap<>();
     private HashMap<Integer, Double> droneAngles = new HashMap<>();
     private HashMap<Integer, Integer[]> lastKnownLocation = new HashMap<>();
+    private HashMap<Integer, Integer> droneCuteIcons = new HashMap<>();
     private final ReentrantLock logQueueLock = new ReentrantLock();
 
     public View(Scheduler scheduler) {
@@ -73,11 +74,75 @@ public class View extends Thread {
     }
 
     private JPanel createStatusBarsPanel() {
-        JPanel statusPanel = createPanel(new Color(255, 255, 255)); // White background
-        statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
-        statusPanel.setPreferredSize(new Dimension(300, 250));
+        // Main panel that will contain everything
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setOpaque(false);
+        //statusPanel.setPreferredSize(new Dimension(300, 250));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    
+        // Background label that will fill the entire space
+        JLabel background = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (getIcon() != null) {
+                    Image img = ((ImageIcon)getIcon()).getImage();
+                    g.drawImage(img, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
+        background.setName("background");
+        background.setLayout(new BorderLayout());
+    
+        // Scrollable content panel for drone tiles
+        JPanel contentPanel = new JPanel();
+        contentPanel.setName("content");
+        contentPanel.setOpaque(false);
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        
+        // Use layered approach
+        JLayeredPane layeredPane = new JLayeredPane();
+        //layeredPane.setPreferredSize(new Dimension(300,250));
+        
+        // Add background first
+        background.setBounds(0, 0, 600, 450);
+        layeredPane.add(background, JLayeredPane.DEFAULT_LAYER);
+        
+        // Add scrollable content
+        scrollPane.setBounds(0, 0, 600, 450);
+        layeredPane.add(scrollPane, JLayeredPane.PALETTE_LAYER);
+        
+        statusPanel.add(layeredPane, BorderLayout.CENTER);
+        
         return statusPanel;
+    }
+
+    private JPanel getContentPanel() {
+        JLayeredPane layeredPane = (JLayeredPane) statusBars.getComponent(0);
+        for (Component comp : layeredPane.getComponents()) {
+            if (comp instanceof JScrollPane) {
+                JScrollPane scrollPane = (JScrollPane) comp;
+                return (JPanel) scrollPane.getViewport().getView();
+            }
+        }
+        return null;
+    }
+    
+    private JLabel getBackgroundLabel() {
+        JLayeredPane layeredPane = (JLayeredPane) statusBars.getComponent(0);
+        for (Component comp : layeredPane.getComponents()) {
+            if (comp.getName() != null && comp.getName().equals("background")) {
+                return (JLabel) comp;
+            }
+        }
+        return null;
     }
 
     private JTextArea createLogComponent() {
@@ -112,17 +177,39 @@ public class View extends Thread {
     }
 
     private void enableCuteMode() {
-        //drone images change
-        //background images change
-        droneIcon = createScaledIcon("/assets/altDrone0.png", 30, 30);
+        // Update background
+        JLabel background = getBackgroundLabel();
+        if (background != null) {
+            background.setIcon(createScaledIcon("/assets/altStatusBarsBackground.png", 
+                statusBars.getPreferredSize().width, 
+                statusBars.getPreferredSize().height));
+        }
+        
+        // Assign random icons to each drone
+        for (Integer droneNum : scheduler.allDroneList.keySet()) {
+            if (!droneCuteIcons.containsKey(droneNum)) {
+                // Generate random number between 0 and 5 for new drones
+                droneCuteIcons.put(droneNum, (int)(Math.random() * 6));
+            }
+            // Update the drone's icon
+            updateDroneIcon(droneNum);
+        }
     }
     
     private void disableCuteMode() {
-        // Restore default visual settings here
-        // Example:
-        // droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
-        // panel.setBackground(new Color(240, 240, 240)); // Original light gray
-        droneIcon = createScaledIcon("/assets/defaultDrone.png", 30, 30);
+        // Remove background
+        JLabel background = getBackgroundLabel();
+        if (background != null) {
+            background.setIcon(null);
+        }
+        
+        // Clear cute icons mapping
+        droneCuteIcons.clear();
+        
+        // Update all drones to default icons
+        for (Integer droneNum : droneImages.keySet()) {
+            updateDroneIcon(droneNum);
+        }
     }
 
     private JPanel createPanel(Color color) {
@@ -139,10 +226,12 @@ public class View extends Thread {
         bottomPanel.setBackground(new Color(240, 240, 240)); // Light gray background
 
         JScrollPane logScrollPane = new JScrollPane(log);
-        logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         logScrollPane.setPreferredSize(new Dimension(600, 250));
         logScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1)); // Add a border to the log scroll pane
         bottomPanel.add(logScrollPane);
+
+        statusBars.setPreferredSize(new Dimension(300,250));
         bottomPanel.add(statusBars);
 
         // Create split pane
@@ -362,7 +451,8 @@ public class View extends Thread {
 
             // Always update the icon with current angle
             double currentAngle = droneAngles.getOrDefault(droneNum, 0.0);
-            droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
+            updateDroneIcon(droneNum);
+            ///droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
         }
 
         // Remove any drones that are no longer active
@@ -393,13 +483,13 @@ public class View extends Thread {
         return new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
     }
 
-    private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle) {
+    private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle, ImageIcon baseIcon) {
         // Create base image (unrotated)
         BufferedImage baseImage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2dBase = baseImage.createGraphics();
 
         // Draw drone icon (centered)
-        g2dBase.drawImage(droneIcon.getImage(), 0, 0, null);
+        g2dBase.drawImage(baseIcon.getImage(), 0, 0, null);
 
         // Draw number (not rotated yet)
         g2dBase.setFont(new Font("Arial", Font.BOLD, 12)); // Modern font
@@ -430,14 +520,19 @@ public class View extends Thread {
     }
 
     private void updateDrones() {
+
+        // Get the content panel 
+       JPanel contentPanel = getContentPanel();
+       if(contentPanel == null) return;
+
         existingDrones.clear();
-        for (Component comp : statusBars.getComponents()) {
+        for (Component comp : contentPanel.getComponents()) {
             if (comp instanceof JPanel) {
                 JPanel dronePanel = (JPanel) comp;
                 // Check if this panel has our expected structure (icon + info panel)
-                if (dronePanel.getComponentCount() == 2 && 
-                    dronePanel.getComponent(1) instanceof JPanel) {
-                    
+                if (dronePanel.getComponentCount() == 2
+                        && dronePanel.getComponent(1) instanceof JPanel) {
+
                     try {
                         JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
                         // The name label is the first component in the info panel
@@ -463,13 +558,31 @@ public class View extends Thread {
             if (existingDrones.contains(droneNum)) {
                 updateDroneTile(droneNum, volume, coords);
             } else {
-                statusBars.add(makeDroneTile("Drone " + droneNum, volume, coords));
-                statusBars.add(Box.createRigidArea(new Dimension(0, 5)));
+                contentPanel.add(makeDroneTile("Drone " + droneNum, volume, coords));
+                contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
             }
         }
 
-        statusBars.revalidate();
-        statusBars.repaint();
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    private void updateDroneIcon(int droneNum) {
+        if (droneImages.containsKey(droneNum)) {
+            ImageIcon icon;
+            if (droneCuteIcons.containsKey(droneNum)) {
+                // Use cute mode icon if available
+                int cuteIconNum = droneCuteIcons.get(droneNum);
+                icon = createScaledIcon("/assets/altDrone" + cuteIconNum + ".png", 30, 30);
+            } else {
+                // Use default icon
+                icon = createScaledIcon("/assets/defaultDrone.png", 30, 30);
+            }
+            
+            // Update the icon with current angle
+            double currentAngle = droneAngles.getOrDefault(droneNum, 0.0);
+            droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle, icon));
+        }
     }
 
     private void updateDroneTile(int droneNumber, String newVolume, Integer[] newLocation) {
@@ -477,10 +590,10 @@ public class View extends Thread {
         if (dronePanel != null) {
             // The info panel is the second component (index 1) of the dronePanel
             JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
-            
+
             // Get all components from the info panel (which has the Y_AXIS layout)
             Component[] infoComponents = infoPanel.getComponents();
-            
+
             // Update the labels - note these are now at indices 0, 2, 4 in the infoPanel
             ((JLabel) infoComponents[0]).setText("Drone " + droneNumber);  // Name
             ((JLabel) infoComponents[2]).setText(
@@ -489,18 +602,21 @@ public class View extends Thread {
             ((JLabel) infoComponents[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
         }
     }
-    
+
     private JPanel findDroneTile(int droneNumber) {
-        for (Component comp : statusBars.getComponents()) {
+        JPanel contentPanel = getContentPanel();
+        if(contentPanel == null) return null;
+
+        for (Component comp : contentPanel.getComponents()) {
             if (comp instanceof JPanel) {
                 JPanel dronePanel = (JPanel) comp;
                 // Check if this panel has our expected structure (icon + info panel)
-                if (dronePanel.getComponentCount() == 2 && 
-                    dronePanel.getComponent(1) instanceof JPanel) {
-                    
+                if (dronePanel.getComponentCount() == 2
+                        && dronePanel.getComponent(1) instanceof JPanel) {
+
                     JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
                     Component[] infoComponents = infoPanel.getComponents();
-                    
+
                     // Check if the first component of infoPanel is our drone name label
                     if (infoComponents.length > 0 && infoComponents[0] instanceof JLabel) {
                         String labelText = ((JLabel) infoComponents[0]).getText();

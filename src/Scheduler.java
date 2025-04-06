@@ -91,8 +91,8 @@ public class Scheduler extends Thread {
     @Override
     public void run() {
         while (!fireIncidentFinish) {
-            System.out.println("[Scheduler] Entering " + getStateAsString() + " state");
-            logQueue.add("[Scheduler] Entering " + getStateAsString() + " state");
+            System.out.println("[Scheduler], Entering " + getStateAsString() + " state");
+            logQueue.add("[Scheduler], Entering " + getStateAsString() + " state");
             this.currentState.action(this);
         }
     }
@@ -173,20 +173,20 @@ public class Scheduler extends Thread {
                     case "NEW_EVENT":
                         Event event = Event
                                 .deserializeEvent(Arrays.copyOfRange(packet.getData(), 10, packet.getLength()));
-                        System.out.println("[Scheduler]: Event Received: " + event.toString());
-                        logQueue.add("[Scheduler]: Event Received: " + event);
+                        System.out.println("[Scheduler], Event Received: " + event.toString());
+                        logQueue.add("[Scheduler], Event Received: " + event);
                         // INSERT INTO PRIORITY QUEUE
                         eventQueue.put(event);
                         this.allEvents.put(event.getId(), event);
                         synchronized (this) {
                             notifyAll();
                         }
-                        System.out.println("[Scheduler]: Added event to eventQueue");
-                        logQueue.add("[Scheduler]: Added event to eventQueue");
+                        System.out.println("[Scheduler], Added event to eventQueue");
+                        logQueue.add("[Scheduler], Added event to eventQueue");
                         break;
                     case "FINISH":
-                        System.out.println("[Scheduler]: Received: FINISH");
-                        logQueue.add("[Scheduler]: Received: FINISH");
+                        System.out.println("[Scheduler], Received: FINISH");
+                        logQueue.add("[Scheduler], Received: FINISH");
                         this.finishEvents();
                         break;
                     case "ACTIVATE":
@@ -222,9 +222,9 @@ public class Scheduler extends Thread {
 
                 String[] splitMessage = message.split(":");
                 if(!splitMessage[0].equals("FAULT_EVENT")) {
-                    System.out.println("[Scheduler] Received: " + message);
+                    System.out.println("[Scheduler], Received: " + message);
                 }
-                logQueue.add("[Scheduler] Received: " + message);
+                logQueue.add("[Scheduler], Received: " + message);
 
                 HashMap<String, Object> localHashMap;
                 int id;
@@ -391,7 +391,7 @@ public class Scheduler extends Thread {
                             int droneId = fault.getDroneID();
                             FaultEvent.Type faultType = fault.getFaultType();
 
-                            System.out.println("[Scheduler] Fault Received: " + fault.toString());
+                            System.out.println("[Scheduler], Fault Received: " + fault.toString());
                             switch (faultType) {
                                 case NOZZLE_JAM:
                                     handleNozzleJam(fault);
@@ -442,8 +442,8 @@ public class Scheduler extends Thread {
 
     private void sendToDrone(Event event, int droneId) {
         byte[] message = event.createMessage("NEW_EVENT:");
-        System.out.println("[Scheduler] Sent Drone " + droneId + ": " + event);
-        logQueue.add("[Scheduler] Sent Drone " + droneId + ": " + event);
+        System.out.println("[Scheduler], Sent Drone " + droneId + ": " + event);
+        logQueue.add("[Scheduler], Sent Drone " + droneId + ": " + event);
         DatagramPacket packet = new DatagramPacket(message, message.length,
                 (InetAddress) this.allDroneList.get(droneId).get("address"),
                 (int) this.allDroneList.get(droneId).get("port"));
@@ -455,8 +455,8 @@ public class Scheduler extends Thread {
     }
 
     private void sendToDrone(String s, int droneId) {
-        System.out.println("[Scheduler] Sent Drone " + droneId + ": " + s);
-        logQueue.add("[Scheduler] Sent Drone " + droneId + ": " + s);
+        System.out.println("[Scheduler], Sent Drone " + droneId + ": " + s);
+        logQueue.add("[Scheduler], Sent Drone " + droneId + ": " + s);
         byte[] data = s.getBytes();
         DatagramPacket packet = new DatagramPacket(data, data.length,
                 (InetAddress) this.allDroneList.get(droneId).get("address"),
@@ -468,12 +468,12 @@ public class Scheduler extends Thread {
         }
     }
 
-    private void finishDrones() {
+    private void finishDrones() throws IOException {
         for (Integer id : allDroneList.keySet()) {
             HashMap<String, Object> drone = allDroneList.get(id);
             sendToDrone("FINISH", id);
-            System.out.println("[Scheduler]: Sent to Drone " + id + ": FINISH");
-            logQueue.add("[Scheduler]: Sent to Drone " + id + ": FINISH");
+            System.out.println("[Scheduler], Sent to Drone " + id + ": FINISH");
+            logQueue.add("[Scheduler], Sent to Drone " + id + ": FINISH");
         }
     }
 
@@ -483,12 +483,12 @@ public class Scheduler extends Thread {
      * - Sets the finish flag to true, signaling all loops to exit.
      * - Notifies any waiting threads to avoid deadlocks.
      */
-    public synchronized void finishEvents() {
+    public synchronized void finishEvents() throws IOException {
         this.fireIncidentFinish = true; // Stop execution of scheduler and monitoring threads
         notifyAll(); // Notify waiting threads to prevent indefinite blocking
         finishDrones();
-        System.out.println("[Scheduler] Shutting down...");
-        logQueue.add("[Scheduler] Shutting down...");
+        System.out.println("[Scheduler], Shutting down...");
+        logQueue.add("[Scheduler], Shutting down...");
     }
 
     private void handleNozzleJam(FaultEvent fault) {
@@ -502,7 +502,7 @@ public class Scheduler extends Thread {
 
         faultedDroneList.add(droneId);
         freeDroneList.remove(Integer.valueOf(droneId));
-        System.out.println("[Scheduler] Drone " + droneId + " added to faulted list and removed from free list!");
+        System.out.println("[Scheduler], Drone " + droneId + " added to faulted list and removed from free list!");
     }
 
     private void handleStuckDrone(FaultEvent fault) {
@@ -516,8 +516,8 @@ public class Scheduler extends Thread {
         faultedDroneList.add(droneId);
         freeDroneList.remove(Integer.valueOf(droneId));
 
-        System.out.println("[Scheduler] Drone " + droneId + " stuck in flight!");
-        System.out.println("[Scheduler] Drone " + droneId + " added to faulted list and removed from free list!");
+        System.out.println("[Scheduler], Drone " + droneId + " stuck in flight!");
+        System.out.println("[Scheduler], Drone " + droneId + " added to faulted list and removed from free list!");
     }
 
     public static void main(String[] args) {

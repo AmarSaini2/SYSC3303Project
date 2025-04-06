@@ -99,7 +99,7 @@ public class Drone extends Thread {
                     // Use the provided FaultEvent.Type enum.
                     FaultEvent.Type faultType = FaultEvent.Type.valueOf(parts[1].toUpperCase());
                     System.out
-                            .println("[Drone " + id + "] Fault injection for stage: " + stage + ", type: " + faultType);
+                            .println("[Drone " + id + "], Fault injection for stage: " + stage + ", type: " + faultType);
                     faultInstructions.put(stage, faultType);
 
                 }
@@ -146,7 +146,7 @@ public class Drone extends Thread {
 
         //Signal scheduler that the drone is finished
         String sendMessage = "FINISHED:"+this.id;
-        System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+        System.out.println("[Drone " + id + "], Sent: " + sendMessage);
         DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
                 schedulerAddress, this.schedulerPort);
         try {
@@ -174,7 +174,7 @@ public class Drone extends Thread {
     protected void sendWakeupMessage() {
         try {
             String sendMessage = "ONLINE:" + this.id;
-            System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+            System.out.println("[Drone " + id + "], Sent: " + sendMessage);
             DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
                     InetAddress.getByName("255.255.255.255"), this.schedulerPort);
             socket.send(sendPacket);
@@ -182,7 +182,7 @@ public class Drone extends Thread {
             DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
             socket.receive(receivePacket);
             String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
+            System.out.println("[Drone " + id + "], Received: " + receiveMessage);
             schedulerAddress = receivePacket.getAddress();
 
             currentState.goNextState(this);
@@ -193,7 +193,7 @@ public class Drone extends Thread {
     }
 
     public void sleepMode() {
-        System.out.println("[Drone " + id + "] IDLE - Waiting for assignment...");
+        System.out.println("[Drone " + id + "], IDLE Waiting for assignment...");
         DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
         try {
             socket.receive(packet);
@@ -204,12 +204,12 @@ public class Drone extends Thread {
             switch (splitMessage[0].toUpperCase()) {
                 case "NEW_EVENT":
                     Event event = Event.deserializeEvent(Arrays.copyOfRange(packet.getData(), 10, packet.getLength()));
-                    System.out.println("[Drone " + this.id + "] Received: " + event);
+                    System.out.println("[Drone " + this.id + "], Received: " + event);
                     this.assignFire(event);
                     currentState.goNextState(this);
                     break;
                 case "FINISH":
-                    System.out.println("[Drone " + this.id + "]: Received: FINISH");
+                    System.out.println("[Drone " + this.id + "], Received: FINISH");
                     this.finish = true;
                     break;
                 default:
@@ -223,7 +223,7 @@ public class Drone extends Thread {
     }
 
     public void moveTo(double[] targetLocation) {
-        System.out.println(String.format("Drone %d moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
+        System.out.println(String.format("Drone %d, moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
 
         //Get x and y distance from target
         double xDistance = targetLocation[0] - this.currentLocation[0];
@@ -254,7 +254,7 @@ public class Drone extends Thread {
     }
 
     public void travelToFire() {
-        // System.out.println("[Drone " + id + "] Traveling to fire at Zone: " +
+        // System.out.println("[Drone " + id + "], Traveling to fire at Zone: " +
         // assignedFire.getZone().getId());
 
         double[] center = assignedFire.getZone().getCenter();
@@ -294,10 +294,10 @@ public class Drone extends Thread {
     }
 
     public void extinguishFire() {
-        // System.out.println("[Drone " + id + "] Dropping firefighting agent...");
+        // System.out.println("[Drone " + id + "], Dropping firefighting agent...");
         FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("DroppingAgent").getStateString());
         if (faultToInject != null) {
-            System.out.println("[Drone " + id + "] Fault injection triggered for ExtinguishFire: " + faultToInject);
+            System.out.println("[Drone " + id + "], Fault injection triggered for ExtinguishFire: " + faultToInject);
             injectFault(faultToInject);
             return;
         }
@@ -335,9 +335,9 @@ public class Drone extends Thread {
     }
 
     public void returnToBase() {
-        // System.out.println("[Drone " + id + "] Returning to base...");
+        // System.out.println("[Drone " + id + "], Returning to base...");
         moveTo(new double[]{0.0, 0.0});
-        // System.out.println("[Drone " + id + "] Reached base.");
+        // System.out.println("[Drone " + id + "], Reached base.");
 
         String response = sendReceive(String.format("%s:%d", this.getStateAsString(), this.id));
         String[] splitMessage = response.split(":");
@@ -357,7 +357,7 @@ public class Drone extends Thread {
     }
 
     public void refillTank() {
-        // System.out.println("[Drone " + id + "] Refilling tank...");
+        // System.out.println("[Drone " + id + "], Refilling tank...");
         carryingVolume = attributes.get("maxCapacity");
 
         try {
@@ -384,7 +384,7 @@ public class Drone extends Thread {
     }
 
     public void handleFault() {
-        System.out.println("[Drone " + id + "] FAULT detected. Returning to base...");
+        System.out.println("[Drone " + id + "], FAULT detected. Returning to base...");
 
         String response = sendReceive(String.format("%s:%d:%d:%.2f", this.getStateAsString(), this.id,
                 this.assignedFire.getId(), this.carryingVolume));
@@ -404,7 +404,7 @@ public class Drone extends Thread {
 
     private String sendReceive(String sendMessage) {
         try {
-            System.out.println("[Drone " + id + "] Sent: " + sendMessage);
+            System.out.println("[Drone " + id + "], Sent: " + sendMessage);
             DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
                     schedulerAddress, this.schedulerPort);
             messageSendTime = System.currentTimeMillis();
@@ -416,7 +416,7 @@ public class Drone extends Thread {
             loggingArray.add("");
 
             String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
+            System.out.println("[Drone " + id + "], Received: " + receiveMessage);
 
             return receiveMessage;
         } catch (IOException e) {

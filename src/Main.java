@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 /**
  * The Main class initializes and starts the firefighting drone system.
  *
@@ -16,7 +18,7 @@
  * extinguishing operations.
  */
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Drone drone0 = new Drone(6000, "src/droneFaultInjection_0.txt");
         Drone drone0 = new Drone(6000);
         Drone drone1 = new Drone(6000);

@@ -162,7 +162,7 @@ public class FireIncident extends Thread {
         byte[] message = e.createMessage("NEW_EVENT:");
         try{
             DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
-            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + e);
+            System.out.println("[FireIncidentSubsystem], Sent Packet to Scheduler containing: " + e);
             socket.send(packet);
         }catch(UnknownHostException f){
             f.printStackTrace();
@@ -174,7 +174,7 @@ public class FireIncident extends Thread {
     private void sendToScheduler(String msg){
         try{
             DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
-            System.out.println("[FireIncidentSubsystem]: Sent Packet to Scheduler containing: " + msg);
+            System.out.println("[FireIncidentSubsystem], Sent Packet to Scheduler containing: " + msg);
             socket.send(packet);
         }catch(IOException e){
             throw new RuntimeException(e);
@@ -192,13 +192,13 @@ public class FireIncident extends Thread {
                 String[] splitMessage = message.split(":");
                 switch (splitMessage[0].toUpperCase()) {
                     case "FAILURE"://probably can be removed
-                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + "failed! Reassigning fire: " + splitMessage[2]);
+                        System.out.println("[FireIncidentSubsystem], Drone " + splitMessage[1] + "failed! Reassigning fire: " + splitMessage[2]);
                         break;
                     case "REFILLED_REQUESTED"://probably can be removed
-                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " needs refill. Will be available soon.");
+                        System.out.println("[FireIncidentSubsystem], Drone " + splitMessage[1] + " needs refill. Will be available soon.");
                         break;
                     case "SUCCESS":
-                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " successfully extinguished fire: " + splitMessage[2]);
+                        System.out.println("[FireIncidentSubsystem], Drone " + splitMessage[1] + " successfully extinguished fire: " + splitMessage[2]);
                         break;
                     default:
                         System.out.println("Invalid message: "+message);
@@ -207,7 +207,7 @@ public class FireIncident extends Thread {
             }
             sendToScheduler("FINISH");
         }catch(SocketTimeoutException e){
-            System.out.println("[FireIncidentSubsystem]: No responses received");
+            System.out.println("[FireIncidentSubsystem], No responses received");
         }catch(IOException e){
             e.printStackTrace();
         }

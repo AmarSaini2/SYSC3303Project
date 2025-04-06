@@ -18,7 +18,7 @@ public class TimeStampDaemon {
             @Override
             public void println(String message) {
                 super.println(message);
-                String newLog = formatter.format(new Date())+":"+message;
+                String newLog = formatter.format(new Date())+","+message;
                 tempLogs.add(newLog);
             }
         });
@@ -28,7 +28,12 @@ public class TimeStampDaemon {
                 try{
                     flushLogs();
                     Thread.sleep(5000);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | IOException e) {
+                } finally {
+                    try {
+                        LogAnalyzer.analyzeLogs("src/logs.txt");
+                    } catch (IOException e) {
+                    }
                 }
             }
         });
@@ -37,7 +42,7 @@ public class TimeStampDaemon {
         timePrinter.start();
     }
 
-    private static void flushLogs(){
+    private static void flushLogs() throws IOException {
         try {
             FileWriter writer = new FileWriter(file);
             for(String eventLog : tempLogs){

@@ -148,6 +148,8 @@ public class Scheduler extends Thread {
 
                     this.freeDroneList.remove(id);
 
+                    this.allDroneList.get(id).put("state", "En Route");
+
                     sendToDrone(event, id);
                     break;
                 }
@@ -261,7 +263,7 @@ public class Scheduler extends Thread {
                         //update current state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "En Route");
+                        localHashMap.put("state", "Dropping Agent");
                         this.allDroneList.put(id, localHashMap);
                         double agentDropAmount = 15.0;
                         int eventId = Integer.parseInt(splitMessage[2]);
@@ -291,7 +293,7 @@ public class Scheduler extends Thread {
                         //update current state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Dropping Agent");
+                        localHashMap.put("state", "Returning To Base");
                         this.allDroneList.put(id, localHashMap);
 
 
@@ -350,7 +352,7 @@ public class Scheduler extends Thread {
                         //updating state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Returning to Base");
+                        localHashMap.put("state", "Filling Tank");
                         this.allDroneList.put(id, localHashMap);
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
@@ -358,7 +360,7 @@ public class Scheduler extends Thread {
                         //updating state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Filling Tank");
+                        localHashMap.put("state", "Idle");
                         this.allDroneList.put(id, localHashMap);
 
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume", 15.0);
@@ -426,6 +428,9 @@ public class Scheduler extends Thread {
                         break;
                     case "FINISHED":
                         this.dronesFinished++;
+                        id = Integer.parseInt(splitMessage[1]);
+                        localHashMap = this.allDroneList.get(id);
+                        localHashMap.put("state", "Finished");
                         if (this.dronesFinished >= this.allDroneList.size()){
                             this.droneFinish = true;
                         }

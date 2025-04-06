@@ -624,6 +624,17 @@ public class View extends Thread {
                     String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
             );
             ((JLabel) infoComponents[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
+
+            //Figure out how to get rid of this abomination
+            switch (scheduler.allDroneList.get(droneNumber).get("state").toString()){
+                case "Online":
+                    break;
+                case "NEW_EVENT":
+                    break;
+                case "Idle":
+                    break;
+
+            }
         }
     }
 

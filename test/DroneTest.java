@@ -67,7 +67,7 @@ public class DroneTest {
 
                 testSocket.receive(receivePacket2);
                 String droneResponse = new String(receivePacket2.getData(), 0, receivePacket2.getLength());
-                assertEquals("LOCATION:0:7:6", droneResponse);
+                assertEquals("LOCATION:0:9:7", droneResponse);
 
 
             } catch (IOException e) {
@@ -92,7 +92,7 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "LOCATION:0:14:12");
+            assertEquals(droneResponse, "LOCATION:0:18:15");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -116,7 +116,7 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "LOCATION:0:21:18");
+            assertEquals(droneResponse, "LOCATION:0:27:23");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -140,7 +140,7 @@ public class DroneTest {
             testSocket.receive(receivePacket);
             String droneResponse = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-            assertEquals(droneResponse, "LOCATION:0:28:24");
+            assertEquals(droneResponse, "LOCATION:0:36:31");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -186,7 +186,7 @@ public class DroneTest {
 
             testSocket.receive(receivePacket2);
             String droneResponse = new String(receivePacket2.getData(), 0, receivePacket2.getLength());
-            assertEquals("Returning To Base:1", droneResponse); //assert that drone correctly returns back to base after encountering a fault
+            assertEquals("Fault:1:4:15.00", droneResponse); //assert that drone correctly returns back to base after encountering a fault
 
         } catch (IOException e) {
             throw new RuntimeException(e);

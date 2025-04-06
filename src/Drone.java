@@ -5,10 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Drone extends Thread {
 
@@ -19,7 +16,7 @@ public class Drone extends Thread {
     private final HashMap<String, Double> attributes;
     private double carryingVolume;
     private double agentDropAmount;
-    private final int SLEEPMULTIPLIER = 50;
+    private final int SLEEPMULTIPLIER = 1;
 
     private final Random random;
 
@@ -35,12 +32,17 @@ public class Drone extends Thread {
     private double[] currentLocation;
 
     private Map<String, FaultEvent.Type> faultInstructions = new HashMap<>();
+    private ArrayList<String> loggingArray;
+    long droneStartTime, droneEndTime, messageSendTime, messageGetTime, moveStartTime, moveEndTime, fireStartTime, fireEndTime, restStartTime, restEndTime;
 
     public Drone(int schedulerPort) {
         this.id = idCounter++;
 
         this.random = new Random();
         this.attributes = new HashMap<>();
+        this.loggingArray = new ArrayList<>();
+
+        this.droneStartTime = System.currentTimeMillis();
 
         // Setting up drone attributes
         attributes.put("takeoffSpeed", 3.0);
@@ -152,6 +154,9 @@ public class Drone extends Thread {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        int test = 0;
+
 
     }
 
@@ -402,10 +407,14 @@ public class Drone extends Thread {
             System.out.println("[Drone " + id + "] Sent: " + sendMessage);
             DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
                     schedulerAddress, this.schedulerPort);
+            messageSendTime = System.currentTimeMillis();
             socket.send(sendPacket);
 
-            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048); //this is erroneous, because it allocates too much space in the byte array, which causes excess garbage data to be assigned to the response
+            DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048); //this is erroneous, because it allocates too much space in the byte array, which causes excess garbage data to be assigned to the response - should be fixed eventually
             socket.receive(receivePacket);
+            messageGetTime = System.currentTimeMillis();
+            loggingArray.add("");
+
             String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
             System.out.println("[Drone " + id + "] Received: " + receiveMessage);
 

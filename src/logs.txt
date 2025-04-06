@@ -1089,3 +1089,1042 @@
 18:11:52.687:Drone 1 was active for 99.88% of the time.
 18:11:52.687:Drone 1 finished in 998608 us.
 18:11:52.687:FLUSH_LOGS_TO_FILE
+=======
+13:46:39.391,[Scheduler], Entering Idle state
+13:46:39.396,[Drone 0], Sent: ONLINE:0
+13:46:39.397,[Drone 1], Sent: ONLINE:1
+13:46:39.400,[Drone 2], Sent: ONLINE:2
+13:46:39.404,[FireIncidentSubsystem], Sent Packet to Scheduler containing: ACTIVATE
+13:46:39.405,[Scheduler], Entering Active state
+13:46:39.407,[Scheduler], Received: ONLINE:0
+13:46:39.407,[Scheduler], Sent Drone 0: OK
+13:46:39.409,[Scheduler], Received: ONLINE:1
+13:46:39.409,[Drone 0], Received: OK
+13:46:39.409,[Scheduler], Sent Drone 1: OK
+13:46:39.410,[Drone 0], IDLE Waiting for assignment...
+13:46:39.410,[Scheduler], Received: ONLINE:2
+13:46:39.410,[Drone 1], Received: OK
+13:46:39.410,[Scheduler], Sent Drone 2: OK
+13:46:39.410,[Drone 1], IDLE Waiting for assignment...
+13:46:39.411,[Drone 2], Received: OK
+13:46:39.411,[Drone 2], IDLE Waiting for assignment...
+13:46:39.466,[FireIncidentSubsystem], Sent Packet to Scheduler containing: Event [id: 0, time: 13:46:39, zone:1, type: FIRE_DETECTED, severity: HIGH]
+13:46:39.467,[FireIncidentSubsystem], Sent Packet to Scheduler containing: Event [id: 1, time: 13:46:39, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+13:46:39.470,[FireIncidentSubsystem], Sent Packet to Scheduler containing: Event [id: 2, time: 13:46:39, zone:3, type: FIRE_DETECTED, severity: LOW]
+13:46:39.471,[Scheduler], Event Received: Event [id: 0, time: 13:46:39, zone:1, type: FIRE_DETECTED, severity: HIGH]
+13:46:39.472,[Scheduler], Added event to eventQueue
+13:46:39.473,[Scheduler], Event Received: Event [id: 1, time: 13:46:39, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+13:46:39.473,[Scheduler], Added event to eventQueue
+13:46:39.474,[Scheduler], Sent Drone 0: Event [id: 0, time: 13:46:39, zone:1, type: FIRE_DETECTED, severity: HIGH]
+13:46:39.474,[FireIncidentSubsystem], Sent Packet to Scheduler containing: Event [id: 3, time: 13:46:39, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+13:46:39.475,[Scheduler], Sent Drone 1: Event [id: 0, time: 13:46:39, zone:1, type: FIRE_DETECTED, severity: HIGH]
+13:46:39.475,[Scheduler], Event Received: Event [id: 2, time: 13:46:39, zone:3, type: FIRE_DETECTED, severity: LOW]
+13:46:39.475,[Scheduler], Added event to eventQueue
+13:46:39.489,[Drone 0], Received: Event [id: 0, time: 13:46:39, zone:1, type: FIRE_DETECTED, severity: HIGH]
+13:46:39.490,[Scheduler], Sent Drone 2: Event [id: 1, time: 13:46:39, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+13:46:39.490,Drone 0, moving to (250.00,250.00)
+13:46:39.491,[Scheduler], Event Received: Event [id: 3, time: 13:46:39, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+13:46:39.491,[Scheduler], Added event to eventQueue
+13:46:39.492,[Drone 1], Received: Event [id: 0, time: 13:46:39, zone:1, type: FIRE_DETECTED, severity: HIGH]
+13:46:39.492,Drone 1, moving to (250.00,250.00)
+13:46:39.492,[Drone 2], Received: Event [id: 1, time: 13:46:39, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+13:46:39.492,Drone 2, moving to (750.00,250.00)
+13:46:39.493,[Scheduler], Received: LOCATION:0:8:8
+13:46:39.494,[Scheduler], Received: LOCATION:1:8:8
+13:46:39.494,[Scheduler], Received: LOCATION:2:11:3
+13:46:39.494,[Scheduler], Received: LOCATION:0:16:16
+13:46:39.494,[Scheduler], Received: LOCATION:2:22:7
+13:46:39.496,[Scheduler], Received: LOCATION:1:16:16
+13:46:39.496,[Scheduler], Received: LOCATION:0:25:25
+13:46:39.497,[Scheduler], Received: LOCATION:2:34:11
+13:46:39.497,[Scheduler], Received: LOCATION:1:25:25
+13:46:39.498,[Scheduler], Received: LOCATION:0:33:33
+13:46:39.499,[Scheduler], Received: LOCATION:2:45:15
+13:46:39.499,[Scheduler], Received: LOCATION:1:33:33
+13:46:39.500,[Scheduler], Received: LOCATION:0:42:42
+13:46:39.500,[Scheduler], Received: LOCATION:2:56:18
+13:46:39.501,[Scheduler], Received: LOCATION:1:42:42
+13:46:39.503,[Scheduler], Received: LOCATION:0:50:50
+13:46:39.503,[Scheduler], Received: LOCATION:2:68:22
+13:46:39.503,[Scheduler], Received: LOCATION:1:50:50
+13:46:39.504,[Scheduler], Received: LOCATION:2:79:26
+13:46:39.505,[Scheduler], Received: LOCATION:0:59:59
+13:46:39.505,[Scheduler], Received: LOCATION:1:59:59
+13:46:39.506,[Scheduler], Received: LOCATION:2:91:30
+13:46:39.507,[Scheduler], Received: LOCATION:0:67:67
+13:46:39.508,[Scheduler], Received: LOCATION:1:67:67
+13:46:39.509,[Scheduler], Received: LOCATION:2:102:34
+13:46:39.509,[Scheduler], Received: LOCATION:0:76:76
+13:46:39.510,[Scheduler], Received: LOCATION:1:76:76
+13:46:39.511,[Scheduler], Received: LOCATION:0:84:84
+13:46:39.511,[Scheduler], Received: LOCATION:2:113:37
+13:46:39.512,[Scheduler], Received: LOCATION:1:84:84
+13:46:39.513,[Scheduler], Received: LOCATION:0:93:93
+13:46:39.513,[Scheduler], Received: LOCATION:2:125:41
+13:46:39.514,[Scheduler], Received: LOCATION:1:93:93
+13:46:39.515,[Scheduler], Received: LOCATION:0:101:101
+13:46:39.515,[Scheduler], Received: LOCATION:2:136:45
+13:46:39.516,[Scheduler], Received: LOCATION:1:101:101
+13:46:39.517,[Scheduler], Received: LOCATION:0:110:110
+13:46:39.517,[Scheduler], Received: LOCATION:2:147:49
+13:46:39.518,[Scheduler], Received: LOCATION:1:110:110
+13:46:39.519,[Scheduler], Received: LOCATION:2:159:53
+13:46:39.520,[Scheduler], Received: LOCATION:0:118:118
+13:46:39.520,[Scheduler], Received: LOCATION:1:118:118
+13:46:39.521,[Scheduler], Received: LOCATION:2:170:56
+13:46:39.521,[Scheduler], Received: LOCATION:0:127:127
+13:46:39.522,[Scheduler], Received: LOCATION:1:127:127
+13:46:39.523,[Scheduler], Received: LOCATION:2:182:60
+13:46:39.523,[Scheduler], Received: LOCATION:0:135:135
+13:46:39.524,[Scheduler], Received: LOCATION:0:144:144
+13:46:39.524,[Scheduler], Received: LOCATION:2:193:64
+13:46:39.524,[Scheduler], Received: LOCATION:1:135:135
+13:46:39.526,[Scheduler], Received: LOCATION:0:152:152
+13:46:39.526,[Scheduler], Received: LOCATION:2:204:68
+13:46:39.527,[Scheduler], Received: LOCATION:1:144:144
+13:46:39.528,[Scheduler], Received: LOCATION:2:216:72
+13:46:39.528,[Scheduler], Received: LOCATION:1:152:152
+13:46:39.528,[Scheduler], Received: LOCATION:0:161:161
+13:46:39.530,[Scheduler], Received: LOCATION:1:161:161
+13:46:39.530,[Scheduler], Received: LOCATION:0:169:169
+13:46:39.531,[Scheduler], Received: LOCATION:2:227:75
+13:46:39.532,[Scheduler], Received: LOCATION:2:239:79
+13:46:39.532,[Scheduler], Received: LOCATION:0:178:178
+13:46:39.532,[Scheduler], Received: LOCATION:1:169:169
+13:46:39.534,[Scheduler], Received: LOCATION:2:250:83
+13:46:39.535,[Scheduler], Received: LOCATION:1:178:178
+13:46:39.535,[Scheduler], Received: LOCATION:0:186:186
+13:46:39.535,[Scheduler], Received: LOCATION:2:261:87
+13:46:39.536,[Scheduler], Received: LOCATION:1:186:186
+13:46:39.537,[Scheduler], Received: LOCATION:0:195:195
+13:46:39.537,[Scheduler], Received: LOCATION:2:273:91
+13:46:39.538,[Scheduler], Received: LOCATION:0:203:203
+13:46:39.539,[Scheduler], Received: LOCATION:1:195:195
+13:46:39.539,[Scheduler], Received: LOCATION:2:284:94
+13:46:39.540,[Scheduler], Received: LOCATION:1:203:203
+13:46:39.541,[Scheduler], Received: LOCATION:0:212:212
+13:46:39.541,[Scheduler], Received: LOCATION:2:295:98
+13:46:39.542,[Scheduler], Received: LOCATION:0:220:220
+13:46:39.543,[Scheduler], Received: LOCATION:1:212:212
+13:46:39.543,[Scheduler], Received: LOCATION:2:307:102
+13:46:39.544,[Scheduler], Received: LOCATION:0:229:229
+13:46:39.545,[Scheduler], Received: LOCATION:1:220:220
+13:46:39.545,[Scheduler], Received: LOCATION:2:318:106
+13:46:39.546,[Scheduler], Received: LOCATION:1:229:229
+13:46:39.547,[Scheduler], Received: LOCATION:0:237:237
+13:46:39.547,[Scheduler], Received: LOCATION:2:330:110
+13:46:39.548,[Scheduler], Received: LOCATION:0:246:246
+13:46:39.549,[Scheduler], Received: LOCATION:1:237:237
+13:46:39.549,[Scheduler], Received: LOCATION:2:341:113
+13:46:39.550,[Scheduler], Received: LOCATION:1:246:246
+13:46:39.551,[Drone 0], Sent: En Route:0:0:15.00
+13:46:39.551,[Scheduler], Received: En Route:0:0:15.00
+13:46:39.551,[Scheduler], Sent Drone 0: DROP:15.00
+13:46:39.551,[Drone 0], Received: DROP:15.00
+13:46:39.552,[Drone 1], Sent: En Route:1:0:15.00
+13:46:39.552,[Scheduler], Received: LOCATION:2:352:117
+13:46:39.553,[Scheduler], Received: En Route:1:0:15.00
+13:46:39.553,[Scheduler], Sent Drone 1: DROP:15.00
+13:46:39.553,[Drone 1], Received: DROP:15.00
+13:46:39.553,[Scheduler], Received: LOCATION:2:364:121
+13:46:39.555,[Scheduler], Received: LOCATION:2:375:125
+13:46:39.558,[Scheduler], Received: LOCATION:2:387:129
+13:46:39.560,[Scheduler], Received: LOCATION:2:398:132
+13:46:39.562,[Scheduler], Received: LOCATION:2:409:136
+13:46:39.564,[Scheduler], Received: LOCATION:2:421:140
+13:46:39.565,[Drone 0], Sent: Dropping Agent:0:0:15.00:0.00
+13:46:39.565,[Scheduler], Received: Dropping Agent:0:0:15.00:0.00
+13:46:39.565,[Scheduler], Sent Drone 0: OK
+13:46:39.566,[Drone 0], Received: OK
+13:46:39.566,[Drone 1], Sent: Dropping Agent:1:0:15.00:0.00
+13:46:39.566,Drone 0, moving to (0.00,0.00)
+13:46:39.566,[Scheduler], Received: LOCATION:2:432:144
+13:46:39.566,[Scheduler], Received: Dropping Agent:1:0:15.00:0.00
+13:46:39.567,[Scheduler], Sent Drone 1: OK
+13:46:39.567,[FireIncidentSubsystem], Drone 1 successfully extinguished fire: 0
+13:46:39.567,[Scheduler], Received: LOCATION:0:237:237
+13:46:39.567,[Drone 1], Received: OK
+13:46:39.567,Drone 1, moving to (0.00,0.00)
+13:46:39.568,[Scheduler], Received: LOCATION:1:237:237
+13:46:39.568,[Scheduler], Received: LOCATION:2:443:147
+13:46:39.568,[Scheduler], Received: LOCATION:0:229:229
+13:46:39.570,[Scheduler], Received: LOCATION:0:220:220
+13:46:39.570,[Scheduler], Received: LOCATION:2:455:151
+13:46:39.570,[Scheduler], Received: LOCATION:1:229:229
+13:46:39.572,[Scheduler], Received: LOCATION:1:220:220
+13:46:39.572,[Scheduler], Received: LOCATION:2:466:155
+13:46:39.572,[Scheduler], Received: LOCATION:0:212:212
+13:46:39.575,[Scheduler], Received: LOCATION:1:212:212
+13:46:39.575,[Scheduler], Received: LOCATION:2:478:159
+13:46:39.575,[Scheduler], Received: LOCATION:0:203:203
+13:46:39.577,[Scheduler], Received: LOCATION:0:195:195
+13:46:39.577,[Scheduler], Received: LOCATION:2:489:163
+13:46:39.577,[Scheduler], Received: LOCATION:1:203:203
+13:46:39.579,[Scheduler], Received: LOCATION:2:500:166
+13:46:39.579,[Scheduler], Received: LOCATION:0:186:186
+13:46:39.579,[Scheduler], Received: LOCATION:1:195:195
+13:46:39.581,[Scheduler], Received: LOCATION:0:178:178
+13:46:39.581,[Scheduler], Received: LOCATION:1:186:186
+13:46:39.582,[Scheduler], Received: LOCATION:2:512:170
+13:46:39.583,[Scheduler], Received: LOCATION:0:169:169
+13:46:39.584,[Scheduler], Received: LOCATION:1:178:178
+13:46:39.585,[Scheduler], Received: LOCATION:2:523:174
+13:46:39.585,[Scheduler], Received: LOCATION:2:535:178
+13:46:39.585,[Scheduler], Received: LOCATION:1:169:169
+13:46:39.585,[Scheduler], Received: LOCATION:0:161:161
+13:46:39.587,[Scheduler], Received: LOCATION:2:546:182
+13:46:39.587,[Scheduler], Received: LOCATION:0:152:152
+13:46:39.588,[Scheduler], Received: LOCATION:1:161:161
+13:46:39.589,[Scheduler], Received: LOCATION:2:557:185
+13:46:39.589,[Scheduler], Received: LOCATION:0:144:144
+13:46:39.589,[Scheduler], Received: LOCATION:1:152:152
+13:46:39.591,[Scheduler], Received: LOCATION:2:569:189
+13:46:39.591,[Scheduler], Received: LOCATION:1:144:144
+13:46:39.591,[Scheduler], Received: LOCATION:0:135:135
+13:46:39.592,[Scheduler], Received: LOCATION:2:580:193
+13:46:39.593,[Scheduler], Received: LOCATION:1:135:135
+13:46:39.594,[Scheduler], Received: LOCATION:0:127:127
+13:46:39.594,[Scheduler], Received: LOCATION:2:591:197
+13:46:39.595,[Scheduler], Received: LOCATION:0:118:118
+13:46:39.595,[Scheduler], Received: LOCATION:1:127:127
+13:46:39.596,[Scheduler], Received: LOCATION:2:603:201
+13:46:39.597,[Scheduler], Received: LOCATION:1:118:118
+13:46:39.597,[Scheduler], Received: LOCATION:0:110:110
+13:46:39.598,[Scheduler], Received: LOCATION:2:614:204
+13:46:39.599,[Scheduler], Received: LOCATION:1:110:110
+13:46:39.599,[Scheduler], Received: LOCATION:0:101:101
+13:46:39.600,[Scheduler], Received: LOCATION:2:626:208
+13:46:39.603,[Scheduler], Received: LOCATION:1:101:101
+13:46:39.604,[Scheduler], Received: LOCATION:0:93:93
+13:46:39.605,[Scheduler], Received: LOCATION:0:84:84
+13:46:39.605,[Scheduler], Received: LOCATION:1:93:93
+13:46:39.605,[Scheduler], Received: LOCATION:2:637:212
+13:46:39.605,[Scheduler], Received: LOCATION:1:84:84
+13:46:39.605,[Scheduler], Received: LOCATION:0:76:76
+13:46:39.607,[Scheduler], Received: LOCATION:2:648:216
+13:46:39.609,[Scheduler], Received: LOCATION:1:76:76
+13:46:39.609,[Scheduler], Received: LOCATION:0:67:67
+13:46:39.610,[Scheduler], Received: LOCATION:2:660:220
+13:46:39.610,[Scheduler], Received: LOCATION:0:59:59
+13:46:39.611,[Scheduler], Received: LOCATION:1:67:67
+13:46:39.612,[Scheduler], Received: LOCATION:1:59:59
+13:46:39.613,[Scheduler], Received: LOCATION:0:50:50
+13:46:39.613,[Scheduler], Received: LOCATION:2:671:223
+13:46:39.614,[Scheduler], Received: LOCATION:0:42:42
+13:46:39.614,[Scheduler], Received: LOCATION:1:50:50
+13:46:39.614,[Scheduler], Received: LOCATION:2:683:227
+13:46:39.616,[Scheduler], Received: LOCATION:2:694:231
+13:46:39.616,[Scheduler], Received: LOCATION:1:42:42
+13:46:39.616,[Scheduler], Received: LOCATION:0:33:33
+13:46:39.618,[Scheduler], Received: LOCATION:2:705:235
+13:46:39.619,[Scheduler], Received: LOCATION:1:33:33
+13:46:39.619,[Scheduler], Received: LOCATION:0:25:25
+13:46:39.620,[Scheduler], Received: LOCATION:2:717:239
+13:46:39.620,[Scheduler], Received: LOCATION:0:16:16
+13:46:39.620,[Scheduler], Received: LOCATION:1:25:25
+13:46:39.624,[Scheduler], Received: LOCATION:0:8:8
+13:46:39.624,[Scheduler], Received: LOCATION:1:16:16
+13:46:39.624,[Scheduler], Received: LOCATION:2:728:242
+13:46:39.624,[Scheduler], Received: LOCATION:1:8:8
+13:46:39.625,[Scheduler], Received: LOCATION:0:0:0
+13:46:39.625,[Scheduler], Received: LOCATION:2:739:246
+13:46:39.626,[Drone 0], Sent: Returning To Base:0
+13:46:39.626,[Drone 2], Sent: En Route:2:1:15.00
+13:46:39.626,[Scheduler], Received: LOCATION:1:0:0
+13:46:39.626,[Scheduler], Received: Returning To Base:0
+13:46:39.627,[Scheduler], Sent Drone 0: OK
+13:46:39.627,[Drone 0], Received: OK
+13:46:39.627,[Scheduler], Received: En Route:2:1:15.00
+13:46:39.627,[Scheduler], Sent Drone 2: DROP:15.00
+13:46:39.628,[Drone 1], Sent: Returning To Base:1
+13:46:39.628,[Drone 2], Received: DROP:15.00
+13:46:39.628,[Scheduler], Received: Returning To Base:1
+13:46:39.628,[Scheduler], Sent Drone 1: OK
+13:46:39.629,[Drone 1], Received: OK
+13:46:39.641,[Drone 2], Sent: Dropping Agent:2:1:15.00:0.00
+13:46:39.642,[Scheduler], Received: Dropping Agent:2:1:15.00:0.00
+13:46:39.643,[Scheduler], Sent Drone 2: OK
+13:46:39.643,[Drone 2], Received: OK
+13:46:39.643,Drone 2, moving to (0.00,0.00)
+13:46:39.643,[Scheduler], Received: LOCATION:2:728:242
+13:46:39.645,[Scheduler], Received: LOCATION:2:717:239
+13:46:39.647,[Scheduler], Received: LOCATION:2:705:235
+13:46:39.648,[Drone 0], Sent: Filling Tank:0
+13:46:39.649,[Scheduler], Received: Filling Tank:0
+13:46:39.649,[Scheduler], Sent Drone 0: OK
+13:46:39.649,[Drone 0], Received: OK
+13:46:39.649,[Drone 0], IDLE Waiting for assignment...
+13:46:39.649,[Scheduler], Received: LOCATION:2:694:231
+13:46:39.650,[Scheduler], Sent Drone 0: Event [id: 1, time: 13:46:39, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+13:46:39.651,[Scheduler], Received: LOCATION:2:683:227
+13:46:39.651,[Drone 1], Sent: Filling Tank:1
+13:46:39.651,[Scheduler], Received: Filling Tank:1
+13:46:39.651,[Scheduler], Sent Drone 1: OK
+13:46:39.653,[Drone 1], Received: OK
+13:46:39.653,[Drone 1], IDLE Waiting for assignment...
+13:46:39.654,[Drone 0], Received: Event [id: 1, time: 13:46:39, zone:2, type: DRONE_REQUEST, severity: MODERATE]
+13:46:39.655,[Scheduler], Sent Drone 1: Event [id: 3, time: 13:46:39, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+13:46:39.655,Drone 0, moving to (750.00,250.00)
+13:46:39.655,[Scheduler], Received: LOCATION:2:671:223
+13:46:39.657,[Scheduler], Received: LOCATION:0:11:3
+13:46:39.657,[Scheduler], Received: LOCATION:2:660:220
+13:46:39.658,[Scheduler], Received: LOCATION:0:22:7
+13:46:39.658,[Drone 1], Received: Event [id: 3, time: 13:46:39, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+13:46:39.659,[Scheduler], Received: LOCATION:2:648:216
+13:46:39.659,Drone 1, moving to (250.00,750.00)
+13:46:39.659,[Scheduler], Received: LOCATION:1:3:11
+13:46:39.659,[Scheduler], Received: LOCATION:0:34:11
+13:46:39.661,[Scheduler], Received: LOCATION:1:7:22
+13:46:39.661,[Scheduler], Received: LOCATION:0:45:15
+13:46:39.661,[Scheduler], Received: LOCATION:2:637:212
+13:46:39.662,[Scheduler], Received: LOCATION:1:11:34
+13:46:39.663,[Scheduler], Received: LOCATION:0:56:18
+13:46:39.663,[Scheduler], Received: LOCATION:2:626:208
+13:46:39.665,[Scheduler], Received: LOCATION:1:15:45
+13:46:39.665,[Scheduler], Received: LOCATION:0:68:22
+13:46:39.665,[Scheduler], Received: LOCATION:2:614:204
+13:46:39.665,[Scheduler], Received: LOCATION:0:79:26
+13:46:39.667,[Scheduler], Received: LOCATION:2:603:201
+13:46:39.667,[Scheduler], Received: LOCATION:1:18:56
+13:46:39.671,[Scheduler], Received: LOCATION:1:22:68
+13:46:39.671,[Scheduler], Received: LOCATION:2:591:197
+13:46:39.671,[Scheduler], Received: LOCATION:0:91:30
+13:46:39.671,[Scheduler], Received: LOCATION:1:26:79
+13:46:39.673,[Scheduler], Received: LOCATION:2:580:193
+13:46:39.673,[Scheduler], Received: LOCATION:0:102:34
+13:46:39.673,[Scheduler], Received: LOCATION:1:30:91
+13:46:39.674,[Scheduler], Received: LOCATION:2:569:189
+13:46:39.675,[Scheduler], Received: LOCATION:0:113:37
+13:46:39.675,[Scheduler], Received: LOCATION:1:34:102
+13:46:39.676,[Scheduler], Received: LOCATION:2:557:185
+13:46:39.677,[Scheduler], Received: LOCATION:0:125:41
+13:46:39.677,[Scheduler], Received: LOCATION:1:37:113
+13:46:39.678,[Scheduler], Received: LOCATION:2:546:182
+13:46:39.679,[Scheduler], Received: LOCATION:0:136:45
+13:46:39.679,[Scheduler], Received: LOCATION:1:41:125
+13:46:39.680,[Scheduler], Received: LOCATION:0:147:49
+13:46:39.681,[Scheduler], Received: LOCATION:2:535:178
+13:46:39.681,[Scheduler], Received: LOCATION:1:45:136
+13:46:39.682,[Scheduler], Received: LOCATION:2:523:174
+13:46:39.683,[Scheduler], Received: LOCATION:0:159:53
+13:46:39.683,[Scheduler], Received: LOCATION:1:49:147
+13:46:39.685,[Scheduler], Received: LOCATION:0:170:56
+13:46:39.685,[Scheduler], Received: LOCATION:2:512:170
+13:46:39.685,[Scheduler], Received: LOCATION:1:53:159
+13:46:39.687,[Scheduler], Received: LOCATION:0:182:60
+13:46:39.687,[Scheduler], Received: LOCATION:2:500:166
+13:46:39.687,[Scheduler], Received: LOCATION:1:56:170
+13:46:39.688,[Scheduler], Received: LOCATION:2:489:163
+13:46:39.691,[Scheduler], Received: LOCATION:1:60:182
+13:46:39.691,[Scheduler], Received: LOCATION:2:478:159
+13:46:39.691,[Scheduler], Received: LOCATION:0:193:64
+13:46:39.692,[Scheduler], Received: LOCATION:1:64:193
+13:46:39.692,[Scheduler], Received: LOCATION:2:466:155
+13:46:39.692,[Scheduler], Received: LOCATION:0:204:68
+13:46:39.694,[Scheduler], Received: LOCATION:1:68:204
+13:46:39.694,[Scheduler], Received: LOCATION:2:455:151
+13:46:39.694,[Scheduler], Received: LOCATION:0:216:72
+13:46:39.696,[Scheduler], Received: LOCATION:1:72:216
+13:46:39.696,[Scheduler], Received: LOCATION:2:443:147
+13:46:39.696,[Scheduler], Received: LOCATION:0:227:75
+13:46:39.698,[Scheduler], Received: LOCATION:1:75:227
+13:46:39.698,[Scheduler], Received: LOCATION:2:432:144
+13:46:39.698,[Scheduler], Received: LOCATION:0:239:79
+13:46:39.700,[Scheduler], Received: LOCATION:2:421:140
+13:46:39.700,[Scheduler], Received: LOCATION:1:79:239
+13:46:39.700,[Scheduler], Received: LOCATION:0:250:83
+13:46:39.702,[Scheduler], Received: LOCATION:1:83:250
+13:46:39.702,[Scheduler], Received: LOCATION:2:409:136
+13:46:39.703,[Scheduler], Received: LOCATION:0:261:87
+13:46:39.704,[Scheduler], Received: LOCATION:2:398:132
+13:46:39.704,[Scheduler], Received: LOCATION:1:87:261
+13:46:39.704,[Scheduler], Received: LOCATION:0:273:91
+13:46:39.706,[Scheduler], Received: LOCATION:2:387:129
+13:46:39.706,[Scheduler], Received: LOCATION:1:91:273
+13:46:39.706,[Scheduler], Received: LOCATION:0:284:94
+13:46:39.707,[Scheduler], Received: LOCATION:2:375:125
+13:46:39.708,[Scheduler], Received: LOCATION:1:94:284
+13:46:39.708,[Scheduler], Received: LOCATION:0:295:98
+13:46:39.709,[Scheduler], Received: LOCATION:2:364:121
+13:46:39.711,[Scheduler], Received: LOCATION:2:352:117
+13:46:39.712,[Scheduler], Received: LOCATION:0:307:102
+13:46:39.713,[Scheduler], Received: LOCATION:1:98:295
+13:46:39.713,[Scheduler], Received: LOCATION:2:341:113
+13:46:39.714,[Scheduler], Received: LOCATION:0:318:106
+13:46:39.714,[Scheduler], Received: LOCATION:1:102:307
+13:46:39.715,[Scheduler], Received: LOCATION:2:330:110
+13:46:39.716,[Scheduler], Received: LOCATION:0:330:110
+13:46:39.716,[Scheduler], Received: LOCATION:1:106:318
+13:46:39.717,[Scheduler], Received: LOCATION:2:318:106
+13:46:39.719,[Scheduler], Received: LOCATION:0:341:113
+13:46:39.719,[Scheduler], Received: LOCATION:1:110:330
+13:46:39.720,[Scheduler], Received: LOCATION:2:307:102
+13:46:39.720,[Scheduler], Received: LOCATION:1:113:341
+13:46:39.721,[Scheduler], Received: LOCATION:0:352:117
+13:46:39.722,[Scheduler], Received: LOCATION:2:295:98
+13:46:39.722,[Scheduler], Received: LOCATION:1:117:352
+13:46:39.723,[Scheduler], Received: LOCATION:0:364:121
+13:46:39.724,[Scheduler], Received: LOCATION:2:284:94
+13:46:39.724,[Scheduler], Received: LOCATION:1:121:364
+13:46:39.724,[Scheduler], Received: LOCATION:0:375:125
+13:46:39.725,[Scheduler], Received: LOCATION:2:273:91
+13:46:39.726,[Scheduler], Received: LOCATION:1:125:375
+13:46:39.727,[Scheduler], Received: LOCATION:0:387:129
+13:46:39.727,[Scheduler], Received: LOCATION:2:261:87
+13:46:39.728,[Scheduler], Received: LOCATION:0:398:132
+13:46:39.729,[Scheduler], Received: LOCATION:1:129:387
+13:46:39.730,[Scheduler], Received: LOCATION:2:250:83
+13:46:39.730,[Scheduler], Received: LOCATION:0:409:136
+13:46:39.731,[Scheduler], Received: LOCATION:1:132:398
+13:46:39.732,[Scheduler], Received: LOCATION:2:239:79
+13:46:39.732,[Scheduler], Received: LOCATION:0:421:140
+13:46:39.733,[Scheduler], Received: LOCATION:0:432:144
+13:46:39.734,[Scheduler], Received: LOCATION:2:227:75
+13:46:39.734,[Scheduler], Received: LOCATION:1:136:409
+13:46:39.736,[Scheduler], Received: LOCATION:2:216:72
+13:46:39.736,[Scheduler], Received: LOCATION:0:443:147
+13:46:39.738,[Scheduler], Received: LOCATION:1:140:421
+13:46:39.738,[Scheduler], Received: LOCATION:0:455:151
+13:46:39.738,[Scheduler], Received: LOCATION:1:144:432
+13:46:39.739,[Scheduler], Received: LOCATION:2:204:68
+13:46:39.740,[Scheduler], Received: LOCATION:1:147:443
+13:46:39.740,[Scheduler], Received: LOCATION:0:466:155
+13:46:39.741,[Scheduler], Received: LOCATION:1:151:455
+13:46:39.741,[Scheduler], Received: LOCATION:2:193:64
+13:46:39.742,[Scheduler], Received: LOCATION:0:478:159
+13:46:39.743,[Scheduler], Received: LOCATION:2:182:60
+13:46:39.743,[Scheduler], Received: LOCATION:1:155:466
+13:46:39.744,[Scheduler], Received: LOCATION:0:489:163
+13:46:39.745,[Scheduler], Received: LOCATION:1:159:478
+13:46:39.745,[Scheduler], Received: LOCATION:2:170:56
+13:46:39.746,[Scheduler], Received: LOCATION:0:500:166
+13:46:39.746,[Scheduler], Received: LOCATION:2:159:53
+13:46:39.747,[Scheduler], Received: LOCATION:1:163:489
+13:46:39.747,[Scheduler], Received: LOCATION:0:512:170
+13:46:39.748,[Scheduler], Received: LOCATION:2:147:49
+13:46:39.749,[Scheduler], Received: LOCATION:0:523:174
+13:46:39.749,[Scheduler], Received: LOCATION:1:166:500
+13:46:39.750,[Scheduler], Received: LOCATION:2:136:45
+13:46:39.751,[Scheduler], Received: LOCATION:0:535:178
+13:46:39.751,[Scheduler], Received: LOCATION:1:170:512
+13:46:39.751,[Scheduler], Received: LOCATION:2:125:41
+13:46:39.753,[Scheduler], Received: LOCATION:0:546:182
+13:46:39.753,[Scheduler], Received: LOCATION:1:174:523
+13:46:39.753,[Scheduler], Received: LOCATION:2:113:37
+13:46:39.754,[Scheduler], Received: LOCATION:0:557:185
+13:46:39.756,[Scheduler], Received: LOCATION:1:178:535
+13:46:39.756,[Scheduler], Received: LOCATION:2:102:34
+13:46:39.756,[Scheduler], Received: LOCATION:0:569:189
+13:46:39.757,[Scheduler], Received: LOCATION:2:91:30
+13:46:39.758,[Scheduler], Received: LOCATION:1:182:546
+13:46:39.758,[Scheduler], Received: LOCATION:0:580:193
+13:46:39.758,[Scheduler], Received: LOCATION:1:185:557
+13:46:39.759,[Scheduler], Received: LOCATION:2:79:26
+13:46:39.760,[Scheduler], Received: LOCATION:0:591:197
+13:46:39.760,[Scheduler], Received: LOCATION:1:189:569
+13:46:39.760,[Scheduler], Received: LOCATION:2:68:22
+13:46:39.762,[Scheduler], Received: LOCATION:0:603:201
+13:46:39.762,[Scheduler], Received: LOCATION:2:56:18
+13:46:39.762,[Scheduler], Received: LOCATION:1:193:580
+13:46:39.764,[Scheduler], Received: LOCATION:2:45:15
+13:46:39.764,[Scheduler], Received: LOCATION:0:614:204
+13:46:39.764,[Scheduler], Received: LOCATION:1:197:591
+13:46:39.765,[Scheduler], Received: LOCATION:2:34:11
+13:46:39.766,[Scheduler], Received: LOCATION:0:626:208
+13:46:39.767,[Scheduler], Received: LOCATION:1:201:603
+13:46:39.768,[Scheduler], Received: LOCATION:2:22:7
+13:46:39.768,[Scheduler], Received: LOCATION:0:637:212
+13:46:39.768,[Scheduler], Received: LOCATION:1:204:614
+13:46:39.772,[Scheduler], Received: LOCATION:2:11:3
+13:46:39.772,[Scheduler], Received: LOCATION:0:648:216
+13:46:39.772,[Scheduler], Received: LOCATION:1:208:626
+13:46:39.773,[Scheduler], Received: LOCATION:2:0:0
+13:46:39.773,[Scheduler], Received: LOCATION:0:660:220
+13:46:39.773,[Scheduler], Received: LOCATION:1:212:637
+13:46:39.774,[Drone 2], Sent: Returning To Base:2
+13:46:39.774,[Scheduler], Received: Returning To Base:2
+13:46:39.774,[Scheduler], Sent Drone 2: OK
+13:46:39.774,[Drone 2], Received: OK
+13:46:39.775,[Scheduler], Received: LOCATION:0:671:223
+13:46:39.775,[Scheduler], Received: LOCATION:1:216:648
+13:46:39.777,[Scheduler], Received: LOCATION:0:683:227
+13:46:39.777,[Scheduler], Received: LOCATION:1:220:660
+13:46:39.779,[Scheduler], Received: LOCATION:0:694:231
+13:46:39.779,[Scheduler], Received: LOCATION:1:223:671
+13:46:39.781,[Scheduler], Received: LOCATION:0:705:235
+13:46:39.781,[Scheduler], Received: LOCATION:1:227:683
+13:46:39.784,[Scheduler], Received: LOCATION:0:717:239
+13:46:39.785,[Scheduler], Received: LOCATION:1:231:694
+13:46:39.785,[Scheduler], Received: LOCATION:0:728:242
+13:46:39.786,[Scheduler], Received: LOCATION:1:235:705
+13:46:39.787,[Scheduler], Received: LOCATION:1:239:717
+13:46:39.787,[Scheduler], Received: LOCATION:0:739:246
+13:46:39.789,[Scheduler], Received: LOCATION:1:242:728
+13:46:39.789,[Drone 0], Sent: En Route:0:1:15.00
+13:46:39.789,[Scheduler], Received: En Route:0:1:15.00
+13:46:39.790,[Scheduler], Sent Drone 0: DROP:5.00
+13:46:39.790,[Drone 0], Received: DROP:5.00
+13:46:39.791,[Scheduler], Received: LOCATION:1:246:739
+13:46:39.793,[Drone 1], Sent: En Route:1:3:15.00
+13:46:39.793,[Scheduler], Received: En Route:1:3:15.00
+13:46:39.794,[Scheduler], Sent Drone 1: DROP:15.00
+13:46:39.794,[Drone 1], Received: DROP:15.00
+13:46:39.794,[Drone 0], Sent: Dropping Agent:0:1:5.00:10.00
+13:46:39.795,[Scheduler], Received: Dropping Agent:0:1:5.00:10.00
+13:46:39.795,[Scheduler], Sent Drone 0: OK
+13:46:39.795,[FireIncidentSubsystem], Drone 0 successfully extinguished fire: 1
+13:46:39.795,[Drone 0], Received: OK
+13:46:39.795,Drone 0, moving to (0.00,0.00)
+13:46:39.796,[Drone 2], Sent: Filling Tank:2
+13:46:39.796,[Scheduler], Received: LOCATION:0:728:242
+13:46:39.796,[Scheduler], Received: Filling Tank:2
+13:46:39.796,[Scheduler], Sent Drone 2: OK
+13:46:39.796,[Drone 2], Received: OK
+13:46:39.796,[Drone 2], IDLE Waiting for assignment...
+13:46:39.797,[Scheduler], Sent Drone 2: Event [id: 3, time: 13:46:39, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+13:46:39.798,[Scheduler], Received: LOCATION:0:717:239
+13:46:39.799,[Drone 2], Received: Event [id: 3, time: 13:46:39, zone:4, type: FIRE_DETECTED, severity: MODERATE]
+13:46:39.800,Drone 2, moving to (250.00,750.00)
+13:46:39.800,[Scheduler], Received: LOCATION:0:705:235
+13:46:39.800,[Scheduler], Received: LOCATION:2:3:11
+13:46:39.801,[Scheduler], Received: LOCATION:2:7:22
+13:46:39.801,[Scheduler], Received: LOCATION:0:694:231
+13:46:39.803,[Scheduler], Received: LOCATION:0:683:227
+13:46:39.803,[Scheduler], Received: LOCATION:2:11:34
+13:46:39.805,[Scheduler], Received: LOCATION:2:15:45
+13:46:39.805,[Scheduler], Received: LOCATION:0:671:223
+13:46:39.806,[Drone 1], Sent: Dropping Agent:1:3:15.00:0.00
+13:46:39.807,[Scheduler], Received: Dropping Agent:1:3:15.00:0.00
+13:46:39.807,[Scheduler], Sent Drone 1: OK
+13:46:39.807,[Scheduler], Received: LOCATION:0:660:220
+13:46:39.807,[Drone 1], Received: OK
+13:46:39.807,Drone 1, moving to (0.00,0.00)
+13:46:39.807,[Scheduler], Received: LOCATION:2:18:56
+13:46:39.807,[Scheduler], Received: LOCATION:1:242:728
+13:46:39.809,[Scheduler], Received: LOCATION:1:239:717
+13:46:39.810,[Scheduler], Received: LOCATION:0:648:216
+13:46:39.810,[Scheduler], Received: LOCATION:2:22:68
+13:46:39.813,[Scheduler], Received: LOCATION:2:26:79
+13:46:39.813,[Scheduler], Received: LOCATION:1:235:705
+13:46:39.813,[Scheduler], Received: LOCATION:0:637:212
+13:46:39.813,[Scheduler], Received: LOCATION:1:231:694
+13:46:39.813,[Scheduler], Received: LOCATION:0:626:208
+13:46:39.813,[Scheduler], Received: LOCATION:2:30:91
+13:46:39.815,[Scheduler], Received: LOCATION:0:614:204
+13:46:39.815,[Scheduler], Received: LOCATION:1:227:683
+13:46:39.815,[Scheduler], Received: LOCATION:2:34:102
+13:46:39.817,[Scheduler], Received: LOCATION:0:603:201
+13:46:39.817,[Scheduler], Received: LOCATION:2:37:113
+13:46:39.817,[Scheduler], Received: LOCATION:1:223:671
+13:46:39.822,[Scheduler], Received: LOCATION:1:220:660
+13:46:39.822,[Scheduler], Received: LOCATION:0:591:197
+13:46:39.823,[Scheduler], Received: LOCATION:1:216:648
+13:46:39.823,[Scheduler], Received: LOCATION:1:212:637
+13:46:39.823,[Scheduler], Received: LOCATION:0:580:193
+13:46:39.823,[Scheduler], Received: LOCATION:2:41:125
+13:46:39.824,[Scheduler], Received: LOCATION:0:569:189
+13:46:39.824,[Scheduler], Received: LOCATION:1:208:626
+13:46:39.824,[Scheduler], Received: LOCATION:2:45:136
+13:46:39.826,[Scheduler], Received: LOCATION:0:557:185
+13:46:39.827,[Scheduler], Received: LOCATION:1:204:614
+13:46:39.827,[Scheduler], Received: LOCATION:2:49:147
+13:46:39.828,[Scheduler], Received: LOCATION:1:201:603
+13:46:39.828,[Scheduler], Received: LOCATION:0:546:182
+13:46:39.828,[Scheduler], Received: LOCATION:2:53:159
+13:46:39.830,[Scheduler], Received: LOCATION:1:197:591
+13:46:39.830,[Scheduler], Received: LOCATION:0:535:178
+13:46:39.830,[Scheduler], Received: LOCATION:2:56:170
+13:46:39.831,[Scheduler], Received: LOCATION:2:60:182
+13:46:39.832,[Scheduler], Received: LOCATION:0:523:174
+13:46:39.832,[Scheduler], Received: LOCATION:1:193:580
+13:46:39.833,[Scheduler], Received: LOCATION:2:64:193
+13:46:39.835,[Scheduler], Received: LOCATION:0:512:170
+13:46:39.835,[Scheduler], Received: LOCATION:1:189:569
+13:46:39.835,[Scheduler], Received: LOCATION:2:68:204
+13:46:39.837,[Scheduler], Received: LOCATION:1:185:557
+13:46:39.837,[Scheduler], Received: LOCATION:0:500:166
+13:46:39.837,[Scheduler], Received: LOCATION:2:72:216
+13:46:39.839,[Scheduler], Received: LOCATION:1:182:546
+13:46:39.839,[Scheduler], Received: LOCATION:0:489:163
+13:46:39.839,[Scheduler], Received: LOCATION:2:75:227
+13:46:39.840,[Scheduler], Received: LOCATION:1:178:535
+13:46:39.841,[Scheduler], Received: LOCATION:0:478:159
+13:46:39.841,[Scheduler], Received: LOCATION:2:79:239
+13:46:39.843,[Scheduler], Received: LOCATION:0:466:155
+13:46:39.843,[Scheduler], Received: LOCATION:1:174:523
+13:46:39.843,[Scheduler], Received: LOCATION:2:83:250
+13:46:39.845,[Scheduler], Received: LOCATION:1:170:512
+13:46:39.845,[Scheduler], Received: LOCATION:0:455:151
+13:46:39.845,[Scheduler], Received: LOCATION:2:87:261
+13:46:39.846,[Scheduler], Received: LOCATION:0:443:147
+13:46:39.847,[Scheduler], Received: LOCATION:2:91:273
+13:46:39.847,[Scheduler], Received: LOCATION:1:166:500
+13:46:39.849,[Scheduler], Received: LOCATION:0:432:144
+13:46:39.849,[Scheduler], Received: LOCATION:1:163:489
+13:46:39.849,[Scheduler], Received: LOCATION:2:94:284
+13:46:39.851,[Scheduler], Received: LOCATION:2:98:295
+13:46:39.851,[Scheduler], Received: LOCATION:0:421:140
+13:46:39.851,[Scheduler], Received: LOCATION:1:159:478
+13:46:39.853,[Scheduler], Received: LOCATION:0:409:136
+13:46:39.853,[Scheduler], Received: LOCATION:1:155:466
+13:46:39.853,[Scheduler], Received: LOCATION:2:102:307
+13:46:39.855,[Scheduler], Received: LOCATION:0:398:132
+13:46:39.855,[Scheduler], Received: LOCATION:2:106:318
+13:46:39.855,[Scheduler], Received: LOCATION:1:151:455
+13:46:39.857,[Scheduler], Received: LOCATION:2:110:330
+13:46:39.857,[Scheduler], Received: LOCATION:0:387:129
+13:46:39.857,[Scheduler], Received: LOCATION:1:147:443
+13:46:39.858,[Scheduler], Received: LOCATION:1:144:432
+13:46:39.859,[Scheduler], Received: LOCATION:2:113:341
+13:46:39.859,[Scheduler], Received: LOCATION:0:375:125
+13:46:39.860,[Scheduler], Received: LOCATION:2:117:352
+13:46:39.860,[Scheduler], Received: LOCATION:1:140:421
+13:46:39.860,[Scheduler], Received: LOCATION:0:364:121
+13:46:39.863,[Scheduler], Received: LOCATION:1:136:409
+13:46:39.863,[Scheduler], Received: LOCATION:0:352:117
+13:46:39.864,[Scheduler], Received: LOCATION:2:121:364
+13:46:39.864,[Scheduler], Received: LOCATION:1:132:398
+13:46:39.864,[Scheduler], Received: LOCATION:0:341:113
+13:46:39.865,[Scheduler], Received: LOCATION:2:125:375
+13:46:39.866,[Scheduler], Received: LOCATION:0:330:110
+13:46:39.866,[Scheduler], Received: LOCATION:1:129:387
+13:46:39.867,[Scheduler], Received: LOCATION:2:129:387
+13:46:39.869,[Scheduler], Received: LOCATION:0:318:106
+13:46:39.869,[Scheduler], Received: LOCATION:1:125:375
+13:46:39.869,[Scheduler], Received: LOCATION:2:132:398
+13:46:39.870,[Scheduler], Received: LOCATION:0:307:102
+13:46:39.870,[Scheduler], Received: LOCATION:1:121:364
+13:46:39.871,[Scheduler], Received: LOCATION:2:136:409
+13:46:39.873,[Scheduler], Received: LOCATION:0:295:98
+13:46:39.873,[Scheduler], Received: LOCATION:1:117:352
+13:46:39.873,[Scheduler], Received: LOCATION:2:140:421
+13:46:39.874,[Scheduler], Received: LOCATION:1:113:341
+13:46:39.875,[Scheduler], Received: LOCATION:0:284:94
+13:46:39.875,[Scheduler], Received: LOCATION:2:144:432
+13:46:39.876,[Scheduler], Received: LOCATION:0:273:91
+13:46:39.876,[Scheduler], Received: LOCATION:1:110:330
+13:46:39.877,[Scheduler], Received: LOCATION:2:147:443
+13:46:39.878,[Scheduler], Received: LOCATION:1:106:318
+13:46:39.879,[Scheduler], Received: LOCATION:0:261:87
+13:46:39.879,[Scheduler], Received: LOCATION:2:151:455
+13:46:39.880,[Scheduler], Received: LOCATION:0:250:83
+13:46:39.881,[Scheduler], Received: LOCATION:1:102:307
+13:46:39.881,[Scheduler], Received: LOCATION:2:155:466
+13:46:39.883,[Scheduler], Received: LOCATION:0:239:79
+13:46:39.883,[Scheduler], Received: LOCATION:1:98:295
+13:46:39.883,[Scheduler], Received: LOCATION:2:159:478
+13:46:39.885,[Scheduler], Received: LOCATION:0:227:75
+13:46:39.885,[Scheduler], Received: LOCATION:1:94:284
+13:46:39.885,[Scheduler], Received: LOCATION:2:163:489
+13:46:39.885,[Scheduler], Received: LOCATION:1:91:273
+13:46:39.886,[Scheduler], Received: LOCATION:0:216:72
+13:46:39.886,[Scheduler], Received: LOCATION:2:166:500
+13:46:39.887,[Scheduler], Received: LOCATION:0:204:68
+13:46:39.887,[Scheduler], Received: LOCATION:1:87:261
+13:46:39.888,[Scheduler], Received: LOCATION:2:170:512
+13:46:39.889,[Scheduler], Received: LOCATION:0:193:64
+13:46:39.889,[Scheduler], Received: LOCATION:1:83:250
+13:46:39.890,[Scheduler], Received: LOCATION:2:174:523
+13:46:39.891,[Scheduler], Received: LOCATION:1:79:239
+13:46:39.891,[Scheduler], Received: LOCATION:0:182:60
+13:46:39.892,[Scheduler], Received: LOCATION:2:178:535
+13:46:39.893,[Scheduler], Received: LOCATION:1:75:227
+13:46:39.893,[Scheduler], Received: LOCATION:0:170:56
+13:46:39.894,[Scheduler], Received: LOCATION:2:182:546
+13:46:39.896,[Scheduler], Received: LOCATION:1:72:216
+13:46:39.896,[Scheduler], Received: LOCATION:0:159:53
+13:46:39.897,[Scheduler], Received: LOCATION:2:185:557
+13:46:39.898,[Scheduler], Received: LOCATION:1:68:204
+13:46:39.898,[Scheduler], Received: LOCATION:0:147:49
+13:46:39.899,[Scheduler], Received: LOCATION:2:189:569
+13:46:39.900,[Scheduler], Received: LOCATION:0:136:45
+13:46:39.900,[Scheduler], Received: LOCATION:1:64:193
+13:46:39.900,[Scheduler], Received: LOCATION:2:193:580
+13:46:39.903,[Scheduler], Received: LOCATION:2:197:591
+13:46:39.903,[Scheduler], Received: LOCATION:0:125:41
+13:46:39.904,[Scheduler], Received: LOCATION:2:201:603
+13:46:39.904,[Scheduler], Received: LOCATION:1:60:182
+13:46:39.905,[Scheduler], Received: LOCATION:2:204:614
+13:46:39.905,[Scheduler], Received: LOCATION:0:113:37
+13:46:39.907,[Scheduler], Received: LOCATION:2:208:626
+13:46:39.907,[Scheduler], Received: LOCATION:1:56:170
+13:46:39.908,[Scheduler], Received: LOCATION:0:102:34
+13:46:39.910,[Scheduler], Received: LOCATION:0:91:30
+13:46:39.910,[Scheduler], Received: LOCATION:1:53:159
+13:46:39.910,[Scheduler], Received: LOCATION:2:212:637
+13:46:39.913,[Scheduler], Received: LOCATION:0:79:26
+13:46:39.913,[Scheduler], Received: LOCATION:1:49:147
+13:46:39.914,[Scheduler], Received: LOCATION:2:216:648
+13:46:39.914,[Scheduler], Received: LOCATION:1:45:136
+13:46:39.914,[Scheduler], Received: LOCATION:0:68:22
+13:46:39.916,[Scheduler], Received: LOCATION:1:41:125
+13:46:39.916,[Scheduler], Received: LOCATION:2:220:660
+13:46:39.916,[Scheduler], Received: LOCATION:0:56:18
+13:46:39.917,[Scheduler], Received: LOCATION:1:37:113
+13:46:39.917,[Scheduler], Received: LOCATION:2:223:671
+13:46:39.917,[Scheduler], Received: LOCATION:0:45:15
+13:46:39.920,[Scheduler], Received: LOCATION:1:34:102
+13:46:39.920,[Scheduler], Received: LOCATION:0:34:11
+13:46:39.920,[Scheduler], Received: LOCATION:2:227:683
+13:46:39.920,[Scheduler], Received: LOCATION:1:30:91
+13:46:39.920,[Scheduler], Received: LOCATION:0:22:7
+13:46:39.922,[Scheduler], Received: LOCATION:2:231:694
+13:46:39.925,[Scheduler], Received: LOCATION:1:26:79
+13:46:39.925,[Scheduler], Received: LOCATION:0:11:3
+13:46:39.925,[Scheduler], Received: LOCATION:2:235:705
+13:46:39.926,[Scheduler], Received: LOCATION:2:239:717
+13:46:39.926,[Scheduler], Received: LOCATION:0:0:0
+13:46:39.926,[Scheduler], Received: LOCATION:1:22:68
+13:46:39.927,[Scheduler], Received: LOCATION:2:242:728
+13:46:39.928,[Scheduler], Received: LOCATION:1:18:56
+13:46:39.928,[Drone 0], Sent: Returning To Base:0
+13:46:39.928,[Scheduler], Received: Returning To Base:0
+13:46:39.928,[Scheduler], Sent Drone 0: OK
+13:46:39.929,[Drone 0], Received: OK
+13:46:39.929,[Scheduler], Received: LOCATION:2:246:739
+13:46:39.930,[Scheduler], Received: LOCATION:1:15:45
+13:46:39.933,[Scheduler], Received: LOCATION:1:11:34
+13:46:39.933,[Drone 2], Sent: En Route:2:3:15.00
+13:46:39.933,[Scheduler], Received: En Route:2:3:15.00
+13:46:39.934,[Scheduler], Sent Drone 2: DROP:5.00
+13:46:39.934,[Scheduler], Received: LOCATION:1:7:22
+13:46:39.935,[Drone 2], Received: DROP:5.00
+13:46:39.937,[Scheduler], Received: LOCATION:1:3:11
+13:46:39.939,[Scheduler], Received: LOCATION:1:0:0
+13:46:39.940,[Drone 2], Sent: Dropping Agent:2:3:5.00:10.00
+13:46:39.941,[Scheduler], Received: Dropping Agent:2:3:5.00:10.00
+13:46:39.941,[Scheduler], Sent Drone 2: OK
+13:46:39.941,[FireIncidentSubsystem], Drone 2 successfully extinguished fire: 3
+13:46:39.941,[Drone 2], Received: OK
+13:46:39.941,Drone 2, moving to (0.00,0.00)
+13:46:39.941,[Scheduler], Received: LOCATION:2:242:728
+13:46:39.943,[Drone 1], Sent: Returning To Base:1
+13:46:39.943,[Scheduler], Received: Returning To Base:1
+13:46:39.943,[Scheduler], Sent Drone 1: OK
+13:46:39.943,[Drone 1], Received: OK
+13:46:39.944,[Scheduler], Received: LOCATION:2:239:717
+13:46:39.945,[Scheduler], Received: LOCATION:2:235:705
+13:46:39.948,[Scheduler], Received: LOCATION:2:231:694
+13:46:39.950,[Drone 0], Sent: Filling Tank:0
+13:46:39.950,[Scheduler], Received: Filling Tank:0
+13:46:39.950,[Scheduler], Sent Drone 0: OK
+13:46:39.950,[Drone 0], Received: OK
+13:46:39.950,[Drone 0], IDLE Waiting for assignment...
+13:46:39.955,[Scheduler], Sent Drone 0: Event [id: 2, time: 13:46:39, zone:3, type: FIRE_DETECTED, severity: LOW]
+13:46:39.957,[Scheduler], Received: LOCATION:2:227:683
+13:46:39.958,[Scheduler], Received: LOCATION:2:223:671
+13:46:39.958,[Drone 0], Received: Event [id: 2, time: 13:46:39, zone:3, type: FIRE_DETECTED, severity: LOW]
+13:46:39.959,Drone 0, moving to (750.00,750.00)
+13:46:39.959,[Scheduler], Received: LOCATION:0:8:8
+13:46:39.962,[Scheduler], Received: LOCATION:0:16:16
+13:46:39.962,[Scheduler], Received: LOCATION:2:220:660
+13:46:39.963,[Scheduler], Received: LOCATION:0:25:25
+13:46:39.963,[Scheduler], Received: LOCATION:2:216:648
+13:46:39.965,[Drone 1], Sent: Filling Tank:1
+13:46:39.965,[Scheduler], Received: LOCATION:0:33:33
+13:46:39.965,[Scheduler], Received: LOCATION:2:212:637
+13:46:39.965,[Scheduler], Received: Filling Tank:1
+13:46:39.965,[Scheduler], Sent Drone 1: OK
+13:46:39.965,[Drone 1], Received: OK
+13:46:39.965,[Drone 1], IDLE Waiting for assignment...
+13:46:39.967,[Scheduler], Received: LOCATION:2:208:626
+13:46:39.967,[Scheduler], Received: LOCATION:0:42:42
+13:46:39.971,[Scheduler], Received: LOCATION:0:50:50
+13:46:39.972,[Scheduler], Received: LOCATION:0:59:59
+13:46:39.972,[Scheduler], Received: LOCATION:2:204:614
+13:46:39.973,[Scheduler], Received: LOCATION:0:67:67
+13:46:39.973,[Scheduler], Received: LOCATION:2:201:603
+13:46:39.976,[Scheduler], Received: LOCATION:0:76:76
+13:46:39.976,[Scheduler], Received: LOCATION:2:197:591
+13:46:39.979,[Scheduler], Received: LOCATION:0:84:84
+13:46:39.979,[Scheduler], Received: LOCATION:2:193:580
+13:46:39.981,[Scheduler], Received: LOCATION:2:189:569
+13:46:39.981,[Scheduler], Received: LOCATION:0:93:93
+13:46:39.984,[Scheduler], Received: LOCATION:2:185:557
+13:46:39.984,[Scheduler], Received: LOCATION:0:101:101
+13:46:39.986,[Scheduler], Received: LOCATION:0:110:110
+13:46:39.986,[Scheduler], Received: LOCATION:2:182:546
+13:46:39.990,[Scheduler], Received: LOCATION:0:118:118
+13:46:39.990,[Scheduler], Received: LOCATION:2:178:535
+13:46:39.990,[Scheduler], Received: LOCATION:0:127:127
+13:46:39.990,[Scheduler], Received: LOCATION:2:174:523
+13:46:39.992,[Scheduler], Received: LOCATION:0:135:135
+13:46:39.992,[Scheduler], Received: LOCATION:2:170:512
+13:46:39.995,[Scheduler], Received: LOCATION:2:166:500
+13:46:39.995,[Scheduler], Received: LOCATION:0:144:144
+13:46:39.998,[Scheduler], Received: LOCATION:2:163:489
+13:46:39.998,[Scheduler], Received: LOCATION:0:152:152
+13:46:40.000,[Scheduler], Received: LOCATION:2:159:478
+13:46:40.000,[Scheduler], Received: LOCATION:0:161:161
+13:46:40.003,[Scheduler], Received: LOCATION:2:155:466
+13:46:40.003,[Scheduler], Received: LOCATION:0:169:169
+13:46:40.003,[Scheduler], Received: LOCATION:0:178:178
+13:46:40.005,[Scheduler], Received: LOCATION:0:186:186
+13:46:40.005,[Scheduler], Received: LOCATION:2:151:455
+13:46:40.007,[Scheduler], Received: LOCATION:2:147:443
+13:46:40.007,[Scheduler], Received: LOCATION:0:195:195
+13:46:40.009,[Scheduler], Received: LOCATION:0:203:203
+13:46:40.009,[Scheduler], Received: LOCATION:2:144:432
+13:46:40.011,[Scheduler], Received: LOCATION:0:212:212
+13:46:40.011,[Scheduler], Received: LOCATION:2:140:421
+13:46:40.013,[Scheduler], Received: LOCATION:0:220:220
+13:46:40.013,[Scheduler], Received: LOCATION:2:136:409
+13:46:40.016,[Scheduler], Received: LOCATION:0:229:229
+13:46:40.016,[Scheduler], Received: LOCATION:2:132:398
+13:46:40.022,[Scheduler], Received: LOCATION:0:237:237
+13:46:40.022,[Scheduler], Received: LOCATION:2:129:387
+13:46:40.022,[Scheduler], Received: LOCATION:0:246:246
+13:46:40.022,[Scheduler], Received: LOCATION:2:125:375
+13:46:40.024,[Scheduler], Received: LOCATION:0:254:254
+13:46:40.024,[Scheduler], Received: LOCATION:2:121:364
+13:46:40.026,[Scheduler], Received: LOCATION:0:263:263
+13:46:40.026,[Scheduler], Received: LOCATION:2:117:352
+13:46:40.028,[Scheduler], Received: LOCATION:2:113:341
+13:46:40.028,[Scheduler], Received: LOCATION:0:271:271
+13:46:40.031,[Scheduler], Received: LOCATION:2:110:330
+13:46:40.031,[Scheduler], Received: LOCATION:0:280:280
+13:46:40.033,[Scheduler], Received: LOCATION:0:288:288
+13:46:40.033,[Scheduler], Received: LOCATION:2:106:318
+13:46:40.037,[Scheduler], Received: LOCATION:0:296:296
+13:46:40.037,[Scheduler], Received: LOCATION:2:102:307
+13:46:40.038,[Scheduler], Received: LOCATION:0:305:305
+13:46:40.038,[Scheduler], Received: LOCATION:2:98:295
+13:46:40.041,[Scheduler], Received: LOCATION:0:313:313
+13:46:40.041,[Scheduler], Received: LOCATION:2:94:284
+13:46:40.043,[Scheduler], Received: LOCATION:0:322:322
+13:46:40.043,[Scheduler], Received: LOCATION:2:91:273
+13:46:40.045,[Scheduler], Received: LOCATION:2:87:261
+13:46:40.045,[Scheduler], Received: LOCATION:0:330:330
+13:46:40.048,[Scheduler], Received: LOCATION:0:339:339
+13:46:40.048,[Scheduler], Received: LOCATION:2:83:250
+13:46:40.051,[Scheduler], Received: LOCATION:0:347:347
+13:46:40.051,[Scheduler], Received: LOCATION:2:79:239
+13:46:40.053,[Scheduler], Received: LOCATION:0:356:356
+13:46:40.053,[Scheduler], Received: LOCATION:2:75:227
+13:46:40.055,[Scheduler], Received: LOCATION:2:72:216
+13:46:40.057,[Scheduler], Received: LOCATION:0:364:364
+13:46:40.058,[Scheduler], Received: LOCATION:2:68:204
+13:46:40.061,[Scheduler], Received: LOCATION:2:64:193
+13:46:40.063,[Scheduler], Received: LOCATION:2:60:182
+13:46:40.066,[Scheduler], Received: LOCATION:2:56:170
+13:46:40.068,[Scheduler], Received: LOCATION:0:373:373
+13:46:40.068,[Scheduler], Received: LOCATION:2:53:159
+13:46:40.070,[Scheduler], Received: LOCATION:2:49:147
+13:46:40.072,[Scheduler], Received: LOCATION:0:381:381
+13:46:40.073,[Scheduler], Received: LOCATION:2:45:136
+13:46:40.074,[Scheduler], Received: LOCATION:2:41:125
+13:46:40.074,[Scheduler], Received: LOCATION:0:390:390
+13:46:40.077,[Scheduler], Received: LOCATION:2:37:113
+13:46:40.077,[Scheduler], Received: LOCATION:0:398:398
+13:46:40.077,[Scheduler], Received: LOCATION:2:34:102
+13:46:40.079,[Scheduler], Received: LOCATION:2:30:91
+13:46:40.082,[Scheduler], Received: LOCATION:0:407:407
+13:46:40.082,[Scheduler], Received: LOCATION:2:26:79
+13:46:40.084,[Scheduler], Received: LOCATION:2:22:68
+13:46:40.086,[Scheduler], Received: LOCATION:2:18:56
+13:46:40.088,[Scheduler], Received: LOCATION:2:15:45
+13:46:40.090,[Scheduler], Received: LOCATION:0:415:415
+13:46:40.091,[Scheduler], Received: LOCATION:2:11:34
+13:46:40.092,[Scheduler], Received: LOCATION:0:424:424
+13:46:40.093,[Scheduler], Received: LOCATION:2:7:22
+13:46:40.094,[Scheduler], Received: LOCATION:0:432:432
+13:46:40.098,[Scheduler], Received: LOCATION:0:441:441
+13:46:40.098,[Scheduler], Received: LOCATION:2:3:11
+13:46:40.098,[Scheduler], Received: LOCATION:2:0:0
+13:46:40.099,[Scheduler], Received: LOCATION:0:449:449
+13:46:40.100,[Drone 2], Sent: Returning To Base:2
+13:46:40.100,[Scheduler], Received: Returning To Base:2
+13:46:40.100,[Scheduler], Sent Drone 2: OK
+13:46:40.100,[Drone 2], Received: OK
+13:46:40.107,[Scheduler], Received: LOCATION:0:458:458
+13:46:40.111,[Scheduler], Received: LOCATION:0:466:466
+13:46:40.113,[Scheduler], Received: LOCATION:0:475:475
+13:46:40.116,[Scheduler], Received: LOCATION:0:483:483
+13:46:40.121,[Scheduler], Received: LOCATION:0:492:492
+13:46:40.122,[Drone 2], Sent: Filling Tank:2
+13:46:40.122,[Scheduler], Received: LOCATION:0:500:500
+13:46:40.122,[Scheduler], Received: Filling Tank:2
+13:46:40.122,[Scheduler], Sent Drone 2: OK
+13:46:40.122,[Drone 2], Received: OK
+13:46:40.122,[Drone 2], IDLE Waiting for assignment...
+13:46:40.125,[Scheduler], Received: LOCATION:0:509:509
+13:46:40.128,[Scheduler], Received: LOCATION:0:517:517
+13:46:40.130,[Scheduler], Received: LOCATION:0:526:526
+13:46:40.132,[Scheduler], Received: LOCATION:0:534:534
+13:46:40.136,[Scheduler], Received: LOCATION:0:543:543
+13:46:40.140,[Scheduler], Received: LOCATION:0:551:551
+13:46:40.141,[Scheduler], Received: LOCATION:0:560:560
+13:46:40.144,[Scheduler], Received: LOCATION:0:568:568
+13:46:40.148,[Scheduler], Received: LOCATION:0:576:576
+13:46:40.149,[Scheduler], Received: LOCATION:0:585:585
+13:46:40.151,[Scheduler], Received: LOCATION:0:593:593
+13:46:40.154,[Scheduler], Received: LOCATION:0:602:602
+13:46:40.155,[Scheduler], Received: LOCATION:0:610:610
+13:46:40.158,[Scheduler], Received: LOCATION:0:619:619
+13:46:40.160,[Scheduler], Received: LOCATION:0:627:627
+13:46:40.163,[Scheduler], Received: LOCATION:0:636:636
+13:46:40.165,[Scheduler], Received: LOCATION:0:644:644
+13:46:40.167,[Scheduler], Received: LOCATION:0:653:653
+13:46:40.172,[Scheduler], Received: LOCATION:0:661:661
+13:46:40.173,[Scheduler], Received: LOCATION:0:670:670
+13:46:40.175,[Scheduler], Received: LOCATION:0:678:678
+13:46:40.177,[Scheduler], Received: LOCATION:0:687:687
+13:46:40.179,[Scheduler], Received: LOCATION:0:695:695
+13:46:40.181,[Scheduler], Received: LOCATION:0:704:704
+13:46:40.183,[Scheduler], Received: LOCATION:0:712:712
+13:46:40.187,[Scheduler], Received: LOCATION:0:721:721
+13:46:40.188,[Scheduler], Received: LOCATION:0:729:729
+13:46:40.190,[Scheduler], Received: LOCATION:0:738:738
+13:46:40.191,[Scheduler], Received: LOCATION:0:746:746
+13:46:40.193,[Drone 0], Sent: En Route:0:2:15.00
+13:46:40.193,[Scheduler], Received: En Route:0:2:15.00
+13:46:40.193,[Scheduler], Sent Drone 0: DROP:10.00
+13:46:40.193,[Drone 0], Received: DROP:10.00
+13:46:40.204,[Drone 0], Sent: Dropping Agent:0:2:10.00:5.00
+13:46:40.204,[Scheduler], Received: Dropping Agent:0:2:10.00:5.00
+13:46:40.205,[Scheduler], Sent Drone 0: OK
+13:46:40.205,[FireIncidentSubsystem], Drone 0 successfully extinguished fire: 2
+13:46:40.205,[FireIncidentSubsystem], Sent Packet to Scheduler containing: FINISH
+13:46:40.206,[Drone 0], Received: OK
+13:46:40.206,Drone 0, moving to (0.00,0.00)
+13:46:40.206,[Scheduler], Received: LOCATION:0:738:738
+13:46:40.207,[Scheduler], Received: FINISH
+13:46:40.207,[Scheduler], Sent Drone 0: FINISH
+13:46:40.208,[Scheduler], Sent to Drone 0: FINISH
+13:46:40.208,[Scheduler], Sent Drone 1: FINISH
+13:46:40.208,[Scheduler], Sent to Drone 1: FINISH
+13:46:40.208,[Scheduler], Sent Drone 2: FINISH
+13:46:40.208,[Scheduler], Sent to Drone 2: FINISH
+13:46:40.208,[Scheduler], Shutting down...
+13:46:40.208,[Drone 2], Received: FINISH
+13:46:40.209,[Drone 1], Received: FINISH
+13:46:40.209,[Scheduler], Received: LOCATION:0:729:729
+13:46:40.209,[Drone 2], Sent: FINISHED:2
+13:46:40.209,[Drone 1], Sent: FINISHED:1
+13:46:40.209,[Scheduler], Received: FINISHED:2
+13:46:40.209,[Scheduler], Received: FINISHED:1
+13:46:40.210,[Scheduler], Received: LOCATION:0:721:721
+13:46:40.211,[Scheduler], Received: LOCATION:0:712:712
+13:46:40.213,[Scheduler], Received: LOCATION:0:704:704
+13:46:40.215,[Scheduler], Received: LOCATION:0:695:695
+13:46:40.217,[Scheduler], Received: LOCATION:0:687:687
+13:46:40.219,[Scheduler], Received: LOCATION:0:678:678
+13:46:40.221,[Scheduler], Received: LOCATION:0:670:670
+13:46:40.223,[Scheduler], Received: LOCATION:0:661:661
+13:46:40.226,[Scheduler], Received: LOCATION:0:653:653
+13:46:40.229,[Scheduler], Received: LOCATION:0:644:644
+13:46:40.231,[Scheduler], Received: LOCATION:0:636:636
+13:46:40.234,[Scheduler], Received: LOCATION:0:627:627
+13:46:40.236,[Scheduler], Received: LOCATION:0:619:619
+13:46:40.238,[Scheduler], Received: LOCATION:0:610:610
+13:46:40.240,[Scheduler], Received: LOCATION:0:602:602
+13:46:40.242,[Scheduler], Received: LOCATION:0:593:593
+13:46:40.244,[Scheduler], Received: LOCATION:0:585:585
+13:46:40.246,[Scheduler], Received: LOCATION:0:576:576
+13:46:40.249,[Scheduler], Received: LOCATION:0:568:568
+13:46:40.253,[Scheduler], Received: LOCATION:0:560:560
+13:46:40.253,[Scheduler], Received: LOCATION:0:551:551
+13:46:40.255,[Scheduler], Received: LOCATION:0:543:543
+13:46:40.257,[Scheduler], Received: LOCATION:0:534:534
+13:46:40.259,[Scheduler], Received: LOCATION:0:526:526
+13:46:40.262,[Scheduler], Received: LOCATION:0:517:517
+13:46:40.265,[Scheduler], Received: LOCATION:0:509:509
+13:46:40.267,[Scheduler], Received: LOCATION:0:500:500
+13:46:40.268,[Scheduler], Received: LOCATION:0:492:492
+13:46:40.270,[Scheduler], Received: LOCATION:0:483:483
+13:46:40.272,[Scheduler], Received: LOCATION:0:475:475
+13:46:40.274,[Scheduler], Received: LOCATION:0:466:466
+13:46:40.278,[Scheduler], Received: LOCATION:0:458:458
+13:46:40.279,[Scheduler], Received: LOCATION:0:449:449
+13:46:40.281,[Scheduler], Received: LOCATION:0:441:441
+13:46:40.283,[Scheduler], Received: LOCATION:0:432:432
+13:46:40.288,[Scheduler], Received: LOCATION:0:424:424
+13:46:40.288,[Scheduler], Received: LOCATION:0:415:415
+13:46:40.288,[Scheduler], Received: LOCATION:0:407:407
+13:46:40.291,[Scheduler], Received: LOCATION:0:398:398
+13:46:40.294,[Scheduler], Received: LOCATION:0:390:390
+13:46:40.297,[Scheduler], Received: LOCATION:0:381:381
+13:46:40.300,[Scheduler], Received: LOCATION:0:373:373
+13:46:40.304,[Scheduler], Received: LOCATION:0:364:364
+13:46:40.304,[Scheduler], Received: LOCATION:0:356:356
+13:46:40.307,[Scheduler], Received: LOCATION:0:347:347
+13:46:40.309,[Scheduler], Received: LOCATION:0:339:339
+13:46:40.311,[Scheduler], Received: LOCATION:0:330:330
+13:46:40.315,[Scheduler], Received: LOCATION:0:322:322
+13:46:40.317,[Scheduler], Received: LOCATION:0:313:313
+13:46:40.321,[Scheduler], Received: LOCATION:0:305:305
+13:46:40.323,[Scheduler], Received: LOCATION:0:296:296
+13:46:40.325,[Scheduler], Received: LOCATION:0:288:288
+13:46:40.326,[Scheduler], Received: LOCATION:0:280:280
+13:46:40.329,[Scheduler], Received: LOCATION:0:271:271
+13:46:40.331,[Scheduler], Received: LOCATION:0:263:263
+13:46:40.339,[Scheduler], Received: LOCATION:0:254:254
+13:46:40.339,[Scheduler], Received: LOCATION:0:246:246
+13:46:40.340,[Scheduler], Received: LOCATION:0:237:237
+13:46:40.340,[Scheduler], Received: LOCATION:0:229:229
+13:46:40.344,[Scheduler], Received: LOCATION:0:220:220
+13:46:40.344,[Scheduler], Received: LOCATION:0:212:212
+13:46:40.345,[Scheduler], Received: LOCATION:0:203:203
+13:46:40.348,[Scheduler], Received: LOCATION:0:195:195
+13:46:40.353,[Scheduler], Received: LOCATION:0:186:186
+13:46:40.354,[Scheduler], Received: LOCATION:0:178:178
+13:46:40.355,[Scheduler], Received: LOCATION:0:169:169
+13:46:40.357,[Scheduler], Received: LOCATION:0:161:161
+13:46:40.359,[Scheduler], Received: LOCATION:0:152:152
+13:46:40.363,[Scheduler], Received: LOCATION:0:144:144
+13:46:40.363,[Scheduler], Received: LOCATION:0:135:135
+13:46:40.365,[Scheduler], Received: LOCATION:0:127:127
+13:46:40.367,[Scheduler], Received: LOCATION:0:118:118
+13:46:40.370,[Scheduler], Received: LOCATION:0:110:110
+13:46:40.372,[Scheduler], Received: LOCATION:0:101:101
+13:46:40.374,[Scheduler], Received: LOCATION:0:93:93
+13:46:40.376,[Scheduler], Received: LOCATION:0:84:84
+13:46:40.378,[Scheduler], Received: LOCATION:0:76:76
+13:46:40.380,[Scheduler], Received: LOCATION:0:67:67
+13:46:40.383,[Scheduler], Received: LOCATION:0:59:59
+13:46:40.386,[Scheduler], Received: LOCATION:0:50:50
+13:46:40.387,[Scheduler], Received: LOCATION:0:42:42
+13:46:40.389,[Scheduler], Received: LOCATION:0:33:33
+13:46:40.391,[Scheduler], Received: LOCATION:0:25:25
+13:46:40.393,[Scheduler], Received: LOCATION:0:16:16
+13:46:40.395,[Scheduler], Received: LOCATION:0:8:8
+13:46:40.397,[Drone 0], Sent: Returning To Base:0
+13:46:40.397,[Drone 0], Received: FINISH
+13:46:40.397,[Scheduler], Received: Returning To Base:0
+13:46:40.397,[Scheduler], Sent Drone 0: OK
+13:46:40.397,Drone 0, moving to (0.00,0.00)
+13:46:40.397,[Scheduler], Received: LOCATION:0:0:0
+13:46:40.399,[Drone 0], Sent: Returning To Base:0
+13:46:40.399,[Drone 0], Received: OK
+13:46:40.399,[Scheduler], Received: Returning To Base:0
+13:46:40.399,[Scheduler], Sent Drone 0: OK
+13:46:40.424,[Drone 0], Sent: Filling Tank:0
+13:46:40.424,[Scheduler], Received: Filling Tank:0
+13:46:40.424,[Drone 0], Received: OK
+13:46:40.424,[Scheduler], Sent Drone 0: OK
+13:46:40.424,[Drone 0], Sent: FINISHED:0
+13:46:40.424,[Scheduler], Received: FINISHED:0
+13:46:48.793,
+Drone 0:
+13:46:48.793,  Fires extinguished: 2
+13:46:48.794,  Drone Utilization Rate: 100.0 %
+13:46:48.794,  Response time: 654 ms
+13:46:48.794,  Time in idle: 0 ms
+13:46:48.794,  Time in enroute: 880 ms
+13:46:48.794,  Time in fault: 0 ms
+13:46:48.794,
+Drone 1:
+13:46:48.794,  Fires extinguished: 1
+13:46:48.794,  Drone Utilization Rate: 100.0 %
+13:46:48.795,  Response time: 15 ms
+13:46:48.795,  Time in idle: 0 ms
+13:46:48.795,  Time in enroute: 241 ms
+13:46:48.795,  Time in fault: 0 ms
+13:46:48.795,
+Drone 2:
+13:46:48.795,  Fires extinguished: 1
+13:46:48.795,  Drone Utilization Rate: 100.0 %
+13:46:48.795,  Response time: 315 ms
+13:46:48.795,  Time in idle: 0 ms
+13:46:48.795,  Time in enroute: 307 ms
+13:46:48.795,  Time in fault: 0 ms

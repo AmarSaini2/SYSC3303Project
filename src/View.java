@@ -1,5 +1,6 @@
-
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
@@ -25,6 +26,7 @@ public class View extends Thread {
     private HashMap<Integer, JLabel> droneImages = new HashMap<>();
     private HashMap<Integer, Double> droneAngles = new HashMap<>();
     private HashMap<Integer, Integer[]> lastKnownLocation = new HashMap<>();
+    private HashMap<Integer, Integer> droneCuteIcons = new HashMap<>();
     private final ReentrantLock logQueueLock = new ReentrantLock();
 
     public View(Scheduler scheduler) {
@@ -38,7 +40,7 @@ public class View extends Thread {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.addComponentListener(new ResizeListener());
 
-        droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);
+        droneIcon = createScaledIcon("/assets/defaultDrone.png", 30, 30);
         panel = createPanel(new Color(240, 240, 240)); // Light gray background
         panel.setLayout(new GridBagLayout());
 
@@ -71,11 +73,35 @@ public class View extends Thread {
     }
 
     private JPanel createStatusBarsPanel() {
-        JPanel statusPanel = createPanel(new Color(255, 255, 255)); // White background
-        statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.Y_AXIS));
-        statusPanel.setPreferredSize(new Dimension(300, 250));
+        // Simplified status panel without background label
+        JPanel statusPanel = new JPanel(new BorderLayout());
+        statusPanel.setOpaque(true);
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // Scrollable content panel for drone tiles
+        JPanel contentPanel = new JPanel();
+        contentPanel.setOpaque(false);
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        statusPanel.add(scrollPane, BorderLayout.CENTER);
         return statusPanel;
+    }
+
+    private JPanel getContentPanel() {
+        for (Component comp : statusBars.getComponents()) {
+            if (comp instanceof JScrollPane) {
+                JScrollPane scrollPane = (JScrollPane) comp;
+                return (JPanel) scrollPane.getViewport().getView();
+            }
+        }
+        return null;
     }
 
     private JTextArea createLogComponent() {
@@ -83,9 +109,9 @@ public class View extends Thread {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
-        textArea.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
-        textArea.setBackground(new Color(240, 240, 240)); // Light gray background
-        textArea.setForeground(Color.BLACK); // Black text
+        textArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        textArea.setBackground(new Color(240, 240, 240));
+        textArea.setForeground(Color.BLACK);
         DefaultCaret caret = (DefaultCaret) textArea.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         return textArea;
@@ -93,13 +119,122 @@ public class View extends Thread {
 
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        JMenu menu = new JMenu("Controls");
-        JMenuItem start = new JMenuItem("Start");
-        start.setBackground(new Color(200, 200, 200)); // Light gray background
-        start.setForeground(Color.BLACK); // Black text
-        menu.add(start);
-        menuBar.add(menu);
+        JRadioButton cuteMode = new JRadioButton("cute mode");
+        cuteMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (cuteMode.isSelected()) {
+                    enableCuteMode();
+                } else {
+                    disableCuteMode();
+                }
+            }
+        });
+        menuBar.add(cuteMode);
         return menuBar;
+    }
+
+    private void enableCuteMode() {
+        // Main color palette
+        Color darkPurple = new Color(81, 66, 131);
+        Color lightLavender = new Color(202, 197, 237);
+        Color paleLavender = new Color(225, 221, 244);
+        Color softPurple = new Color(223, 207, 243);
+        Color pinkLavender = new Color(240, 195, 226);
+
+        // Update main frame and panel
+        panel.setBackground(paleLavender);
+        frame.getContentPane().setBackground(paleLavender);
+
+        // Update menu bar
+        menuBar.setBackground(darkPurple);
+        menuBar.setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
+        for (Component comp : menuBar.getComponents()) {
+            if (comp instanceof JRadioButton) {
+                JRadioButton button = (JRadioButton) comp;
+                button.setBackground(darkPurple);
+                button.setForeground(Color.WHITE);
+                button.setFont(new Font("Arial", Font.BOLD, 12));
+                button.setFocusPainted(false);
+            }
+        }
+
+        // Update map panel
+        map.setBackground(lightLavender);
+        map.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(darkPurple, 2),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        // Update status bars panel
+        statusBars.setBackground(paleLavender);
+        statusBars.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(softPurple, 1),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+
+        // Update log component
+        log.setBackground(paleLavender);
+        log.setForeground(darkPurple);
+        log.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(softPurple, 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+        log.setFont(new Font("Arial", Font.PLAIN, 12));
+
+        // Update drone tiles
+        for (Component comp : getContentPanel().getComponents()) {
+            if (comp instanceof JPanel) {
+                JPanel dronePanel = (JPanel) comp;
+                dronePanel.setBackground(pinkLavender);
+                dronePanel.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(darkPurple, 1),
+                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                ));
+
+                if (dronePanel.getComponentCount() > 1 && dronePanel.getComponent(1) instanceof JPanel) {
+                    JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+                    infoPanel.setBackground(softPurple);
+                    infoPanel.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(lightLavender, 1),
+                            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                    ));
+
+                    for (Component infoComp : infoPanel.getComponents()) {
+                        if (infoComp instanceof JLabel) {
+                            ((JLabel) infoComp).setForeground(darkPurple);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Assign random cute icons to drones
+        for (Integer droneNum : scheduler.allDroneList.keySet()) {
+            if (!droneCuteIcons.containsKey(droneNum)) {
+                droneCuteIcons.put(droneNum, (int) (Math.random() * 6));
+            }
+            updateDroneIcon(droneNum);
+        }
+
+        // Update split pane divider
+        JSplitPane splitPane = (JSplitPane) panel.getComponent(0);
+        splitPane.setDividerSize(1);
+        splitPane.setBackground(darkPurple);
+
+        // Refresh all components
+        panel.revalidate();
+        panel.repaint();
+    }
+
+    private void disableCuteMode() {
+        // Clear cute icons mapping
+        droneCuteIcons.clear();
+
+        // Update all drones to default icons
+        for (Integer droneNum : droneImages.keySet()) {
+            updateDroneIcon(droneNum);
+        }
     }
 
     private JPanel createPanel(Color color) {
@@ -113,60 +248,73 @@ public class View extends Thread {
     private void addComponentsToPanel(JPanel panel, JComponent map, JComponent log, JComponent statusBars) {
         // Create bottom panel
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
-        bottomPanel.setBackground(new Color(240, 240, 240)); // Light gray background
+        bottomPanel.setBackground(new Color(240, 240, 240));
 
         JScrollPane logScrollPane = new JScrollPane(log);
-        logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        logScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         logScrollPane.setPreferredSize(new Dimension(600, 250));
-        logScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1)); // Add a border to the log scroll pane
+        logScrollPane.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
         bottomPanel.add(logScrollPane);
+
+        statusBars.setPreferredSize(new Dimension(300, 250));
         bottomPanel.add(statusBars);
 
         // Create split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, map, bottomPanel);
-        splitPane.setResizeWeight(0.7); // 70% of space goes to map
+        splitPane.setResizeWeight(0.7);
         splitPane.setDividerSize(5);
-        splitPane.setBorder(BorderFactory.createEmptyBorder()); // Remove default border
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
 
         panel.add(splitPane, new GridBagConstraints(0, 0, 1, 1, 1.0, 1.0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     }
 
     private JPanel makeDroneTile(String droneName, String volume, Integer[] location) {
-        JPanel tile = new JPanel();
-        tile.setLayout(new BoxLayout(tile, BoxLayout.Y_AXIS));
-        tile.setBorder(BorderFactory.createCompoundBorder(
+        //make info panel (right side)
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        tile.setBackground(new Color(255, 255, 255)); // White background for tiles
-        tile.setMaximumSize(new Dimension(300, 100)); // Increased height to accommodate new text
+        infoPanel.setBackground(new Color(255, 255, 255));
+        infoPanel.setMaximumSize(new Dimension(300, 100));
 
+        // Add info components
         JLabel nameLabel = new JLabel(droneName);
-        nameLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Modern font
+        nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         String details = String.format("Vol: %s | Loc: (%d,%d)", volume, location[0], location[1]);
         JLabel detailsLabel = new JLabel(details);
-        detailsLabel.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
+        detailsLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         detailsLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Add state text area
-        JTextArea stateText = new JTextArea();
-        stateText.setEditable(false); // Make it read-only
-        stateText.setLineWrap(true);
-        stateText.setWrapStyleWord(true);
-        stateText.setFont(new Font("Arial", Font.PLAIN, 12)); // Modern font
-        stateText.setBackground(new Color(255, 255, 255)); // White background
-        stateText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        stateText.setText("State: Online"); // Default state text
+        JLabel stateText = new JLabel("Online");
+        stateText.setFont(new Font("Arial", Font.PLAIN, 12));
+        stateText.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        tile.add(nameLabel);
-        tile.add(Box.createRigidArea(new Dimension(0, 5)));
-        tile.add(detailsLabel);
-        tile.add(Box.createRigidArea(new Dimension(0, 5)));
-        tile.add(stateText);
+        infoPanel.add(nameLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        infoPanel.add(detailsLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        infoPanel.add(stateText);
 
-        return tile;
+        // Create the main panel with icon on left and info on right
+        JPanel dronePanel = new JPanel();
+        dronePanel.setLayout(new BoxLayout(dronePanel, BoxLayout.X_AXIS));
+        dronePanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.black, 1),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+
+        // Add drone icon (left side)
+        int droneId = Integer.parseInt(droneName.substring(droneName.indexOf(" ") + 1));
+        JLabel icon = new JLabel(droneImages.get(droneId).getIcon());
+        icon.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+
+        dronePanel.add(icon);
+        dronePanel.add(infoPanel);
+
+        return dronePanel;
     }
 
     private void updateLogs() {
@@ -245,13 +393,13 @@ public class View extends Thread {
             boolean rendered = (boolean) zoneData[2];
 
             Event.Severity severity = Event.Severity.OUT;
-            for(Integer eventId: scheduler.allEvents.keySet()){
-                if(scheduler.allEvents.get(eventId).getZone().getId() == zoneId){
+            for (Integer eventId : scheduler.allEvents.keySet()) {
+                if (scheduler.allEvents.get(eventId).getZone().getId() == zoneId) {
                     severity = scheduler.allEvents.get(eventId).getSeverity();
                 }
             }
             Color color = new Color(0, 100, 0, 150);
-            switch (severity){
+            switch (severity) {
                 case HIGH:
                     color = new Color(255, 0, 0, 150);
                     break;
@@ -328,7 +476,7 @@ public class View extends Thread {
 
             // Always update the icon with current angle
             double currentAngle = droneAngles.getOrDefault(droneNum, 0.0);
-            droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle));
+            updateDroneIcon(droneNum);
         }
 
         // Remove any drones that are no longer active
@@ -359,17 +507,16 @@ public class View extends Thread {
         return new ZoneLabel(zoneId, new Color(200, 50, 50, 150), 0.5f);
     }
 
-    private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle) {
+    private ImageIcon createRotatedDroneImageWithNumber(int droneNum, double angle, ImageIcon baseIcon) {
         // Create base image (unrotated)
         BufferedImage baseImage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2dBase = baseImage.createGraphics();
 
         // Draw drone icon (centered)
-        ImageIcon originalIcon = createScaledIcon("/assets/Drone.png", 30, 30);
-        g2dBase.drawImage(originalIcon.getImage(), 0, 0, null);
+        g2dBase.drawImage(baseIcon.getImage(), 0, 0, null);
 
         // Draw number (not rotated yet)
-        g2dBase.setFont(new Font("Arial", Font.BOLD, 12)); // Modern font
+        g2dBase.setFont(new Font("Arial", Font.BOLD, 12));
         g2dBase.setColor(Color.BLACK);
         String droneNumberStr = String.valueOf(droneNum);
         FontMetrics fm = g2dBase.getFontMetrics();
@@ -397,15 +544,33 @@ public class View extends Thread {
     }
 
     private void updateDrones() {
+        // Get the content panel 
+        JPanel contentPanel = getContentPanel();
+        if (contentPanel == null) {
+            return;
+        }
+
         existingDrones.clear();
-        for (Component comp : statusBars.getComponents()) {
+        for (Component comp : contentPanel.getComponents()) {
             if (comp instanceof JPanel) {
-                try {
-                    String name = ((JLabel) ((JPanel) comp).getComponent(0)).getText();
-                    int droneNum = Integer.parseInt(name.replace("Drone ", ""));
-                    existingDrones.add(droneNum);
-                } catch (Exception e) {
-                    // Handle potential parsing errors
+                JPanel dronePanel = (JPanel) comp;
+                // Check if this panel has our expected structure (icon + info panel)
+                if (dronePanel.getComponentCount() == 2
+                        && dronePanel.getComponent(1) instanceof JPanel) {
+
+                    try {
+                        JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+                        // The name label is the first component in the info panel
+                        String name = ((JLabel) infoPanel.getComponent(0)).getText();
+                        int droneNum = Integer.parseInt(name.replace("Drone ", ""));
+                        existingDrones.add(droneNum);
+
+                        JLabel icon = (JLabel) dronePanel.getComponent(0);
+                        icon.setIcon(droneImages.get(droneNum).getIcon());
+                    } catch (Exception e) {
+                        // Handle potential parsing errors (malformed drone name or component structure)
+                        System.err.println("Error parsing drone panel: " + e.getMessage());
+                    }
                 }
             }
         }
@@ -417,36 +582,73 @@ public class View extends Thread {
             if (existingDrones.contains(droneNum)) {
                 updateDroneTile(droneNum, volume, coords);
             } else {
-                statusBars.add(makeDroneTile("Drone " + droneNum, volume, coords));
-                statusBars.add(Box.createRigidArea(new Dimension(0, 5)));
+                contentPanel.add(makeDroneTile("Drone " + droneNum, volume, coords));
+                contentPanel.add(Box.createRigidArea(new Dimension(0, 5)));
             }
         }
 
-        statusBars.revalidate();
-        statusBars.repaint();
+        contentPanel.revalidate();
+        contentPanel.repaint();
+    }
+
+    private void updateDroneIcon(int droneNum) {
+        if (droneImages.containsKey(droneNum)) {
+            ImageIcon icon;
+            if (droneCuteIcons.containsKey(droneNum)) {
+                // Use cute mode icon if available
+                int cuteIconNum = droneCuteIcons.get(droneNum);
+                icon = createScaledIcon("/assets/altDrone" + cuteIconNum + ".png", 30, 30);
+            } else {
+                // Use default icon
+                icon = createScaledIcon("/assets/defaultDrone.png", 30, 30);
+            }
+
+            // Update the icon with current angle
+            double currentAngle = droneAngles.getOrDefault(droneNum, 0.0);
+            droneImages.get(droneNum).setIcon(createRotatedDroneImageWithNumber(droneNum, currentAngle, icon));
+        }
     }
 
     private void updateDroneTile(int droneNumber, String newVolume, Integer[] newLocation) {
-        JPanel tile = findDroneTile(droneNumber);
-        if (tile != null) {
-            // Update the labels
-            Component[] children = tile.getComponents();
-            ((JLabel) children[0]).setText("Drone " + droneNumber);  // Name
-            ((JLabel) children[2]).setText(
+        JPanel dronePanel = findDroneTile(droneNumber);
+        if (dronePanel != null) {
+            // The info panel is the second component (index 1) of the dronePanel
+            JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+
+            // Get all components from the info panel (which has the Y_AXIS layout)
+            Component[] infoComponents = infoPanel.getComponents();
+
+            // Update the labels - note these are now at indices 0, 2, 4 in the infoPanel
+            ((JLabel) infoComponents[0]).setText("Drone " + droneNumber);  // Name
+            ((JLabel) infoComponents[2]).setText(
                     String.format("Vol: %s | Loc: (%d,%d)", newVolume, newLocation[0], newLocation[1])
             );
-            ((JTextArea) children[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
+            ((JLabel) infoComponents[4]).setText(scheduler.allDroneList.get(droneNumber).get("state").toString());
         }
     }
 
     private JPanel findDroneTile(int droneNumber) {
-        for (Component comp : statusBars.getComponents()) {
+        JPanel contentPanel = getContentPanel();
+        if (contentPanel == null) {
+            return null;
+        }
+
+        for (Component comp : contentPanel.getComponents()) {
             if (comp instanceof JPanel) {
-                Component[] children = ((JPanel) comp).getComponents();
-                if (children.length > 0 && children[0] instanceof JLabel) {
-                    String labelText = ((JLabel) children[0]).getText();
-                    if (labelText.equals("Drone " + droneNumber)) {
-                        return (JPanel) comp;
+                JPanel dronePanel = (JPanel) comp;
+                // Check if this panel has our expected structure (icon + info panel)
+                if (dronePanel.getComponentCount() == 2
+                        && dronePanel.getComponent(1) instanceof JPanel) {
+
+                    JPanel infoPanel = (JPanel) dronePanel.getComponent(1);
+                    Component[] infoComponents = infoPanel.getComponents();
+
+                    // Check if the first component of infoPanel is our drone name label
+                    if (infoComponents.length > 0 && infoComponents[0] instanceof JLabel) {
+                        String labelText = ((JLabel) infoComponents[0]).getText();
+                        if (labelText.equals("Drone " + droneNumber)) {
+                            return dronePanel;
+                        }
                     }
                 }
             }
@@ -464,22 +666,17 @@ public class View extends Thread {
     }
 
     private class ResizeListener extends ComponentAdapter {
-
         @Override
         public void componentResized(ComponentEvent e) {
             // Recalculate all zone positions on resize
             for (Object[] zoneData : zoneMap.values()) {
                 zoneData[2] = false; // Mark all zones for re-rendering
             }
-            updateMap();
-            updateDrones();
-            updateLogs();
         }
     }
 
     public static void main(String[] args) {
         // Entry point for the application
         // You would typically initialize the Scheduler and start the View here
-        
     }
 }

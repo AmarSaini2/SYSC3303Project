@@ -247,8 +247,30 @@ public class Drone extends Thread {
             try {
                 socket.send(packet);
                 sleep(SLEEPMULTIPLIER);
+                DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048);
+                socket.setSoTimeout(10);
+                socket.receive(receivePacket);
+                socket.setSoTimeout(0);
+
+                String message = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                String[] splitMessage = message.split(":");
+
+                switch (splitMessage[0].toUpperCase()) {
+                    case "NEW_EVENT": {
+                        currentState.handleNewEvent(this);
+                        Event event = Event.deserializeEvent(Arrays.copyOfRange(receivePacket.getData(), 10, receivePacket.getLength()));
+                        System.out.println("[Drone " + this.id + "], Received: " + event);
+                        this.assignFire(event);
+                        return;
+                    }
+
+                    case "FINISH":
+                        this.finish = true;
+                        break;
+                }
+            } catch (SocketTimeoutException e) {
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
     }
@@ -338,21 +360,22 @@ public class Drone extends Thread {
         // System.out.println("[Drone " + id + "], Returning to base...");
         moveTo(new double[]{0.0, 0.0});
         // System.out.println("[Drone " + id + "], Reached base.");
-
-        String response = sendReceive(String.format("%s:%d", this.getStateAsString(), this.id));
-        String[] splitMessage = response.split(":");
-        switch (splitMessage[0].toUpperCase()) {
-            case "FINISH":
-                this.finish = true;
-                break;
-            case "FAULT":
-                currentState.handleFault(this);
-                break;
-            case "OK":
-                currentState.goNextState(this);
-                break;
-            default:
-                System.out.println("Invalid message: " + response);
+        if(this.assignedFire == null){
+            String response = sendReceive(String.format("%s:%d", this.getStateAsString(), this.id));
+            String[] splitMessage = response.split(":");
+            switch (splitMessage[0].toUpperCase()) {
+                case "FINISH":
+                    this.finish = true;
+                    break;
+                case "FAULT":
+                    currentState.handleFault(this);
+                    break;
+                case "OK":
+                    currentState.goNextState(this);
+                    break;
+                default:
+                    System.out.println("Invalid message: " + response);
+            }
         }
     }
 

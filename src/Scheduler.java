@@ -135,8 +135,23 @@ public class Scheduler extends Thread {
 
                 // Sends the first drone in freeDroneList to the event
                 // TODO can be improved by picking the closest drone instead of just the first
+                int chosenDroneId = -1;
+                int minDistance = -1;
                 for (Integer id : this.freeDroneList) {
-                    event.setAgentSent(event.getAgentSent() + (double) allDroneList.get(id).get("volume"));
+                    //Get drone location
+                    //Get drone distance to zone
+                    //If distance is less then min distance
+                    Integer[] location = (Integer[]) allDroneList.get(id).get("location");
+                    int distanceFromZone = (int) Math.sqrt(location[0]*location[0] + location[1]*location[1]);
+
+                    if(distanceFromZone < minDistance || minDistance < 0){
+                        chosenDroneId = id;
+                        minDistance = distanceFromZone;
+                    }
+                }
+
+                if(chosenDroneId >= 0) {
+                    event.setAgentSent(event.getAgentSent() + (double) allDroneList.get(chosenDroneId).get("volume"));
 
                     // Checks if event still requires more agent
                     if (event.getAgentSent() < (event.getAgentRequired() - 0.0001)) {
@@ -146,12 +161,11 @@ public class Scheduler extends Thread {
                         this.fullyServicedEvents.put(event.getId(), event);
                     }
 
-                    this.freeDroneList.remove(id);
+                    this.freeDroneList.remove((Integer) chosenDroneId);
 
-                    this.allDroneList.get(id).put("state", "En Route");
+                    this.allDroneList.get(chosenDroneId).put("state", "En Route");
 
-                    sendToDrone(event, id);
-                    break;
+                    sendToDrone(event, chosenDroneId);
                 }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -301,11 +315,10 @@ public class Scheduler extends Thread {
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume",
                                 Double.parseDouble(splitMessage[4]));
 
-                        // TODO can be added later once NEW_EVENT case is added to some sendReceive
-                        // Add drone back to freeDroneList if it still has some agent in tank
-                        // if(Double.parseDouble(splitMessage[4]) > 0.0001){
-                        // this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
-                        // }
+                         //Add drone back to freeDroneList if it still has some agent in tank
+                         if(Double.parseDouble(splitMessage[4]) > 0.0001){
+                            this.freeDroneList.add(Integer.parseInt(splitMessage[1]));
+                         }
 
                         int eventId = Integer.parseInt(splitMessage[2]);
                         if (this.fullyServicedEvents.containsKey(eventId)) {
@@ -318,11 +331,7 @@ public class Scheduler extends Thread {
                                 this.fullyServicedEvents.remove(eventId);
                                 byte[] msg = ("SUCCESS:" + splitMessage[1] + ":" + splitMessage[2]).getBytes();
                                 this.fireIncidentSocket.send(
-                                        new DatagramPacket(msg, msg.length, fireIncidentAddress, fireIncidentPort));// forward
-                                                                                                                    // drone
-                                                                                                                    // messages
-                                                                                                                    // to
-                                                                                                                    // FireIncident
+                                        new DatagramPacket(msg, msg.length, fireIncidentAddress, fireIncidentPort));
                             } else {
                                 event.setAgentRequired(agentRequired);
                                 event.setAgentSent(event.getAgentSent() - Double.parseDouble(splitMessage[3]));
@@ -343,9 +352,9 @@ public class Scheduler extends Thread {
                         // TODO check previous
                         // Notify the scheduler (run method) that a drone is available for a new
                         // assignment
-                        // synchronized (this){
-                        // notifyAll();
-                        // }
+                         synchronized (this){
+                            notifyAll();
+                         }
                         break;
                     }
                     case "Returning To Base":

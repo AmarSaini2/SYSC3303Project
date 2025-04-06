@@ -279,7 +279,8 @@ public class Scheduler extends Thread {
                         localHashMap = this.allDroneList.get(id);
                         localHashMap.put("state", "Dropping Agent");
                         this.allDroneList.put(id, localHashMap);
-                        double agentDropAmount = 15.0;
+
+                        double agentDropAmount = Double.parseDouble(splitMessage[3]);
                         int eventId = Integer.parseInt(splitMessage[2]);
                         Event event = null;
 
@@ -295,9 +296,11 @@ public class Scheduler extends Thread {
                             }
                         }
 
-                        if (event.getAgentRequired() < 14.9999) {
-                            agentDropAmount = event.getAgentRequired();
+                        if ((event.getAgentRequired()-event.getAgentDropping()) < (agentDropAmount+0.0001)) {
+                            agentDropAmount = (event.getAgentRequired()-event.getAgentDropping()) ;
                         }
+
+                        event.setAgentDropping(event.getAgentDropping() + agentDropAmount);
 
                         sendToDrone(String.format("DROP:%.2f", agentDropAmount), Integer.parseInt(splitMessage[1]));
                         break;
@@ -327,6 +330,7 @@ public class Scheduler extends Thread {
                             if (agentRequired < 0.0001) {
                                 event.setAgentRequired(0.0);
                                 event.setAgentSent(0.0);
+                                event.setAgentDropping(0.0);
                                 event.setSeverity(Event.Severity.OUT);
                                 this.fullyServicedEvents.remove(eventId);
                                 byte[] msg = ("SUCCESS:" + splitMessage[1] + ":" + splitMessage[2]).getBytes();
@@ -335,6 +339,7 @@ public class Scheduler extends Thread {
                             } else {
                                 event.setAgentRequired(agentRequired);
                                 event.setAgentSent(event.getAgentSent() - Double.parseDouble(splitMessage[3]));
+                                event.setAgentDropping(event.getAgentDropping() - Double.parseDouble(splitMessage[3]));
                             }
                         } else {
                             for (Event event : this.eventQueue) {

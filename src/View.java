@@ -35,7 +35,7 @@ public class View extends Thread {
 
     private void initializeUI() {
         frame = new JFrame("Drone Control Panel");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.addComponentListener(new ResizeListener());
 
         droneIcon = createScaledIcon("/assets/Drone.png", 30, 30);

@@ -14,7 +14,6 @@ There are three main components of project:
 - **Main.java**: Entry point for the system, initializes and starts all subsystems.
 - **Drone.java**: Simulates a drone responding to fire incidents. Handles travel, water/foam release, and communication with the scheduler.
 - **DroneFSM.java**: Manages the state of the drone.
-- **DroneResponse.java**: Holds fire response data from drones.
 - **DroneTest.java**: Unit tests for the `Drone` class to verify correct behavior.
 - **Event.java**: Represents a fire event, storing details like severity, time, and location.
 - **FaultEvent.java**: Represents an event during which a drone fault occurred.

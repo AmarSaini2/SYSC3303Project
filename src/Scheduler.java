@@ -95,6 +95,9 @@ public class Scheduler extends Thread {
             logQueue.add("[Scheduler], Entering " + getStateAsString() + " state");
             this.currentState.action(this);
         }
+
+        //I add a forced flush to each thread because the daemon thread only flushes every 5 seconds by default, which can result in missing logging data if the threads while data is stored in array
+        System.out.println("FLUSH_LOGS_TO_FILE");
     }
 
     public void idleAction() {

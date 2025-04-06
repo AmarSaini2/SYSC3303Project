@@ -1,3 +1,4 @@
+import java.util.Set;
 import java.io.IOException;
 
 /**
@@ -63,12 +64,6 @@ public class Main {
             drone2.join();
         } catch (InterruptedException e) {
             e.printStackTrace(); // Handle any interruption in thread execution
-        }
-
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 }

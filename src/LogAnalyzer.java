@@ -1,3 +1,5 @@
+//deprecated in favour of alternate system for logging, keeping code here as proof of work for kaitlyn - sam
+
 import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

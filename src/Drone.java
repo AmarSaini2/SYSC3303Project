@@ -32,17 +32,19 @@ public class Drone extends Thread {
     private double[] currentLocation;
 
     private Map<String, FaultEvent.Type> faultInstructions = new HashMap<>();
-    private ArrayList<String> loggingArray;
-    long droneStartTime, droneEndTime, messageSendTime, messageGetTime, moveStartTime, moveEndTime, fireStartTime, fireEndTime, restStartTime, restEndTime;
+
+
+    //variables used for logging
+    private ArrayList<Long> messageTimes, moveTimes, restTimes;
+    private long droneStartTime, droneEndTime;
+    private long inactiveTime;
 
     public Drone(int schedulerPort) {
+        droneStartTime = System.nanoTime() / 1000;
         this.id = idCounter++;
 
         this.random = new Random();
         this.attributes = new HashMap<>();
-        this.loggingArray = new ArrayList<>();
-
-        this.droneStartTime = System.currentTimeMillis();
 
         // Setting up drone attributes
         attributes.put("takeoffSpeed", 3.0);
@@ -56,6 +58,11 @@ public class Drone extends Thread {
         this.droneFSM = new DroneFSM();
         this.droneFSM.initialize(this);
         this.currentState = DroneFSM.getState("StartUp");
+
+        this.messageTimes = new ArrayList<>();
+        this.moveTimes = new ArrayList<>();
+        this.restTimes = new ArrayList<>();
+        this.inactiveTime = 0;
 
         try {
             this.socket = new DatagramSocket();
@@ -155,9 +162,10 @@ public class Drone extends Thread {
             throw new RuntimeException(e);
         }
 
-        int test = 0;
-
-
+        droneEndTime = System.nanoTime() / 1000;
+        formatLogging();
+        //I add a forced flush to each thread because the daemon thread only flushes every 5 seconds by default, which can result in missing logging data if the threads while data is stored in array
+        System.out.println("FLUSH_LOGS_TO_FILE");
     }
 
     /**
@@ -196,7 +204,11 @@ public class Drone extends Thread {
         System.out.println("[Drone " + id + "], IDLE Waiting for assignment...");
         DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
         try {
+            long restStartTime = System.nanoTime() / 1000;
             socket.receive(packet);
+            long restEndTime = System.nanoTime() / 1000;
+            System.out.println(String.format("Drone %d slept for %d us.", id, (restEndTime - restStartTime)));
+            restTimes.add(restEndTime - restStartTime);
 
             String message = new String(packet.getData(), 0, packet.getLength());
             String[] splitMessage = message.split(":");
@@ -222,6 +234,7 @@ public class Drone extends Thread {
         }
     }
 
+    //function to move to [x,y] position. Home base is at 0,0
     public void moveTo(double[] targetLocation) {
         System.out.println(String.format("Drone %d, moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
 
@@ -237,6 +250,7 @@ public class Drone extends Thread {
         //Calculate number of seconds it would take to reach zone
         int secondsRequired = (int) Math.floor(totalDistance / this.attributes.get("travelSpeed"));
 
+        long moveStartTime = System.nanoTime() / 1000;
         //Move the drone
         for (int i = 0; i < secondsRequired; i++) {
             this.currentLocation[0] += this.attributes.get("travelSpeed") * xRatio;
@@ -251,6 +265,11 @@ public class Drone extends Thread {
                 e.printStackTrace();
             }
         }
+        long moveEndTime = System.nanoTime() / 1000;
+
+        System.out.println(String.format("Drone %d moved from (%f, %f) to (%f, %f) in %d us.",  id, this.currentLocation[0], this.currentLocation[1], targetLocation[0], targetLocation[1], (moveEndTime - moveStartTime)));
+        moveTimes.add(moveEndTime - moveStartTime);
+
     }
 
     public void travelToFire() {
@@ -309,6 +328,9 @@ public class Drone extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        //logging for extinguished fires told via fireIncident
+
 
         this.carryingVolume -= this.agentDropAmount;
 
@@ -407,16 +429,21 @@ public class Drone extends Thread {
             System.out.println("[Drone " + id + "], Sent: " + sendMessage);
             DatagramPacket sendPacket = new DatagramPacket(sendMessage.getBytes(), sendMessage.getBytes().length,
                     schedulerAddress, this.schedulerPort);
-            messageSendTime = System.currentTimeMillis();
+            long messageSendTime = System.nanoTime() / 1000;
             socket.send(sendPacket);
 
             DatagramPacket receivePacket = new DatagramPacket(new byte[2048], 2048); //this is erroneous, because it allocates too much space in the byte array, which causes excess garbage data to be assigned to the response - should be fixed eventually
+            long inactiveStartTime = System.nanoTime() / 1000;
             socket.receive(receivePacket);
-            messageGetTime = System.currentTimeMillis();
-            loggingArray.add("");
+            inactiveTime += (System.nanoTime() / 1000) - inactiveStartTime;
+
+            long messageGetTime = System.nanoTime() / 1000;
 
             String receiveMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            System.out.println("[Drone " + id + "], Received: " + receiveMessage);
+
+            System.out.println("[Drone " + id + "] Received: " + receiveMessage);
+            System.out.println(String.format("Drone %d sent '%s' and received '%s' in %d us.", id, sendMessage, receiveMessage, (messageGetTime - messageSendTime)));
+            messageTimes.add(messageGetTime - messageSendTime);
 
             return receiveMessage;
         } catch (IOException e) {
@@ -436,6 +463,46 @@ public class Drone extends Thread {
     // Testing Only
     public DatagramSocket getSocket() {
         return this.socket;
+    }
+
+    /**
+     * handles the various logging arrays and adds related data to the logs. Should only be called when drones are done.
+     */
+    public void formatLogging(){
+        float averageMessage, averageMove, averageRest;
+        long totalMessage, totalMove, totalRest;
+
+        class Helper{
+            public float getAverage(ArrayList<Long> arr){
+                float avg = -1;
+                avg = getSum(arr);
+                return avg / arr.size();
+            }
+
+            public long getSum(ArrayList<Long> arr){
+                long sum = 0;
+                for(int i = 0; i<arr.size(); i++){
+                    sum += arr.get(i);
+                }
+                return sum;
+            }
+        }
+
+        Helper helper = new Helper();
+
+        totalMessage = helper.getSum(messageTimes);
+        totalMove = helper.getSum(moveTimes);
+        totalRest = helper.getSum(restTimes);
+
+        averageMessage = helper.getAverage(messageTimes);
+        averageMove = helper.getAverage(moveTimes);
+        averageRest = helper.getAverage(restTimes);
+
+        System.out.println(String.format("Drone %d spent a total of %dus waiting on messages, for an average of %.2fus across %d messages.", id, totalMessage, averageMessage, messageTimes.size()));
+        System.out.println(String.format("Drone %d spent a total of %dus moving, for an average of %.2fus across %d movements.", id, totalMove, averageMove, moveTimes.size()));
+        System.out.println(String.format("Drone %d spent a total of %dus resting, for an average of %.2fus across %d fires.", id, totalRest, averageRest, restTimes.size()));
+        System.out.println(String.format("Drone %d was active for %.2f%% of the time.", id, (1 - (float)inactiveTime / (droneEndTime - droneStartTime)) * 100));
+        System.out.println(String.format("Drone %d finished in %d us.", id, (droneEndTime - droneStartTime)));
     }
 
     public static void main(String[] args) {

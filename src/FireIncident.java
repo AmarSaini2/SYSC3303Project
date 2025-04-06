@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.*;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -28,6 +29,10 @@ public class FireIncident extends Thread {
 
     private int schedulerPort;
 
+    //for logging
+    private HashMap<Integer, Long> fireStartTimes;
+    private HashMap<Integer, Long> fireTotalTimes;
+
     /**
      * Constructs a FireIncident instance.
      *
@@ -43,6 +48,9 @@ public class FireIncident extends Thread {
         this.zones = new HashMap<>();
 
         this.schedulerPort = schedulerPort;
+
+        this.fireTotalTimes = new HashMap<>();
+        this.fireStartTimes = new HashMap<>();
 
         try{
             this.socket = new DatagramSocket();
@@ -160,6 +168,7 @@ public class FireIncident extends Thread {
 
     private void sendToScheduler(Event e){
         byte[] message = e.createMessage("NEW_EVENT:");
+        fireStartTimes.put(e.getId(), System.currentTimeMillis());
         try{
             DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
             System.out.println("[FireIncidentSubsystem], Sent Packet to Scheduler containing: " + e);
@@ -198,7 +207,11 @@ public class FireIncident extends Thread {
                         System.out.println("[FireIncidentSubsystem], Drone " + splitMessage[1] + " needs refill. Will be available soon.");
                         break;
                     case "SUCCESS":
-                        System.out.println("[FireIncidentSubsystem], Drone " + splitMessage[1] + " successfully extinguished fire: " + splitMessage[2]);
+                        System.out.println("[FireIncidentSubsystem] Drone " + splitMessage[1] + " successfully extinguished fire: " + splitMessage[2]);
+
+                        long fireTime = System.currentTimeMillis() - fireStartTimes.get(Integer.parseInt(splitMessage[2]));
+                        fireTotalTimes.put(Integer.parseInt(splitMessage[2]), fireTime);
+                        System.out.println(String.format("fire %d was put out in %dms", Integer.parseInt(splitMessage[2]), fireTime));
                         break;
                     default:
                         System.out.println("Invalid message: "+message);
@@ -255,6 +268,9 @@ public class FireIncident extends Thread {
         this.receiveResponse();//get drone responses forwarded by scheduler
 
         this.socket.close();
+
+        //I add a forced flush to each thread because the daemon thread only flushes every 5 seconds by default, which can result in missing logging data if the threads while data is stored in array
+        System.out.println("FLUSH_LOGS_TO_FILE");
     }
 
     public static void main(String[] args) {

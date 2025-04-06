@@ -20,6 +20,11 @@ public class TimeStampDaemon {
                 super.println(message);
                 String newLog = formatter.format(new Date())+","+message;
                 tempLogs.add(newLog);
+
+                //allow forced flushing on guard value so that we can shut down non-daemon threads safely without losing logging data by forcing a flush first
+                if(message.equals("FLUSH_LOGS_TO_FILE")){
+                    flushLogs();
+                }
             }
         });
 

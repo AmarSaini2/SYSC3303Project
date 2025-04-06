@@ -23,7 +23,11 @@ public class TimeStampDaemon {
 
                 //allow forced flushing on guard value so that we can shut down non-daemon threads safely without losing logging data by forcing a flush first
                 if(message.equals("FLUSH_LOGS_TO_FILE")){
-                    flushLogs();
+                    try{
+                        flushLogs();
+                    }catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -34,11 +38,6 @@ public class TimeStampDaemon {
                     flushLogs();
                     Thread.sleep(5000);
                 } catch (InterruptedException | IOException e) {
-                } finally {
-                    try {
-                        LogAnalyzer.analyzeLogs("src/logs.txt");
-                    } catch (IOException e) {
-                    }
                 }
             }
         });

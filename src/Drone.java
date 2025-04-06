@@ -228,7 +228,7 @@ public class Drone extends Thread {
         if(currentState == DroneFSM.getState("EnRoute")){
             FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("EnRoute").getStateString());
             if (faultToInject != null) {
-                System.out.println("[Drone " + id + "] Fault injection triggered for TRAVEL: " + faultToInject);
+                System.out.println("[Drone " + id + "], Fault injection triggered for TRAVEL: " + faultToInject);
                 injectFault(faultToInject);
                 return;
             }

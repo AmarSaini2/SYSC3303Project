@@ -14,6 +14,13 @@ public class FaultEvent implements Serializable {
     // Required for serialization compatibility
     private static final long serialVersionUID = 2L;
 
+    /**
+     * Constructor for a new fault event object
+     * @param timestamp the time of the fault
+     * @param faultType the type of fault
+     * @param droneID the id of the Drone associated with the fault
+     * @param event the event associated with the fault
+     */
     public FaultEvent(LocalTime timestamp, Type faultType, int droneID, Event event) {
         this.timestamp = timestamp;
         this.faultType = faultType;
@@ -22,11 +29,36 @@ public class FaultEvent implements Serializable {
     }
 
     // Getters
+
+    /**
+     * Gets the time stamp of the FaultEvent
+     * @return the time stamp of the FaultEvent
+     */
     public LocalTime getTimestamp() { return timestamp; }
+
+    /**
+     * Gets the type of the FaultEvent
+     * @return the type of the FaultEvent
+     */
     public Type getFaultType() { return faultType; }
+
+    /**
+     * Gets the id of the Drone associated with the FaultEvent
+     * @return an int representing the Drone
+     */
     public int getDroneID() { return droneID; }
+
+    /**
+     * Gets the Event associated with the FaultEvent
+     * @return the Event associated with the FaultEvent
+     */
     public Event getEvent() { return event; }
 
+    /**
+     * Creates a message that contains the command and serialized FaultEvent that will be sent using rpc
+     * @param command the command selected by the user
+     * @return a byte array containg the command and the serialized FaultEvent
+     */
     public byte[] createMessage(String command){
         byte[] commandBytes = command.getBytes();
         byte[] serializedEvent = this.serializeFaultEvent();
@@ -44,7 +76,10 @@ public class FaultEvent implements Serializable {
         return message;
     }
 
-    // Serialization method
+    /**
+     * Serializes this Event into a byte array
+     * @return the byte array representing this Event
+     */
     public byte[] serializeFaultEvent() {
         try (ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
              ObjectOutputStream out = new ObjectOutputStream(byteOut)) {
@@ -56,7 +91,11 @@ public class FaultEvent implements Serializable {
         }
     }
 
-    // Deserialization method
+    /**
+     * Deserializes a byte array into an Event
+     * @param data the byte array which will be deserialized
+     * @return the Event from the byte array
+     */
     public static FaultEvent deserializeFaultEvent(byte[] data) {
         try (ByteArrayInputStream byteIn = new ByteArrayInputStream(data);
              ObjectInputStream in = new ObjectInputStream(byteIn)) {
@@ -67,6 +106,10 @@ public class FaultEvent implements Serializable {
         }
     }
 
+    /**
+     * Returns a string representation of this FaultEvent object
+     * @return a string representation of the FaultEvent
+     */
     @Override
     public String toString() {
         return String.format("[%s] Drone %d: %s", timestamp, droneID, faultType);

@@ -166,6 +166,10 @@ public class FireIncident extends Thread {
         }
     }
 
+    /**
+     * Method to send a new Event to the Scheduler
+     * @param e the Event being sent to the Scheduler
+     */
     private void sendToScheduler(Event e){
         byte[] message = e.createMessage("NEW_EVENT:");
         fireStartTimes.put(e.getId(), System.currentTimeMillis());
@@ -180,6 +184,10 @@ public class FireIncident extends Thread {
         }
     }
 
+    /**
+     * Method to send a message to the Scheduler
+     * @param msg the string message being sent
+     */
     private void sendToScheduler(String msg){
         try{
             DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, InetAddress.getByName("127.0.0.1"), this.schedulerPort);
@@ -190,6 +198,9 @@ public class FireIncident extends Thread {
         }
     }
 
+    /**
+     * Method to receive a response from the Scheduler
+     */
     private void receiveResponse(){
         byte[] buffer = new byte[2048];
         try{

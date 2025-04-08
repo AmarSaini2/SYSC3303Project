@@ -40,7 +40,7 @@ public class Main {
         View view = new View(scheduler);
 
         // Create the FireIncident subsystem that will read fire incidents from a file
-        FireIncident fireIncident = new FireIncident("src/Event_File.csv", "src/Zone_File.csv", 5000);
+        FireIncident fireIncident = new FireIncident("src/Final_event_file.csv", "src/Final_zone_file.csv", 5000);
 
         // Start the FireIncident subsystem (reads fire events and sends them to the
         // scheduler)

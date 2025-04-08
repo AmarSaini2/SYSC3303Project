@@ -75,7 +75,7 @@ public class FireIncident extends Thread {
             String inputLine;
             while (scanner.hasNextLine()) {
                 inputLine = scanner.nextLine();
-                String[] tokens = inputLine.split("\t"); // Split each line into parts
+                String[] tokens = inputLine.split(","); // Split each line into parts
 
                 int id = Integer.parseInt(tokens[0]); // Extract zone ID
 
@@ -116,7 +116,7 @@ public class FireIncident extends Thread {
             String inputLine;
             while (scanner.hasNextLine()) { // Process each event in the file
                 inputLine = scanner.nextLine();
-                String[] tokens = inputLine.split("\t"); // Split each line into components
+                String[] tokens = inputLine.split(","); // Split each line into components
 
                 // Extract event details
                 String timeStamp = tokens[0]; // Timestamp of the event

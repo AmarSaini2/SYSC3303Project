@@ -242,8 +242,9 @@ public class Scheduler extends Thread {
                 String[] splitMessage = message.split(":");
                 if(!splitMessage[0].equals("FAULT_EVENT")) {
                     System.out.println("[Scheduler], Received: " + message);
+                    logQueue.add("[Scheduler], Received: " + message);
                 }
-                logQueue.add("[Scheduler], Received: " + message);
+
 
                 HashMap<String, Object> localHashMap;
                 int id;
@@ -280,7 +281,7 @@ public class Scheduler extends Thread {
                         //update current state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Dropping Agent");
+                        localHashMap.put("state", "En Route");
                         this.allDroneList.put(id, localHashMap);
 
                         int eventId = Integer.parseInt(splitMessage[2]);
@@ -313,7 +314,7 @@ public class Scheduler extends Thread {
                         //update current state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Returning To Base");
+                        localHashMap.put("state", "Dropping Agent");
                         this.allDroneList.put(id, localHashMap);
 
 
@@ -381,7 +382,7 @@ public class Scheduler extends Thread {
                         //updating state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Filling Tank");
+                        localHashMap.put("state", "Returning to Base");
                         this.allDroneList.put(id, localHashMap);
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
@@ -389,7 +390,7 @@ public class Scheduler extends Thread {
                         //updating state for gui
                         id = Integer.parseInt(splitMessage[1]);
                         localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "Idle");
+                        localHashMap.put("state", "Filling Tank");
                         this.allDroneList.put(id, localHashMap);
 
                         this.allDroneList.get(Integer.parseInt(splitMessage[1])).put("volume", 15.0);
@@ -409,13 +410,6 @@ public class Scheduler extends Thread {
                         }
                         break;
                     case "FAULT_EVENT":
-                        //updating  state for gui
-                        id = Integer.parseInt(splitMessage[1]);
-                        localHashMap = this.allDroneList.get(id);
-                        localHashMap.put("state", "FAULT");
-                        this.allDroneList.put(id, localHashMap);
-
-
                         byte[] receivedData = Arrays.copyOfRange(packet.getData(), 15+splitMessage[2].length(), packet.getLength());
                         FaultEvent fault = FaultEvent.deserializeFaultEvent(receivedData);
                         if (fault != null) {
@@ -423,6 +417,13 @@ public class Scheduler extends Thread {
                             FaultEvent.Type faultType = fault.getFaultType();
 
                             System.out.println("[Scheduler], Fault Received: " + fault.toString());
+                            logQueue.add("[Scheduler], Fault Received: " + fault.toString());
+                            //updating  state for gui
+                            id = Integer.parseInt(splitMessage[1]);
+                            localHashMap = this.allDroneList.get(id);
+                            String[] splitFaultString = fault.toString().split(":");
+                            localHashMap.put("state", splitFaultString[3]);
+                            this.allDroneList.put(id, localHashMap);
                             switch (faultType) {
                                 case NOZZLE_JAM:
                                     handleNozzleJam(fault);
@@ -466,6 +467,7 @@ public class Scheduler extends Thread {
                             continue;
                         }
                         break;
+                        /*
                     case "Fault":
                         //updating state for gui
                         id = Integer.parseInt(splitMessage[1]);
@@ -475,6 +477,8 @@ public class Scheduler extends Thread {
 
                         sendToDrone("OK", Integer.parseInt(splitMessage[1]));
                         break;
+                        */
+
                     case "FINISHED":
                         this.dronesFinished++;
                         id = Integer.parseInt(splitMessage[1]);
@@ -562,7 +566,7 @@ public class Scheduler extends Thread {
         // sendToDrone("RETURN_TO_BASE", droneId);
 
         faultedDroneList.add(droneId);
-        freeDroneList.add(droneId);
+        freeDroneList.remove((Integer)droneId);
 
         System.out.println("[Scheduler], Drone " + droneId + " stuck in flight!");
         System.out.println("[Scheduler], Drone " + droneId + " added to faulted list and removed from free list!");

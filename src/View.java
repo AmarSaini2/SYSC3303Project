@@ -393,9 +393,19 @@ public class View extends Thread {
             boolean rendered = (boolean) zoneData[2];
 
             Event.Severity severity = Event.Severity.OUT;
+
+            /*
             for (Integer eventId : scheduler.allEvents.keySet()) {
                 if (scheduler.allEvents.get(eventId).getZone().getId() == zoneId) {
                     severity = scheduler.allEvents.get(eventId).getSeverity();
+                }
+            }
+            */
+
+            for(Object event: scheduler.eventQueue.toArray()){
+                Event e = (Event) event;
+                if(e.getZone().getId() == zoneId){
+                    severity = e.getSeverity();
                 }
             }
             Color color = new Color(0, 100, 0, 150);

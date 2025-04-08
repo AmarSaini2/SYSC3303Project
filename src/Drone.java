@@ -241,15 +241,25 @@ public class Drone extends Thread {
         if(currentState == DroneFSM.getState("EnRoute")){
             FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("EnRoute").getStateString());
             if (faultToInject != null) {
-                System.out.println("[Drone " + id + "], Fault injection triggered for TRAVEL: " + faultToInject);
-                injectFault(faultToInject);
-                return;
+                Random random = new Random();
+                int prob = random.nextInt(10);
+                if (prob == 10) {//1 in 10 chance of fault
+                    System.out.println("[Drone " + id + "], Fault injection triggered for TRAVEL: " + faultToInject);
+                    injectFault(faultToInject);
+                    return;
+                }
             }
+
         }
 
         //Get x and y distance from target
         double xDistance = targetLocation[0] - this.currentLocation[0];
         double yDistance = targetLocation[1] - this.currentLocation[1];
+
+        //stop if the drone is already at its target location
+        if(xDistance == yDistance & xDistance == 0){
+            return;
+        }
 
         //Get the x and y ratios
         double totalDistance = Math.sqrt(xDistance * xDistance + yDistance * yDistance);
@@ -354,16 +364,13 @@ public class Drone extends Thread {
         // System.out.println("[Drone " + id + "], Dropping firefighting agent...");
         FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("DroppingAgent").getStateString());
         if (faultToInject != null) {
-            System.out.println("[Drone " + id + "], Fault injection triggered for ExtinguishFire: " + faultToInject);
-            injectFault(faultToInject);
-            return;
-        }
-
-        try {
-            double timeRequired = this.agentDropAmount / this.attributes.get("flowRate");
-            Thread.sleep((int) timeRequired * SLEEPMULTIPLIER);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            Random random = new Random();
+            int prob = random.nextInt(20);
+            if(prob == 20){//1 in 20 chance of fault
+                System.out.println("[Drone " + id + "], Fault injection triggered for ExtinguishFire: " + faultToInject);
+                injectFault(faultToInject);
+                return;
+            }
         }
 
         //logging for extinguished fires told via fireIncident
@@ -373,6 +380,12 @@ public class Drone extends Thread {
 
         String response = sendReceive(String.format("%s:%d:%d:%.2f:%.2f", this.getStateAsString(), this.id,
                 this.assignedFire.getId(), this.agentDropAmount, this.carryingVolume));
+        try {
+            double timeRequired = this.agentDropAmount / this.attributes.get("flowRate");
+            Thread.sleep((int) timeRequired * SLEEPMULTIPLIER);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         this.agentDropAmount = 0.0;
 
         String[] splitMessage = response.split(":");
@@ -394,12 +407,12 @@ public class Drone extends Thread {
     }
 
     public void returnToBase() {
-        // System.out.println("[Drone " + id + "], Returning to base...");
-        moveTo(new double[]{0.0, 0.0});
         // System.out.println("[Drone " + id + "], Reached base.");
         if(this.assignedFire == null){
             String response = sendReceive(String.format("%s:%d", this.getStateAsString(), this.id));
             String[] splitMessage = response.split(":");
+            // System.out.println("[Drone " + id + "], Returning to base...");
+            moveTo(new double[]{0.0, 0.0});
             switch (splitMessage[0].toUpperCase()) {
                 case "FINISH":
                     this.finish = true;

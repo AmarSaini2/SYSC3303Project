@@ -22,8 +22,15 @@ public class Main {
     public static void main(String[] args) throws IOException {
         Drone drone0 = new Drone(6000, "src/droneFaultInjection_0.txt");
         //Drone drone0 = new Drone(6000);
-        Drone drone1 = new Drone(6000);
-        Drone drone2 = new Drone(6000);
+        Drone drone1 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone2 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone3 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone4 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone5 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone6 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone7 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone8 = new Drone(6000, "src/droneFaultInjection_0.txt");
+        Drone drone9 = new Drone(6000, "src/droneFaultInjection_0.txt");
 
         TimeStampDaemon.startDaemon();
 
@@ -47,6 +54,13 @@ public class Main {
         drone0.start();
         drone1.start();
         drone2.start();
+        drone3.start();
+        drone4.start();
+        drone5.start();
+        drone6.start();
+        drone7.start();
+        drone8.start();
+        drone9.start();
 
 
         /**
@@ -59,9 +73,16 @@ public class Main {
         try {
             scheduler.join(); // Wait for the scheduler to finish execution
             fireIncident.join(); // Wait for the FireIncident subsystem to finish execution
-            drone0.join();
-            drone1.join();
-            drone2.join();
+            drone0.start();
+            drone1.start();
+            drone2.start();
+            drone3.start();
+            drone4.start();
+            drone5.start();
+            drone6.start();
+            drone7.start();
+            drone8.start();
+            drone9.start();
         } catch (InterruptedException e) {
             e.printStackTrace(); // Handle any interruption in thread execution
         }

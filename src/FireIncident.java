@@ -29,6 +29,8 @@ public class FireIncident extends Thread {
 
     private int schedulerPort;
 
+    private long totalTime;
+
     //for logging
     private HashMap<Integer, Long> fireStartTimes;
     private HashMap<Integer, Long> fireTotalTimes;
@@ -223,6 +225,8 @@ public class FireIncident extends Thread {
                         long fireTime = System.currentTimeMillis() - fireStartTimes.get(Integer.parseInt(splitMessage[2]));
                         fireTotalTimes.put(Integer.parseInt(splitMessage[2]), fireTime);
                         System.out.println(String.format("fire %d was put out in %dms", Integer.parseInt(splitMessage[2]), fireTime));
+                        totalTime += fireTime;
+                        System.out.println(String.format("Total time: %d ms", totalTime));
                         break;
                     default:
                         System.out.println("Invalid message: "+message);

@@ -32,7 +32,8 @@ public class Main {
         Drone drone8 = new Drone(6000, "src/droneFaultInjection_0.txt");
         Drone drone9 = new Drone(6000, "src/droneFaultInjection_0.txt");
 
-        TimeStampDaemon.startDaemon();
+        TimeStampDaemon deamon = new TimeStampDaemon();
+        deamon.startDaemon();
 
         // Create the scheduler which will manage drone assignments and event processing
         Scheduler scheduler = new Scheduler(5000, 6000);

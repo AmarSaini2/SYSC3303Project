@@ -11,15 +11,16 @@ public class TimeStampDaemon {
 
     private static ArrayList<String> tempLogs = new ArrayList<>();
 
+
     /**
      * Starts a daemon thread that occasionally flushes the tempLogs array
      */
-    public static void startDaemon() {
+    public void startDaemon() {
         System.setOut(new PrintStream(System.out){
             private final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
 
             @Override
-            public void println(String message) {
+            public synchronized void println(String message) {
                 super.println(message);
                 String newLog = formatter.format(new Date())+","+message;
                 tempLogs.add(newLog);
@@ -31,24 +32,12 @@ public class TimeStampDaemon {
             }
         });
 
-        Thread timePrinter = new Thread(() -> {
-            while (true) {
-                try{
-                    flushLogs();
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                }
-            }
-        });
-
-        timePrinter.setDaemon(true);
-        timePrinter.start();
     }
 
     /**
      * Flushes the tempLog into a log text file
      */
-    private static void flushLogs() {
+    private synchronized void flushLogs() {
         try {
             FileWriter writer = new FileWriter(file);
             for(String eventLog : tempLogs){

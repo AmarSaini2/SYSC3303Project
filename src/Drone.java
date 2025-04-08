@@ -190,7 +190,6 @@ public class Drone extends Thread {
             throw new RuntimeException(e);
         }
 
-        droneEndTime = System.nanoTime() / 1000;
         formatLogging();
         //I add a forced flush to each thread because the daemon thread only flushes every 5 seconds by default, which can result in missing logging data if the threads while data is stored in array
         System.out.println("FLUSH_LOGS_TO_FILE");
@@ -229,6 +228,8 @@ public class Drone extends Thread {
      */
     public void sleepMode() {
         System.out.println("[Drone " + id + "], IDLE Waiting for assignment...");
+        formatLogging();
+        System.out.println("FLUSH_LOGS_TO_FILE");
         DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
         try {
             long restStartTime = System.nanoTime() / 1000;
@@ -484,7 +485,7 @@ public class Drone extends Thread {
 
         try {
             //TODO need an equation for this
-            Thread.sleep(20 * SLEEPMULTIPLIER);
+            Thread.sleep(SLEEPMULTIPLIER);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -586,6 +587,7 @@ public class Drone extends Thread {
     public void formatLogging(){
         float averageMessage, averageMove, averageRest;
         long totalMessage, totalMove, totalRest;
+        long droneEndTime = System.nanoTime() / 1000;
 
         class Helper{
             public float getAverage(ArrayList<Long> arr){

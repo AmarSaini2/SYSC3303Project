@@ -66,26 +66,50 @@ public class Event implements Comparable<Event>, Serializable {
         this.agentSent = 0.0;
     }
 
+    /**
+     * Gets the amount of agent currently being sent to this event
+     * @return the amount of agent being sent to the event
+     */
     public double getAgentSent(){
         return this.agentSent;
     }
 
+    /**
+     * Sets the amount of agent currently being sent to this event
+     * @param agentSent the amount of agent being sent to the event
+     */
     public void setAgentSent(Double agentSent){
         this.agentSent = agentSent;
     }
 
+    /**
+     * Gets the amount of agent currently required by the event
+     * @return the amount of agent currently required by the event to extinguish the fire
+     */
     public double getAgentRequired(){
         return this.agentRequired;
     }
 
+    /**
+     * Changes the amount of agent that is needed to extinguish the fire
+     * @param agentRequired the new amount of agent required to extinguish the fire
+     */
     public void setAgentRequired(Double agentRequired){
         this.agentRequired = agentRequired;
     }
 
+    /**
+     * Gets the amount of agent currently being dropped on the fire
+     * @return the amount of agent currently being dropped on the fire
+     */
     public double getAgentDropping(){
         return this.agentDropping;
     }
 
+    /**
+     * Changes the amount of agent currently being dropped on the fire
+     * @param agentDropping the new amount of agent being dropped on the fire
+     */
     public void setAgentDropping(Double agentDropping){
         this.agentDropping = agentDropping;
     }
@@ -152,18 +176,35 @@ public class Event implements Comparable<Event>, Serializable {
         this.severity = severity;
     }
 
+    /**
+     * Adds a new drone to the arraylist of assigned drones
+     * @param entry the drone to be added
+     */
     public void addAssignedDrone(Object[] entry){
         this.assignedDrones.add(entry);
     }
 
+    /**
+     * Removes a drone from the arraylist of assigned drones
+     * @param entry the drone to be removed
+     */
     public void removeAssignedDrone(Object[] entry){
         this.assignedDrones.remove(entry);
     }
 
+    /**
+     * Gets the Drones that are assigned to this event
+     * @return an arraylist of Drones that are assigned to this event
+     */
     public ArrayList<Object[]> getAssignedDrones(){
         return this.assignedDrones;
     }
 
+    /**
+     * Creates a message that will be passed using rpc
+     * @param command the command associated with the message
+     * @return the message which is a combination of the command and serialized event
+     */
     public byte[] createMessage(String command){
         byte[] commandBytes = command.getBytes();
         byte[] serializedEvent = this.serializeEvent();
@@ -193,11 +234,20 @@ public class Event implements Comparable<Event>, Serializable {
                 + this.severity + "]";
     }
 
+    /**
+     * Compares this event with other events
+     * @param other the object to be compared.
+     * @return returns whether this event has greater value then the other eventw
+     */
     @Override
     public int compareTo(Event other){
         return this.severity.ordinal() - other.severity.ordinal();
     }
 
+    /**
+     * Serialized this event
+     * @return a byte array of the serialized event
+     */
     public byte[] serializeEvent(){
         ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
         try{
@@ -211,6 +261,11 @@ public class Event implements Comparable<Event>, Serializable {
         return null;//return null for failure
     }
 
+    /**
+     * Deserializes a byte array into an event object
+     * @param data the byte array being deserialized
+     * @return the event from the byte array
+     */
     public static Event deserializeEvent(byte[] data){
         ByteArrayInputStream byteIn = new ByteArrayInputStream(data);
         try{

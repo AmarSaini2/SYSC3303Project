@@ -77,5 +77,5 @@ There are three main components of project:
 - Amar, Saini
 - John, Guo
 - Kaitlyn, Conron
-- Yacine, Djaou
 - Samuel, Lo
+- Yacine, Djaou

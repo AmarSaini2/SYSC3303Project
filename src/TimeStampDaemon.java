@@ -11,6 +11,9 @@ public class TimeStampDaemon {
 
     private static ArrayList<String> tempLogs = new ArrayList<>();
 
+    /**
+     * Starts a daemon thread that occasionally flushes the tempLogs array
+     */
     public static void startDaemon() {
         System.setOut(new PrintStream(System.out){
             private final SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
@@ -23,11 +26,7 @@ public class TimeStampDaemon {
 
                 //allow forced flushing on guard value so that we can shut down non-daemon threads safely without losing logging data by forcing a flush first
                 if(message.equals("FLUSH_LOGS_TO_FILE")){
-                    try{
-                        flushLogs();
-                    }catch (IOException e){
-                        e.printStackTrace();
-                    }
+                    flushLogs();
                 }
             }
         });
@@ -37,7 +36,7 @@ public class TimeStampDaemon {
                 try{
                     flushLogs();
                     Thread.sleep(5000);
-                } catch (InterruptedException | IOException e) {
+                } catch (InterruptedException e) {
                 }
             }
         });
@@ -46,7 +45,10 @@ public class TimeStampDaemon {
         timePrinter.start();
     }
 
-    private static void flushLogs() throws IOException {
+    /**
+     * Flushes the tempLog into a log text file
+     */
+    private static void flushLogs() {
         try {
             FileWriter writer = new FileWriter(file);
             for(String eventLog : tempLogs){

@@ -43,8 +43,9 @@ public class Scheduler extends Thread {
     private SchedulerFSM schedulerFSM;
 
     /**
-     * Constructor for the Scheduler class.
-     *
+     * Constructor for the Scheduler Class
+     * @param fireIncidentReceivePort the port that the Scheduler will receive message from the FireIncident subsystem
+     * @param droneReceivePort the port that the Scheduler will receive messages from the Drone subsystems
      */
     public Scheduler(int fireIncidentReceivePort, int droneReceivePort) {
         this.fireIncidentFinish = false; // Initially, the scheduler runs continuously
@@ -73,20 +74,24 @@ public class Scheduler extends Thread {
         this.currentState = SchedulerFSM.getState("Idle");
     }
 
+    /**
+     * Sets the state of the Scheduler
+     * @param stateName the new state of the Scheduler as a string
+     */
     public void setState(String stateName) {
         this.currentState = SchedulerFSM.getState(stateName);
     }
 
+    /**
+     * Returns the current state of the Scheduler as a string
+     * @return the current state of the Scheduler as a string
+     */
     public String getStateAsString() {
         return this.currentState.getStateString();
     }
 
     /**
      * The main execution loop of the Scheduler.
-     * - Continuously checks for new fire requests.
-     * - Assigns fire events to available drones.
-     * - If no drones are available, it waits for one to become free.
-     * - If a drone fails to complete its task, the fire request is requeued.
      */
     @Override
     public void run() {
@@ -100,6 +105,10 @@ public class Scheduler extends Thread {
         System.out.println("FLUSH_LOGS_TO_FILE");
     }
 
+    /**
+     * The action of the Scheduler in the Idle state
+     * Waits for an activation message from the FireIncident
+     */
     public void idleAction() {
         try {
             DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
@@ -116,6 +125,12 @@ public class Scheduler extends Thread {
         }
     }
 
+    /**
+     * the action of the Scheduler in the Active state
+     * - Continuously checks for messages from the FireIncident subsystem.
+     * - Continuously checks for messages from the Drone subsystems.
+     * - Assigns fire events to available drones.
+     */
     public void activeAction() {
         // Start a separate thread to handle drone responses asynchronously
         new Thread(this::processDroneMessages).start();
@@ -137,7 +152,6 @@ public class Scheduler extends Thread {
                 Event event = this.eventQueue.take();
 
                 // Sends the first drone in freeDroneList to the event
-                // TODO can be improved by picking the closest drone instead of just the first
                 int chosenDroneId = -1;
                 int minDistance = -1;
                 for (Integer id : this.freeDroneList) {
@@ -176,6 +190,9 @@ public class Scheduler extends Thread {
         }
     }
 
+    /**
+     * Method that checks if the FireIncident subsystem sent a message
+     */
     private void processFireIncidentMessages() {
         while (!fireIncidentFinish) {
             try {
@@ -498,6 +515,11 @@ public class Scheduler extends Thread {
         }
     }
 
+    /**
+     * Method to send an Event object to a Drone
+     * @param event the Event being sent
+     * @param droneId the id of the Drone which will be sent to
+     */
     private void sendToDrone(Event event, int droneId) {
         byte[] message = event.createMessage("NEW_EVENT:");
         System.out.println("[Scheduler], Sent Drone " + droneId + ": " + event);
@@ -512,6 +534,11 @@ public class Scheduler extends Thread {
         }
     }
 
+    /**
+     * Method to send a message to a Drone
+     * @param s the Message being sent to the drone
+     * @param droneId the Drone that the message will be sent
+     */
     private void sendToDrone(String s, int droneId) {
         System.out.println("[Scheduler], Sent Drone " + droneId + ": " + s);
         logQueue.add("[Scheduler], Sent Drone " + droneId + ": " + s);
@@ -526,7 +553,10 @@ public class Scheduler extends Thread {
         }
     }
 
-    private void finishDrones() throws IOException {
+    /**
+     * Method to message the drones that all Events have been serviced
+     */
+    private void finishDrones(){
         for (Integer id : allDroneList.keySet()) {
             HashMap<String, Object> drone = allDroneList.get(id);
             sendToDrone("FINISH", id);
@@ -549,6 +579,10 @@ public class Scheduler extends Thread {
         logQueue.add("[Scheduler], Shutting down...");
     }
 
+    /**
+     * Handles if the scheduler receives a NozzleJam fault from the drone
+     * @param fault the fault from the drone
+     */
     private void handleNozzleJam(FaultEvent fault) {
         int droneId = fault.getDroneID();
         Event event = fault.getEvent();
@@ -560,6 +594,10 @@ public class Scheduler extends Thread {
         System.out.println("[Scheduler], Drone " + droneId + " added to faulted list and removed from free list!");
     }
 
+    /**
+     * Handles if the scheduler receives a StuckDrone fault from the drone
+     * @param fault the fault from the drone
+     */
     private void handleStuckDrone(FaultEvent fault) {
         int droneId = fault.getDroneID();
         Event event = fault.getEvent();

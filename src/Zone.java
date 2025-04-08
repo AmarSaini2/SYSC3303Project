@@ -52,6 +52,10 @@ public class Zone implements Serializable {
         return end;
     }
 
+    /**
+     * Returns the center coordinate of the zone
+     * @return a double[] that represents the center of the zone
+     */
     public double[] getCenter() {
         double zoneX = this.start[0] + (double) (this.end[0] - this.start[0]) /2;
         double zoneY = this.start[1] + (double) (this.end[1] - this.start[1]) /2;

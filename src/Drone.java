@@ -39,6 +39,10 @@ public class Drone extends Thread {
     private long droneStartTime, droneEndTime;
     private long inactiveTime;
 
+    /**
+     * Constructor for a Drone object
+     * @param schedulerPort the port that the scheduler will be associated with
+     */
     public Drone(int schedulerPort) {
         droneStartTime = System.nanoTime() / 1000;
         this.id = idCounter++;
@@ -77,14 +81,22 @@ public class Drone extends Thread {
 
     }
 
+    /**
+     * Constructor for Drone object
+     * @param schedulerPort the port that the scheduler is associated with
+     * @param faultFileName the file where faults are stored
+     */
     public Drone(int schedulerPort, String faultFileName) {
         this(schedulerPort);
         if (faultFileName != null && !faultFileName.isEmpty()) {
             loadFaultInstructions(faultFileName);
         }
-
     }
 
+    /**
+     * Loads the faults that the drone will encounter from the specified fault file
+     * @param faultFileName the name of the fault file which contains all of the faults
+     */
     private void loadFaultInstructions(String faultFileName) {
         File file = new File(faultFileName);
         if (!file.exists()) {
@@ -116,6 +128,11 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * Gets the associated fault for the specific state of the drone if it has a fault
+     * @param stage the current state of the drone
+     * @return null if there is no fault and the fault type if it is does exist
+     */
     private FaultEvent.Type getFaultForStage(String stage) {
         stage = stage.toUpperCase();
         if (faultInstructions.containsKey(stage)) {
@@ -124,10 +141,18 @@ public class Drone extends Thread {
         return null;
     }
 
+    /**
+     * Sets the state of the drone
+     * @param stateName the state that the drone will be set to
+     */
     public void setState(String stateName) {
         this.currentState = DroneFSM.getState(stateName);
     }
 
+    /**
+     * Gets the current state of the drone
+     * @return the current state of the drone as a string
+     */
     public String getStateAsString() {
         return this.currentState.getStateString();
     }
@@ -144,6 +169,9 @@ public class Drone extends Thread {
         return false;
     }
 
+    /**
+     * The main run function for the Drone class
+     */
     @Override
     public void run() {
         while (!finish || this.currentState != DroneFSM.getState("Idle")) {
@@ -168,17 +196,12 @@ public class Drone extends Thread {
         System.out.println("FLUSH_LOGS_TO_FILE");
     }
 
-    /**
-     * Calculates estimated travel time to the fire zone.
-     */
-    private int getTravelTime(Event fire) {
-        Zone zone = fire.getZone();
-        double distance = Math.sqrt(zone.getStart()[0] * zone.getStart()[0]
-                + zone.getEnd()[1] * zone.getEnd()[1]);
-        return (int) (distance / attributes.get("travelSpeed"));
-    }
-
     // ========== STATE HANDLING FUNCTIONS ==========
+
+    /**
+     * The action if the Drone is in the StartUp state
+     * Sends the scheduler a notification that the Drone exists
+     */
     protected void sendWakeupMessage() {
         try {
             String sendMessage = "ONLINE:" + this.id;
@@ -200,6 +223,10 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * The action if the Drone is in the Idle state
+     * Waits for the scheduler to send an event to service
+     */
     public void sleepMode() {
         System.out.println("[Drone " + id + "], IDLE Waiting for assignment...");
         DatagramPacket packet = new DatagramPacket(new byte[2048], 2048);
@@ -234,7 +261,10 @@ public class Drone extends Thread {
         }
     }
 
-    //function to move to [x,y] position. Home base is at 0,0
+    /**
+     * Function to move the drone from its current location to the target location
+     * @param targetLocation the target location as an double array (x,y)
+     */
     public void moveTo(double[] targetLocation) {
         System.out.println(String.format("Drone %d, moving to (%.2f,%.2f)", this.id, targetLocation[0], targetLocation[1]));
 
@@ -320,6 +350,10 @@ public class Drone extends Thread {
 
     }
 
+    /**
+     * The action if the Drone is in the EnRoute state.
+     * Moves the drone to the fire zone.
+     */
     public void travelToFire() {
         // System.out.println("[Drone " + id + "], Traveling to fire at Zone: " +
         // assignedFire.getZone().getId());
@@ -347,6 +381,10 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * Function to inject a fault into the system
+     * @param faultType the type of fault being injected
+     */
     private void injectFault(FaultEvent.Type faultType) {
         FaultEvent faultEvent = new FaultEvent(LocalTime.now(), faultType, this.id, this.assignedFire);
         byte[] faultData = faultEvent.createMessage("FAULT_EVENT:" +this.id+ ":"+ this.carryingVolume + ":");
@@ -360,6 +398,10 @@ public class Drone extends Thread {
         currentState.handleFault(this);
     }
 
+    /**
+     * The action if the Drone is in the DroppingAgent state
+     * Drops the specified amount of agent
+     */
     public void extinguishFire() {
         // System.out.println("[Drone " + id + "], Dropping firefighting agent...");
         FaultEvent.Type faultToInject = getFaultForStage(DroneFSM.getState("DroppingAgent").getStateString());
@@ -374,7 +416,6 @@ public class Drone extends Thread {
         }
 
         //logging for extinguished fires told via fireIncident
-
 
         this.carryingVolume -= this.agentDropAmount;
 
@@ -406,6 +447,10 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * The action if the Drone is in the ReturningToBase state.
+     * Moves the drone back to (0,0) which is HQ/base
+     */
     public void returnToBase() {
         // System.out.println("[Drone " + id + "], Reached base.");
         if(this.assignedFire == null){
@@ -429,11 +474,16 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * The action if the drone is in the FillingTank state
+     * Refills the Drones agent
+     */
     public void refillTank() {
         // System.out.println("[Drone " + id + "], Refilling tank...");
         carryingVolume = attributes.get("maxCapacity");
 
         try {
+            //TODO need an equation for this
             Thread.sleep(20 * SLEEPMULTIPLIER);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -456,6 +506,9 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * The action if the Drone is in the Fault state.
+     */
     public void handleFault() {
         System.out.println("[Drone " + id + "], FAULT detected. Returning to base...");
 
@@ -475,6 +528,11 @@ public class Drone extends Thread {
         this.assignedFire = null;
     }
 
+    /**
+     * Function that implements a remote procedure call (rpc), sending a message to the scheduler then receiving a message from scheduler.
+     * @param sendMessage the message being sent
+     * @return the message that was received
+     */
     private String sendReceive(String sendMessage) {
         try {
             socket.setSoTimeout(0);
@@ -503,16 +561,21 @@ public class Drone extends Thread {
         }
     }
 
+    /**
+     * Returns a string representation of the Drone object
+     * @return a string representation of the Drone object
+     */
     @Override
     public String toString() {
         return "Drone " + id + " (State: " + currentState + ")";
     }
 
-    public Event getAssignedFire() {
-        return assignedFire;
-    }
-
     // Testing Only
+
+    /**
+     * ONLY FOR TESTING: returns the DatagramSocket so that it can be searched for testing
+     * @return the current DatagramSocket
+     */
     public DatagramSocket getSocket() {
         return this.socket;
     }

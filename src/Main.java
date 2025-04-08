@@ -24,6 +24,13 @@ public class Main {
         //Drone drone0 = new Drone(6000);
         Drone drone1 = new Drone(6000);
         Drone drone2 = new Drone(6000);
+        Drone drone3 = new Drone(6000);
+        Drone drone4 = new Drone(6000);
+        Drone drone5 = new Drone(6000);
+        Drone drone6 = new Drone(6000);
+        Drone drone7 = new Drone(6000);
+        Drone drone8 = new Drone(6000);
+        Drone drone9 = new Drone(6000);
 
         TimeStampDaemon.startDaemon();
 
@@ -47,6 +54,13 @@ public class Main {
         drone0.start();
         drone1.start();
         drone2.start();
+        drone3.start();
+        drone4.start();
+        drone5.start();
+        drone6.start();
+        drone7.start();
+        drone8.start();
+        drone9.start();
 
 
         /**
@@ -62,6 +76,13 @@ public class Main {
             drone0.join();
             drone1.join();
             drone2.join();
+            drone3.join();
+            drone4.join();
+            drone5.join();
+            drone6.join();
+            drone7.join();
+            drone8.join();
+            drone9.join();
         } catch (InterruptedException e) {
             e.printStackTrace(); // Handle any interruption in thread execution
         }
